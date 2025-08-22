@@ -3,6 +3,7 @@ package com.jeeeun.demo.service;
 import com.jeeeun.demo.controller.request.MemberCreateRequest;
 import com.jeeeun.demo.controller.request.MemberUpdateRequest;
 import com.jeeeun.demo.controller.response.MemberCreateResponse;
+import com.jeeeun.demo.controller.response.MemberDeleteResponse;
 import com.jeeeun.demo.controller.response.MemberResponse;
 import com.jeeeun.demo.controller.response.MemberUpdateResponse;
 import com.jeeeun.demo.domain.member.Member;
@@ -17,6 +18,7 @@ import static org.springframework.util.StringUtils.hasText;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @RequiredArgsConstructor
 @Service
@@ -99,6 +101,42 @@ public class MemberService {
                 .build();
     }
 
+    @Transactional
+    public MemberDeleteResponse deleteMember(Integer memberId) {
+
+        // 1) 수정 대상 조회 (소프트 딜리트)
+        Member deleted = memberRepository.findById(memberId)
+                .orElseThrow( () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "회원이 없습니다."));
+
+        // 2) 이미 삭제된 경우
+        if (deleted.isDeleted()) {
+            return MemberDeleteResponse.builder()
+                    .memberId(deleted.getMemberId())
+                    .isDeleted(true)
+                    .deletedAt(deleted.getDeletedAt())
+                    .build();
+        }
+
+        deleted.setDeleted(true); // set은 is가 빠지는 게 규약이란다.
+        deleted.setDeletedAt(LocalDateTime.now());
+
+        memberRepository.save(deleted);
+
+        return MemberDeleteResponse.builder()
+                .memberId(deleted.getMemberId())
+                .isDeleted(deleted.isDeleted()) // 아래 주석에 설명
+                .deletedAt(deleted.getDeletedAt())
+                .build();
+    }
+        /*
+            자바 Bean 네이밍 규약에 따르면,
+            일반 필드 (String, int 등) 는
+            ex) 필드명 : memberName 인 경우,
+                getter : getMemberName(), setter : setMemberName(..)
+            boolean 필드는 상태를 물어보는 의미로 설계됐기 때문에
+            ex) 필드명 :  isDeleted 인 경우,
+                getter : isDeleted(), setter : setDeleted(boolean)
+         */
 }
 /*
     [빌더 패턴에 대한 설명]

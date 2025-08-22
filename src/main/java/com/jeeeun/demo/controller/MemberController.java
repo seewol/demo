@@ -3,6 +3,7 @@ package com.jeeeun.demo.controller;
 import com.jeeeun.demo.controller.request.MemberCreateRequest;
 import com.jeeeun.demo.controller.request.MemberUpdateRequest;
 import com.jeeeun.demo.controller.response.MemberCreateResponse;
+import com.jeeeun.demo.controller.response.MemberDeleteResponse;
 import com.jeeeun.demo.controller.response.MemberResponse;
 import com.jeeeun.demo.controller.response.MemberUpdateResponse;
 import com.jeeeun.demo.service.MemberService;
@@ -59,8 +60,17 @@ public class MemberController {
 //      └ return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
+    // 회원 탈퇴 (D)
+    @DeleteMapping("/members/{memberId}")
+    public ResponseEntity<MemberDeleteResponse> deleteMember(
+            @PathVariable Integer memberId
+    ) {
+        MemberDeleteResponse response = memberService.deleteMember(memberId);
+        return ResponseEntity.ok(response);
+    }
+
     // 내 정보 조회
-    @GetMapping("/member/{memberId}")
+    @GetMapping("/members/{memberId}")
     public MemberResponse getMember(
             @PathVariable("memberId") Integer memberId
     ) {

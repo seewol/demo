@@ -36,11 +36,19 @@ public class Member {
     @Column(name = "phone_number", nullable = false)
     private String phoneNumber;
 
-    @CreatedDate
-    @Column(name = "created_at", updatable = false)
+    @CreatedDate // 엔티티 최초 저장(insert) 시에만 자동으로 값 채워짐
+    @Column(name = "created_at", updatable = false) // 이후 update 시 DB 반영 안 됨
     private LocalDateTime createdAt;
 
-    @LastModifiedDate
+    @LastModifiedDate // 엔티티가 변경(update) 될 떄마다 자동 갱신, insert 때도 한 번 세팅
     @Column(name= "updated_at")
     private LocalDateTime updatedAt;
+
+    @Column(name = "is_deleted", nullable = false)
+    private boolean isDeleted = false;
+
+    @Column(name = "deleted_at", nullable = true)
+    private LocalDateTime deletedAt;
+
+
 }
