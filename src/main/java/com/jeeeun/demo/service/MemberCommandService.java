@@ -4,7 +4,6 @@ import com.jeeeun.demo.controller.request.MemberCreateRequest;
 import com.jeeeun.demo.controller.request.MemberUpdateRequest;
 import com.jeeeun.demo.controller.response.MemberCreateResponse;
 import com.jeeeun.demo.controller.response.MemberDeleteResponse;
-import com.jeeeun.demo.controller.response.MemberResponse;
 import com.jeeeun.demo.controller.response.MemberUpdateResponse;
 import com.jeeeun.demo.domain.member.Member;
 import com.jeeeun.demo.repository.MemberRepository;
@@ -14,19 +13,17 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
-import static org.springframework.util.StringUtils.hasText;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
+
+import static org.springframework.util.StringUtils.hasText;
 
 @RequiredArgsConstructor
 @Service
-public class MemberService {
+public class MemberCommandService {
 
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
-
 
     // 회원가입에 대한 api 생성
     @Transactional // Read 빼고는 @Transactional 붙여주기.
@@ -53,22 +50,7 @@ public class MemberService {
     }
 
 
-    // 전체 멤버 조회에 대한 api 생성
-    @Transactional(readOnly = true)
-    public List<MemberResponse> getMembers() {
-        return memberRepository.findAll()
-                .stream()
-                // map() : Member 엔티티 → MemberResponse DTO로 변환
-                .map(member -> MemberResponse.builder()
-                        .memberId(member.getMemberId())
-                        .memberName(member.getMemberName())
-                        .memberEmail(member.getMemberEmail())
-                        .phoneNumber(member.getPhoneNumber())
-                        .createdAt(member.getCreatedAt())
-                        .updatedAt(member.getUpdatedAt())
-                        .build())
-                .toList();
-    }
+
 
 
     // 내 정보 수정에 대한 api 생성
@@ -138,6 +120,7 @@ public class MemberService {
                 getter : isDeleted(), setter : setDeleted(boolean)
          */
 }
+
 /*
     [빌더 패턴에 대한 설명]
     @Builder 어노테이션 달기
@@ -149,5 +132,3 @@ public class MemberService {
     2. @Builder 어노테이션을 MemberResponse 같은 DTO/Entity 클래스에 붙이면,
        롬복이 빌더 패턴을 자동으로 만들어줌.
  */
-
-
