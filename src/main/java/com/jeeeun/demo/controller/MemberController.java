@@ -2,11 +2,9 @@ package com.jeeeun.demo.controller;
 
 import com.jeeeun.demo.controller.request.MemberCreateRequest;
 import com.jeeeun.demo.controller.request.MemberUpdateRequest;
-import com.jeeeun.demo.controller.response.MemberCreateResponse;
-import com.jeeeun.demo.controller.response.MemberDeleteResponse;
-import com.jeeeun.demo.controller.response.MemberResponse;
-import com.jeeeun.demo.controller.response.MemberUpdateResponse;
-import com.jeeeun.demo.service.MemberService;
+import com.jeeeun.demo.controller.response.*;
+import com.jeeeun.demo.service.MemberCommandService;
+import com.jeeeun.demo.service.MemberQueryService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -21,7 +19,8 @@ import java.util.List;
 // API 엔드 포인트 담당
 public class MemberController {
 
-    private final MemberService memberService;
+    private final MemberCommandService memberCommandService;
+    private final MemberQueryService memberQueryService;
 
     /*
         -- 전체 흐름
@@ -30,13 +29,12 @@ public class MemberController {
                       [JSON]  ←  [MemberResponse DTO]  ←  [Member Entity]
      */
 
-
     // 회원 가입 (C)
     @PostMapping("/members")
     public ResponseEntity<MemberCreateResponse> createMember(
             @Valid @RequestBody MemberCreateRequest request
     ) {
-        MemberCreateResponse response = memberService.createMember(request);
+        MemberCreateResponse response = memberCommandService.createMember(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
 
     }
@@ -46,7 +44,17 @@ public class MemberController {
     public List<MemberResponse> getMembers(){
 
 //        return List.of();
-        return memberService.getMembers();
+        return memberQueryService.getMembers();
+    }
+
+    // 멤버 상세 조회
+
+    @GetMapping("/members/{memberId}/products/{productId}")
+    public MemberDetailResponse getMember(
+            @PathVariable Integer memberId,
+            @PathVariable Integer productId
+    ) {
+        return memberQueryService.getMemberDetail(memberId, productId);
     }
 
     // 내 정보 수정 (U)
@@ -55,7 +63,7 @@ public class MemberController {
             @PathVariable Integer memberId,
             @RequestBody MemberUpdateRequest request
     ) {
-        MemberUpdateResponse response = memberService.updateMember(memberId, request);
+        MemberUpdateResponse response = memberCommandService.updateMember(memberId, request);
         return ResponseEntity.ok(response); // 아래의 축약형
 //      └ return ResponseEntity.status(HttpStatus.OK).body(response);
     }
@@ -65,7 +73,7 @@ public class MemberController {
     public ResponseEntity<MemberDeleteResponse> deleteMember(
             @PathVariable Integer memberId
     ) {
-        MemberDeleteResponse response = memberService.deleteMember(memberId);
+        MemberDeleteResponse response = memberCommandService.deleteMember(memberId);
         return ResponseEntity.ok(response);
     }
 
