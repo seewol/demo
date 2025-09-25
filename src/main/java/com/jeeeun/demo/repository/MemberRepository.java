@@ -1,6 +1,6 @@
 package com.jeeeun.demo.repository;
 
-import com.jeeeun.demo.domain.member.Member;
+import com.jeeeun.demo.domain.Member;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface MemberRepository extends JpaRepository<Member, Integer>, MemberRepositoryCustom {

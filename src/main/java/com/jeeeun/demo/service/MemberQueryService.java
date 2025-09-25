@@ -2,8 +2,8 @@ package com.jeeeun.demo.service;
 
 import com.jeeeun.demo.controller.response.MemberDetailResponse;
 import com.jeeeun.demo.controller.response.MemberResponse;
-import com.jeeeun.demo.domain.member.Member;
-import com.jeeeun.demo.domain.member.Product;
+import com.jeeeun.demo.domain.Member;
+import com.jeeeun.demo.domain.Product;
 import com.jeeeun.demo.repository.MemberRepository;
 import com.jeeeun.demo.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;

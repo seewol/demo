@@ -1,4 +1,4 @@
-package com.jeeeun.demo.domain.member;
+package com.jeeeun.demo.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
