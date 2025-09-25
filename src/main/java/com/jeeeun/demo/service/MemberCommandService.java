@@ -5,7 +5,7 @@ import com.jeeeun.demo.controller.request.MemberUpdateRequest;
 import com.jeeeun.demo.controller.response.MemberCreateResponse;
 import com.jeeeun.demo.controller.response.MemberDeleteResponse;
 import com.jeeeun.demo.controller.response.MemberUpdateResponse;
-import com.jeeeun.demo.domain.member.Member;
+import com.jeeeun.demo.domain.Member;
 import com.jeeeun.demo.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -48,9 +48,6 @@ public class MemberCommandService {
                 .updatedAt(saved.getUpdatedAt())
                 .build();
     }
-
-
-
 
 
     // 내 정보 수정에 대한 api 생성
