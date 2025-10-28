@@ -16,6 +16,7 @@ import java.util.List;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@ToString(exclude = {"category", "member", "productImages", "productOptions"})
 @Entity
 @EntityListeners(AuditingEntityListener.class)
 @Table(name = "product")
@@ -30,6 +31,10 @@ public class Product {
     @ManyToOne(fetch = FetchType.LAZY) // 지연 로딩
     @JoinColumn(name = "category_id", nullable = false)
     private Category category;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "member_id", nullable = false)
+    private Member member;
 
     // 지연로딩이란?
     // product.getCategory() 호출 전까지 카테고리 쿼리 안 날림.
@@ -73,10 +78,6 @@ public class Product {
 
     @Column(name = "is_deleted", nullable = false)
     private boolean isDeleted = false;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id", nullable = false)
-    private Member member;
 
     // mappedBy ?
     // = 상대 엔티티에서 이 관계를 담당하고 있는 필드명 기재

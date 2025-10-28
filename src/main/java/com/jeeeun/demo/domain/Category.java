@@ -12,6 +12,7 @@ import java.util.List;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@ToString(exclude = {"products"})
 @Entity
 @EntityListeners(AuditingEntityListener.class)
 @Table(name = "category")

@@ -9,6 +9,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@ToString(exclude = {"productOption"})
 @Entity
 @EntityListeners(AuditingEntityListener.class)
 @Table(name = "product_option_detail")

@@ -1,20 +1,11 @@
 package com.jeeeun.demo.controller;
 
-import com.jeeeun.demo.controller.request.ProductCreateRequest;
-import com.jeeeun.demo.controller.request.ProductRequest;
-import com.jeeeun.demo.controller.response.ProductCreateResponse;
 import com.jeeeun.demo.controller.response.ProductResponse;
 import com.jeeeun.demo.service.ProductCommandService;
 import com.jeeeun.demo.service.ProductQueryService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.cglib.core.Local;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
-import java.net.URI;
-import java.time.LocalDateTime;
 import java.util.*;
 
 @RequiredArgsConstructor
