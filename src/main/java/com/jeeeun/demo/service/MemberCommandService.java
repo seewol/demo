@@ -18,6 +18,8 @@ import java.time.LocalDateTime;
 
 import static org.springframework.util.StringUtils.hasText;
 
+// 조회 전용 QueryService
+
 @RequiredArgsConstructor
 @Service
 public class MemberCommandService {

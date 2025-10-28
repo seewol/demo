@@ -7,6 +7,8 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 // member Entity
 @Builder // 필드가 많을 때 가독성적으로 좋아서 Setter 대신 사용.
@@ -50,5 +52,6 @@ public class Member {
     @Column(name = "deleted_at", nullable = true)
     private LocalDateTime deletedAt;
 
-
+    @OneToMany(mappedBy = "member")
+    private List<Product> products = new ArrayList<>();
 }

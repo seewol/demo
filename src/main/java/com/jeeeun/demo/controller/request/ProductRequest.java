@@ -11,19 +11,19 @@ import java.time.LocalDateTime;
 @Setter
 @AllArgsConstructor
 public class ProductRequest {
-    String name;
-    Double price;
-    String description;
-    String imageUrl;
-
-    // 상품 수정
-    public void applyTo(ProductResponse updated) {
-        updated.setName(this.name);
-        updated.setPrice(this.price);
-        updated.setDescription(this.description);
-        updated.setImageUrl(this.imageUrl);
-        updated.setUpdatedAt(LocalDateTime.now());
-
-        // 서버에서 찾은 updated(ProductResponse) 를 수정하는 것.
-    }
+//    String name;
+//    Double price;
+//    String description;
+//    String imageUrl;
+//
+//    // 상품 수정
+//    public void applyTo(ProductResponse updated) {
+//        updated.setName(this.name);
+//        updated.setPrice(this.price);
+//        updated.setDescription(this.description);
+//        updated.setImageUrl(this.imageUrl);
+//        updated.setUpdatedAt(LocalDateTime.now());
+//
+//        // 서버에서 찾은 updated(ProductResponse) 를 수정하는 것.
+//    }
 }

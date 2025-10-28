@@ -34,7 +34,8 @@ out/
 /.nb-gradle/
 
 ### VS Code ###
-.vscode/
+.vscode/s
 
 ### Spring Boot Properties ###
 application.properties
+application.yml

@@ -13,6 +13,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+// 상태 변경용 CommandService
+
 @RequiredArgsConstructor
 @Service
 public class MemberQueryService {
@@ -38,23 +40,17 @@ public class MemberQueryService {
                 .toList();
     }
 
-    // 회원 상세 조회
+    // 내 정보 조회
     @Transactional(readOnly = true)
-    public MemberDetailResponse getMemberDetail(Integer memberId, Integer productId) {
+    public MemberDetailResponse getMemberDetail(Integer memberId) {
         Member member = memberRepository.findById(memberId).orElseThrow();
-        Product product = productRepository.findById(productId).orElseThrow();
 
         return MemberDetailResponse.builder()
                 .memberId(member.getMemberId())
                 .memberName(member.getMemberName())
                 .memberEmail(member.getMemberEmail())
                 .phoneNumber(member.getPhoneNumber())
-                .product(
-                    MemberDetailResponse.ProductDetailResponse.builder()
-                            .productId(product.getProductId())
-                            .productName(product.getProductName())
-                            .build()
-                )
+                .productSummary(null)
                 .createdAt(member.getCreatedAt())
                 .updatedAt(member.getUpdatedAt())
                 .build();
