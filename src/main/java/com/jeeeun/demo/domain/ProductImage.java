@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@ToString(exclude = {"product"})
 @Entity
 @EntityListeners(AuditingEntityListener.class)
 @Table(name = "product_image")

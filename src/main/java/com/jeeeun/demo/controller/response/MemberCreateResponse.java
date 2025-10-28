@@ -1,17 +1,15 @@
 package com.jeeeun.demo.controller.response;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.cglib.core.Local;
 
 import java.time.LocalDateTime;
 
 @Getter
-@Builder
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class MemberCreateResponse {
     private Integer memberId;
     private String memberName;
