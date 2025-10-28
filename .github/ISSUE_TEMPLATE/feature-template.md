@@ -12,7 +12,7 @@ assignees: ""
 
 ---
 
-### ☑️️ TO DO
+### ☑️️ TO DO!
 - [ ] Controller 작성
 - [ ] Service 로직 구현
 - [ ] Request / Response DTO 정의
