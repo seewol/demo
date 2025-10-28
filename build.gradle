@@ -19,10 +19,6 @@ repositories {
 
 dependencies {
 
-	// jpa
-	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
-	runtimeOnly("com.h2database:h2")
-
 	implementation 'org.springframework.boot:spring-boot-starter'
 	// 아래 -web은 위의 기본 starter + 웹 개발에 필요한 라이브러리
 	// (예: Spring MVC, Tomcat, Jackson 등)
@@ -38,7 +34,7 @@ dependencies {
 
 	// Database + JPA
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-	runtimeOnly 'com.h2database:h2' // H2 Database for testing
+	runtimeOnly 'com.mysql:mysql-connector-j'
 
 	implementation 'org.hibernate.orm:hibernate-core'
 	implementation 'jakarta.persistence:jakarta.persistence-api'
@@ -48,6 +44,9 @@ dependencies {
 
 	// PasswordEncoder
 	implementation 'org.springframework.security:spring-security-crypto:6.5.1'
+
+	// Swagger UI
+	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0'
 }
 
 repositories {

@@ -2,6 +2,8 @@ package com.jeeeun.demo.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.math.BigDecimal;
@@ -61,10 +63,26 @@ public class Product {
     @Column(name = "discount_end_at")
     private LocalDateTime discountEndAt;
 
+    @CreatedDate
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+
+    @LastModifiedDate
+    @Column(name = "updated_at", nullable = false)
+    private LocalDateTime updatedAt;
+
     @Column(name = "is_deleted", nullable = false)
     private boolean isDeleted = false;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "member_id", nullable = false)
+    private Member member;
+
+    // mappedBy ?
+    // = 상대 엔티티에서 이 관계를 담당하고 있는 필드명 기재
     @OneToMany(mappedBy = "product")
     private List<ProductImage> productImages = new ArrayList<>();
 
+    @OneToMany(mappedBy = "product")
+    private List<ProductOption> productOptions = new ArrayList<>();
 }
