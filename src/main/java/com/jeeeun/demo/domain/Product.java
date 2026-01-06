@@ -1,5 +1,6 @@
 package com.jeeeun.demo.domain;
 
+import com.jeeeun.demo.common.jpa.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
@@ -16,11 +17,12 @@ import java.util.List;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@ToString(exclude = {"category", "member", "productImages", "productOptions"})
+@ToString(exclude = {"category", "member", "productImages",
+        "productOptions", "productVariants"})
 @Entity
 @EntityListeners(AuditingEntityListener.class)
 @Table(name = "product")
-public class Product {
+public class Product extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -68,13 +70,13 @@ public class Product {
     @Column(name = "discount_end_at")
     private LocalDateTime discountEndAt;
 
-    @CreatedDate
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
-
-    @LastModifiedDate
-    @Column(name = "updated_at", nullable = false)
-    private LocalDateTime updatedAt;
+//    @CreatedDate
+//    @Column(name = "created_at", nullable = false, updatable = false)
+//    private LocalDateTime createdAt;
+//
+//    @LastModifiedDate
+//    @Column(name = "updated_at", nullable = false)
+//    private LocalDateTime updatedAt;
 
     @Column(name = "is_deleted", nullable = false)
     private boolean isDeleted = false;
@@ -86,4 +88,7 @@ public class Product {
 
     @OneToMany(mappedBy = "product")
     private List<ProductOption> productOptions = new ArrayList<>();
+
+    @OneToMany(mappedBy = "product")
+    private List<ProductVariant> productVariants = new ArrayList<>();
 }

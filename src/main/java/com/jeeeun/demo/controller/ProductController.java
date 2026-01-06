@@ -1,5 +1,7 @@
 package com.jeeeun.demo.controller;
 
+import com.jeeeun.demo.controller.request.ProductCreateRequest;
+import com.jeeeun.demo.controller.response.ProductCreateResponse;
 import com.jeeeun.demo.controller.response.ProductResponse;
 import com.jeeeun.demo.service.ProductCommandService;
 import com.jeeeun.demo.service.ProductQueryService;
@@ -28,12 +30,16 @@ public class ProductController {
 
     // product POST
     // 상품 등록
-//    @PostMapping("/products")
-//    public ProductCreateResponse createProduct(
-//            @RequestBody ProductCreateRequest request
-//    ) {
-//        return productCommandService.createProduct(request);
-//    }
+    @PostMapping("/products")
+    public ProductCreateResponse createProduct(
+            @RequestBody ProductCreateRequest request
+    ) {
+        return productCommandService.createProduct(request);
+    }
+
+
+
+
 
 
 

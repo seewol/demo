@@ -51,6 +51,8 @@ public class MemberController {
 
 //        return List.of();
         return memberQueryService.getMembers();
+//            List<MemberResponse> members = memberQueryService.getMembers();
+//            return members;
     }
 
     // 내 정보 조회 (회원 상세 조회)
