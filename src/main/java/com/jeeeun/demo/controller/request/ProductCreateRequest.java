@@ -18,10 +18,10 @@ public class ProductCreateRequest {
     // Post /Products 호출 시 아래 필드를 토대로 한 JSON을 한 번에 보냄
 
     @NotNull
-    private Long categoryId;
+    private Integer categoryId;
 
     @NotNull
-    private Long memberId; // 등록자
+    private Integer memberId; // 등록자
 
     @NotBlank
     private String productName;
@@ -86,10 +86,10 @@ public class ProductCreateRequest {
     @Builder
     public static class ProductOptionRequest {
         @NotBlank
-        private String optionName; // 옵션 그룹 이름
+        private String optionName; // 옵션 그룹 이름 (color, size..)
 
         @NotEmpty
-        private List<String> optionDetails; // 그룹의 구체적인 값들
+        private List<String> optionDetails; // 그룹의 세부(구체적인)값들 (red, blue..)
     }
 
 
@@ -105,7 +105,7 @@ public class ProductCreateRequest {
 
         private String optionDetail1;
         private String optionDetail2;
-        private String optionDetail3;
+        private String optionDetail3; // = 실제 FK ID를 받는 방식
 
         @NotNull(message = "additionalPrice 입력은 필수입니다.")
         private BigDecimal additionalPrice;

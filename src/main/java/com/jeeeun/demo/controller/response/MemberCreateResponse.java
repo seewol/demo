@@ -17,4 +17,16 @@ public class MemberCreateResponse {
     private String phoneNumber;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+
+    // Swagger 용 예시 데이터
+    public static MemberCreateResponse example() {
+        return MemberCreateResponse.builder()
+                .memberId(1)
+                .memberName("테스트")
+                .memberEmail("test@gmail.com")
+                .phoneNumber("010-1234-5678")
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .build();
+    }
 }

@@ -1,4 +1,4 @@
-package com.jeeeun.demo.common.error.config;
+package com.jeeeun.demo.common.config;
 
 import org.springframework.context.annotation.Configuration;
 

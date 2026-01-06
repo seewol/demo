@@ -1,5 +1,6 @@
 package com.jeeeun.demo.domain;
 
+import com.jeeeun.demo.common.jpa.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
@@ -18,9 +19,8 @@ import java.util.List;
 @NoArgsConstructor
 @ToString(exclude = {"products"})
 @Entity
-@EntityListeners(AuditingEntityListener.class)
 @Table(name = "member")
-public class Member {
+public class Member extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY) // auto increment
@@ -36,16 +36,16 @@ public class Member {
     @Column(name = "member_pw", nullable = false)
     private String memberPw;
 
-    @Column(name = "phone_number", nullable = false)
+    @Column(name = "phone_number", nullable = false, unique = true)
     private String phoneNumber;
 
-    @CreatedDate // 엔티티 최초 저장(insert) 시에만 자동으로 값 채워짐
-    @Column(name = "created_at", updatable = false) // 이후 update 시 DB 반영 안 됨
-    private LocalDateTime createdAt;
-
-    @LastModifiedDate // 엔티티가 변경(update) 될 떄마다 자동 갱신, insert 때도 한 번 세팅
-    @Column(name= "updated_at")
-    private LocalDateTime updatedAt;
+//    @CreatedDate // 엔티티 최초 저장(insert) 시에만 자동으로 값 채워짐
+//    @Column(name = "created_at", updatable = false) // 이후 update 시 DB 반영 안 됨
+//    private LocalDateTime createdAt;
+//
+//    @LastModifiedDate // 엔티티가 변경(update) 될 떄마다 자동 갱신, insert 때도 한 번 세팅
+//    @Column(name= "updated_at")
+//    private LocalDateTime updatedAt;
 
     @Column(name = "is_deleted", nullable = false)
     private boolean isDeleted = false;

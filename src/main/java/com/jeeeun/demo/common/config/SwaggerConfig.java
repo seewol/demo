@@ -1,4 +1,4 @@
-package com.jeeeun.demo.common.error.config;
+package com.jeeeun.demo.common.config;
 
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;

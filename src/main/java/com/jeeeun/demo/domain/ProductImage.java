@@ -1,5 +1,6 @@
 package com.jeeeun.demo.domain;
 
+import com.jeeeun.demo.common.jpa.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
@@ -16,13 +17,14 @@ import java.time.LocalDateTime;
 @Entity
 @EntityListeners(AuditingEntityListener.class)
 @Table(name = "product_image")
-public class ProductImage {
+public class ProductImage extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "product_image_id", nullable = false)
     private Integer productImageId;
 
+    // FK
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id", nullable = false)
     private Product product;
@@ -33,8 +35,8 @@ public class ProductImage {
     @Column(name = "image_order", nullable = false)
     private Integer imageOrder;
 
-    @CreatedDate
-    @Column(name = "created_at", nullable = false)
-    private LocalDateTime createdAt;
+//    @CreatedDate
+//    @Column(name = "created_at", nullable = false)
+//    private LocalDateTime createdAt;
 
 }

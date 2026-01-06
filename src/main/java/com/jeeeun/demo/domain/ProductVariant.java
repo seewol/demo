@@ -1,5 +1,6 @@
 package com.jeeeun.demo.domain;
 
+import com.jeeeun.demo.common.jpa.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
@@ -21,7 +22,7 @@ import java.util.List;
 @ToString(exclude = {"product", "optionDetail1", "optionDetail2",
         "optionDetail3", "productStocks"})
 @Table(name = "product_variant")
-public class ProductVariant {
+public class ProductVariant extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

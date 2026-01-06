@@ -1,5 +1,7 @@
 package com.jeeeun.demo.service;
 
+import com.jeeeun.demo.common.error.BusinessException;
+import com.jeeeun.demo.common.error.ErrorCode;
 import com.jeeeun.demo.controller.request.MemberCreateRequest;
 import com.jeeeun.demo.controller.request.MemberUpdateRequest;
 import com.jeeeun.demo.controller.response.MemberCreateResponse;
@@ -8,6 +10,7 @@ import com.jeeeun.demo.controller.response.MemberUpdateResponse;
 import com.jeeeun.demo.domain.Member;
 import com.jeeeun.demo.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -15,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 import static org.springframework.util.StringUtils.hasText;
 
@@ -27,28 +31,41 @@ public class MemberCommandService {
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
 
-    // 회원가입에 대한 api 생성
+    // 회원 가입에 대한 api 생성
     @Transactional // Read 빼고는 @Transactional 붙여주기.
     public MemberCreateResponse createMember(MemberCreateRequest req) {
-        // 고려 사항. email 중복 체크
 
-        Member saved = memberRepository.save(
-                Member.builder()
-                        .memberName(req.getMemberName())
-                        .memberEmail(req.getMemberEmail())
-                        .memberPw(passwordEncoder.encode(req.getMemberPw()))
-                        .phoneNumber(req.getPhoneNumber())
-                        .build()
-        );
+        // email, phoneNumber 중복 체크 (unique = true)
+        if (memberRepository.existsByMemberEmailAndIsDeletedFalse(req.getEmail())
+                || memberRepository.existsByPhoneNumberAndIsDeletedFalse(req.getPhoneNumber())) {
+           throw new BusinessException(ErrorCode.CONFLICT_USER);
+        }
 
-        return MemberCreateResponse.builder()
-                .memberId(saved.getMemberId())
-                .memberName(saved.getMemberName())
-                .memberEmail(saved.getMemberEmail())
-                .phoneNumber(saved.getPhoneNumber())
-                .createdAt(saved.getCreatedAt())
-                .updatedAt(saved.getUpdatedAt())
-                .build();
+        try {
+            Member saved = memberRepository.save(
+                    Member.builder()
+                            .memberName(req.getName())
+                            .memberEmail(req.getEmail())
+                            .memberPw(passwordEncoder.encode(req.getPassword()))
+                            .phoneNumber(req.getPhoneNumber())
+                            .build()
+            );
+
+            return MemberCreateResponse.builder()
+                    .memberId(saved.getMemberId())
+                    .memberName(saved.getMemberName())
+                    .memberEmail(saved.getMemberEmail())
+                    .phoneNumber(saved.getPhoneNumber())
+                    .createdAt(saved.getCreatedAt())
+                    .updatedAt(saved.getUpdatedAt())
+                    .build();
+
+        } catch (DataIntegrityViolationException e) {
+            throw new BusinessException(ErrorCode.CONFLICT_USER);
+        }
+
+//        return MemberCreateResponse.example();
+
     }
 
 
@@ -82,12 +99,13 @@ public class MemberCommandService {
                 .build();
     }
 
+    // 회원 탈퇴에 대한 api 생성
     @Transactional
     public MemberDeleteResponse deleteMember(Integer memberId) {
 
-        // 1) 수정 대상 조회 (소프트 딜리트)
-        Member deleted = memberRepository.findById(memberId)
-                .orElseThrow( () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "회원이 없습니다."));
+        // 1) 탈퇴 대상 조회 (소프트 딜리트)
+        Member deleted = memberRepository.findByMemberIdAndIsDeletedFalse(memberId)
+                .orElseThrow( () -> new BusinessException(ErrorCode.NOT_FOUND_USER));
 
         // 2) 이미 삭제된 경우
         if (deleted.isDeleted()) {
@@ -98,8 +116,15 @@ public class MemberCommandService {
                     .build();
         }
 
-        deleted.setDeleted(true); // set은 is가 빠지는 게 규약이란다.
+        // 3) 삭제할 경우
+        deleted.setDeleted(true); // set 은 is가 빠지는 게 규약이란다.
         deleted.setDeletedAt(LocalDateTime.now());
+
+        String uuid = UUID.randomUUID().toString();
+
+        deleted.setMemberEmail("deleted_" + uuid + "_" + deleted.getMemberEmail());
+        deleted.setPhoneNumber("deleted_" + uuid + "_" + deleted.getPhoneNumber());
+        // ex) deleted_b5cdb6df-0472-4161-b788-8e9d8b13809b_010-1111-1113
 
         memberRepository.save(deleted);
 

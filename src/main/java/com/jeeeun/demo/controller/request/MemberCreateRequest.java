@@ -14,15 +14,15 @@ import lombok.Setter;
 public class MemberCreateRequest {
 
     @NotBlank(message = "이름은 필수 입력값입니다.")
-    private String memberName;
+    private String name;
 
     @NotBlank(message = "이메일은 필수 입력값입니다.")
     @Email(message = "이메일 형식에 올바르지 않습니다.")
-    private String memberEmail;
+    private String email;
 
     @NotBlank(message = "비밀번호는 필수 입력값입니다.")
     @Size(min = 10, message = "비밀번호는 최소 10자 이상입니다.")
-    private String memberPw;
+    private String password;
 
     @NotBlank(message = "전화번호는 필수 입력값입니다.")
     @Pattern(regexp = "^(010)-?\\d{3,4}-?\\d{4}$",
