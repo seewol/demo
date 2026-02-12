@@ -1,4 +1,4 @@
-package com.jeeeun.demo.domain;
+package com.jeeeun.demo.domain.product;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -21,7 +21,7 @@ public class Category {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "category_id", nullable = false)
-    private Integer categoryId;
+    private Integer id;
 
     // 연관 관계에서는 FK가 있는 쪽이 주인
     // 여기서는 Product가 FK(category_id)를 가짐
@@ -34,6 +34,6 @@ public class Category {
     // 그렇기 때문에 mappedBy 사용.
 
     @Column(name = "category_name", nullable = false)
-    private String categoryName;
+    private String name;
 
 }

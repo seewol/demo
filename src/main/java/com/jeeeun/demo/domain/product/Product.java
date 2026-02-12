@@ -1,10 +1,9 @@
-package com.jeeeun.demo.domain;
+package com.jeeeun.demo.domain.product;
 
 import com.jeeeun.demo.common.jpa.BaseTimeEntity;
+import com.jeeeun.demo.domain.member.Member;
 import jakarta.persistence.*;
 import lombok.*;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.math.BigDecimal;
@@ -20,14 +19,13 @@ import java.util.List;
 @ToString(exclude = {"category", "member", "productImages",
         "productOptions", "productVariants"})
 @Entity
-@EntityListeners(AuditingEntityListener.class)
 @Table(name = "product")
 public class Product extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "product_id", nullable = false)
-    private Integer productId;
+    private Integer id;
 
     // Many To One : 다대일 (N:1)
     @ManyToOne(fetch = FetchType.LAZY) // 지연 로딩
@@ -43,18 +41,18 @@ public class Product extends BaseTimeEntity {
     // 불필요한 조인을 피할 수 있음이 장점
 
     @Column(name = "product_name", nullable = false)
-    private String productName;
+    private String name;
 
     @Column(name = "product_content", nullable = false)
-    private String productContent;
-
-    // 정가 (할인 전 원가)
-    @Column(name = "original_price", nullable = false)
-    private BigDecimal originalPrice; // 가격은 BigDecimal 사용
+    private String description;
 
     // 판매가 (할인 적용 후 실제 판매가)
     @Column(name = "sale_price", nullable = false)
     private BigDecimal salePrice;
+
+//    // 정가 (할인 전 원가)
+//    @Column(name = "original_price", nullable = false)
+//    private BigDecimal originalPrice; // 가격은 BigDecimal 사용
 
     // 할인 여부
     @Column(name = "is_discounted", nullable = false)
@@ -83,6 +81,8 @@ public class Product extends BaseTimeEntity {
 
     // mappedBy ?
     // = 상대 엔티티에서 이 관계를 담당하고 있는 필드명 기재
+    // mappedBy 가 붙은 쪽은 연관관계 주인이 아님
+
     @OneToMany(mappedBy = "product")
     private List<ProductImage> productImages = new ArrayList<>();
 

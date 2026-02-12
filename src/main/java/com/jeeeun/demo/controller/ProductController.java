@@ -1,10 +1,15 @@
 package com.jeeeun.demo.controller;
 
 import com.jeeeun.demo.controller.request.ProductCreateRequest;
-import com.jeeeun.demo.controller.response.ProductCreateResponse;
-import com.jeeeun.demo.controller.response.ProductResponse;
+import com.jeeeun.demo.controller.request.ProductVariantCreateRequest;
+import com.jeeeun.demo.controller.request.StockUpdateRequest;
+import com.jeeeun.demo.controller.response.*;
 import com.jeeeun.demo.service.ProductCommandService;
 import com.jeeeun.demo.service.ProductQueryService;
+import com.jeeeun.demo.service.product.model.*;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,29 +25,78 @@ public class ProductController {
     private final ProductCommandService productCommandService;
     private final ProductQueryService productQueryService;
 
-    // product GET
-    // 상품 목록 조회
-    @GetMapping("/products")
-    public List<ProductResponse> getProducts () {
-        return productQueryService.getProducts();
-    }
+    // responseCode
+    // 200 : 요청 성공, 201 : 서버에 새로운 리소스 생성 성공
 
 
-    // product POST
-    // 상품 등록
+    // 상품 등록 (C)
+    @Operation(summary = "상품 등록", description = "상품을 등록합니다.")
+    @ApiResponse(responseCode = "201", description = "상품 등록 성공")
     @PostMapping("/products")
     public ProductCreateResponse createProduct(
-            @RequestBody ProductCreateRequest request
+            @Valid @RequestBody ProductCreateRequest request
     ) {
-        return productCommandService.createProduct(request);
+        return ProductCreateResponse.from(productCommandService.createProduct(request.toCommand()));
     }
 
 
+    // 상품 목록 조회 (R)
+    @Operation(summary = "상품 목록 조회", description = "상품 정보를 조회합니다.")
+    @ApiResponse(responseCode = "200", description = "조회 성공")
+    @GetMapping("/products")
+    public List<ProductResponse> getProducts() {
+
+        List<ProductResult> results =  productQueryService.getProducts();
+
+        // List<ProductResult> → List<ProductResponse> 변환 과정
+        return results.stream()
+                .map(ProductResponse::from)
+                .toList();
+    }
 
 
+    // 단일 상품 조회 (상품 상세 조회)
+    @Operation(summary = "단일 상품 조회", description = "상품 정보를 조회합니다.")
+    @ApiResponse(responseCode = "200", description = "조회 성공")
+    @GetMapping("/products/{productId}")
+    public ProductDetailResponse getProduct(
+            @PathVariable Integer productId
+    ) {
+        ProductDetailResult result  = productQueryService.getProductDetail(productId);
+
+        return ProductDetailResponse.from(result);
+    }
 
 
+    // 상품 조합 등록 (C)
+    @Operation(summary = "상품 조합 등록", description = "상품 조합을 등록합니다.")
+    @ApiResponse(responseCode = "201", description = "등록 성공")
+    @PostMapping("/products/{productId}/variants")
+    public ProductVariantCreateResponse createVariant(
+            @PathVariable Integer productId,
+            @Valid @RequestBody ProductVariantCreateRequest request
+    ) {
+        request.validate(); // 입력 값에 대한 검증을 한 후, 서비스로 넘기기
 
+        ProductVariantCreateResult result
+                = productCommandService.createVariant(request.toCommand(productId));
+
+        return ProductVariantCreateResponse.from(result);
+    }
+
+
+    @Operation(summary = "상품 재고 업데이트", description = "상품 재고를 업데이트합니다.")
+    @ApiResponse(responseCode = "200", description = "수정 성공")
+    @PatchMapping("/variants/{variantId}/stock")
+    public StockUpdateResponse updateStock(
+            @PathVariable Integer variantId,
+            @Valid @RequestBody StockUpdateRequest request
+    ) {
+        StockUpdateResult result =
+                productCommandService.updateStock(request.toCommand(variantId));
+
+        return StockUpdateResponse.from(result);
+    }
 
     // product PUT
     // 상품 수정
@@ -204,23 +258,5 @@ public class ProductController {
     */
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
