@@ -2,27 +2,20 @@ package com.jeeeun.demo.service;
 
 import com.jeeeun.demo.common.error.BusinessException;
 import com.jeeeun.demo.common.error.ErrorCode;
-import com.jeeeun.demo.controller.request.MemberCreateRequest;
-import com.jeeeun.demo.controller.request.MemberUpdateRequest;
-import com.jeeeun.demo.controller.response.MemberCreateResponse;
-import com.jeeeun.demo.controller.response.MemberDeleteResponse;
-import com.jeeeun.demo.controller.response.MemberUpdateResponse;
-import com.jeeeun.demo.domain.Member;
+import com.jeeeun.demo.domain.member.Member;
 import com.jeeeun.demo.repository.MemberRepository;
+import com.jeeeun.demo.service.member.model.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 import static org.springframework.util.StringUtils.hasText;
 
-// 조회 전용 QueryService
+// 상태 변경용 CommandService
 
 @RequiredArgsConstructor
 @Service
@@ -33,107 +26,93 @@ public class MemberCommandService {
 
     // 회원 가입에 대한 api 생성
     @Transactional // Read 빼고는 @Transactional 붙여주기.
-    public MemberCreateResponse createMember(MemberCreateRequest req) {
+    public MemberCreateResult signUp(MemberCreateCommand command) {
+
+        // todo 형식 검사 (validate..)는 Controller 에서 마치고 넘어오기
 
         // email, phoneNumber 중복 체크 (unique = true)
-        if (memberRepository.existsByMemberEmailAndIsDeletedFalse(req.getEmail())
-                || memberRepository.existsByPhoneNumberAndIsDeletedFalse(req.getPhoneNumber())) {
+        if (memberRepository.existsByEmailAndIsDeletedFalse(command.email())
+                || memberRepository.existsByPhoneNumberAndIsDeletedFalse(command.phoneNumber())) {
            throw new BusinessException(ErrorCode.CONFLICT_USER);
         }
 
         try {
             Member saved = memberRepository.save(
                     Member.builder()
-                            .memberName(req.getName())
-                            .memberEmail(req.getEmail())
-                            .memberPw(passwordEncoder.encode(req.getPassword()))
-                            .phoneNumber(req.getPhoneNumber())
+                            .name(command.name())
+                            .email(command.email())
+                            .password(passwordEncoder.encode(command.password()))
+                            .phoneNumber(command.phoneNumber())
                             .build()
             );
 
-            return MemberCreateResponse.builder()
-                    .memberId(saved.getMemberId())
-                    .memberName(saved.getMemberName())
-                    .memberEmail(saved.getMemberEmail())
-                    .phoneNumber(saved.getPhoneNumber())
-                    .createdAt(saved.getCreatedAt())
-                    .updatedAt(saved.getUpdatedAt())
-                    .build();
+            return MemberCreateResult.from(saved);
 
         } catch (DataIntegrityViolationException e) {
             throw new BusinessException(ErrorCode.CONFLICT_USER);
         }
 
 //        return MemberCreateResponse.example();
-
     }
 
 
     // 내 정보 수정에 대한 api 생성
     @Transactional
-    public MemberUpdateResponse updateMember(Integer memberId, MemberUpdateRequest req) {
-
+    public MemberUpdateResult updateMember(MemberUpdateCommand command) {
 
         // 1) 수정 대상 조회
-        Member updated = memberRepository.findById(memberId)
-                .orElseThrow( () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "회원이 없습니다."));
+        Member updated = memberRepository.findByIdAndIsDeletedFalse(command.id())
+                .orElseThrow( () -> new BusinessException(ErrorCode.NOT_FOUND_USER));
 
-        // 2) 수정 내용 필드 반영
-        if (hasText(req.getMemberName())) {
-            updated.setMemberName(req.getMemberName().trim());
+        // 2) name 수정
+        if (hasText(command.name())) {
+            updated.setName(command.name().trim());
         }
 
-        if (hasText(req.getPhoneNumber())) {
-            updated.setPhoneNumber(req.getPhoneNumber().trim());
+        // 3) phoneNumber 수정 (Request.toCommand()에서 정규화/검증 완료)
+        if (hasText(command.phoneNumber())) {
+            String newPhone = command.phoneNumber().trim();
+            String currentPhone = updated.getPhoneNumber();
+
+            // 바뀐 경우에만 중복 체크하기
+            if (!newPhone.equals(currentPhone)) {
+                boolean exists = memberRepository
+                        .existsByPhoneNumberAndIsDeletedFalseAndIdNot(
+                                newPhone, updated.getId()
+                        ); // 다른 활성 회원이 사용 중이면 막기 (본인 제외)
+
+                if (exists) {
+                    throw new BusinessException(ErrorCode.DUPLICATE_PHONE_NUMBER);
+                }
+
+                updated.setPhoneNumber(newPhone);
+            }
         }
 
-        // Auditing의 @LastModifiedDate 반영 보장!
+        // Auditing 의 @LastModifiedDate 반영 보장!
         memberRepository.saveAndFlush(updated);
+        // updateAt 에 즉시 반영된 값이 필요할 때
 
-        return MemberUpdateResponse.builder()
-                .memberId(updated.getMemberId())
-                .memberEmail(updated.getMemberEmail())
-                .memberName(updated.getMemberName())
-                .phoneNumber(updated.getPhoneNumber())
-                .updatedAt(updated.getUpdatedAt())
-                .build();
+        return MemberUpdateResult.from(updated);
+
     }
+
 
     // 회원 탈퇴에 대한 api 생성
     @Transactional
-    public MemberDeleteResponse deleteMember(Integer memberId) {
+    public void deleteMember(Integer memberId) {
 
         // 1) 탈퇴 대상 조회 (소프트 딜리트)
-        Member deleted = memberRepository.findByMemberIdAndIsDeletedFalse(memberId)
+        Member member = memberRepository.findByIdAndIsDeletedFalse(memberId)
                 .orElseThrow( () -> new BusinessException(ErrorCode.NOT_FOUND_USER));
 
-        // 2) 이미 삭제된 경우
-        if (deleted.isDeleted()) {
-            return MemberDeleteResponse.builder()
-                    .memberId(deleted.getMemberId())
-                    .isDeleted(true)
-                    .deletedAt(deleted.getDeletedAt())
-                    .build();
-        }
+        member.setDeleted(true);
+        member.setDeletedAt(LocalDateTime.now());
+        member.setEmail(null);
+        member.setPhoneNumber(null);
 
-        // 3) 삭제할 경우
-        deleted.setDeleted(true); // set 은 is가 빠지는 게 규약이란다.
-        deleted.setDeletedAt(LocalDateTime.now());
-
-        String uuid = UUID.randomUUID().toString();
-
-        deleted.setMemberEmail("deleted_" + uuid + "_" + deleted.getMemberEmail());
-        deleted.setPhoneNumber("deleted_" + uuid + "_" + deleted.getPhoneNumber());
-        // ex) deleted_b5cdb6df-0472-4161-b788-8e9d8b13809b_010-1111-1113
-
-        memberRepository.save(deleted);
-
-        return MemberDeleteResponse.builder()
-                .memberId(deleted.getMemberId())
-                .isDeleted(deleted.isDeleted()) // 아래 주석에 설명
-                .deletedAt(deleted.getDeletedAt())
-                .build();
     }
+
         /*
             자바 Bean 네이밍 규약에 따르면,
             일반 필드 (String, int 등) 는

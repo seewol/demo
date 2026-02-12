@@ -4,19 +4,16 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
-@Getter
-@Setter
-@AllArgsConstructor
-@NoArgsConstructor
 @Builder
-public class ProductImageRequest {
+public record ProductImageRequest (
 
     @NotBlank
-    private String imageUrl;
+    String imageUrl,
 
     @NotNull
-    private Integer imageOrder;
-}
+    Integer imageOrder
+
+) {}
 
 /* ★ ★ ★ ★ ★
 

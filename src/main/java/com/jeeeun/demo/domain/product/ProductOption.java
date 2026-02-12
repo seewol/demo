@@ -1,4 +1,4 @@
-package com.jeeeun.demo.domain;
+package com.jeeeun.demo.domain.product;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -21,7 +21,7 @@ public class ProductOption {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "option_id", nullable = false)
-    private Integer optionId;
+    private Integer id;
 
     // FK
     @ManyToOne(fetch = FetchType.LAZY)
@@ -30,7 +30,7 @@ public class ProductOption {
 
     // 옵션 설명 (ex. color, size)
     @Column(name = "option_name", nullable = false)
-    private String optionName;
+    private String name;
 
     @OneToMany(mappedBy = "productOption")
     private List<ProductOptionDetail> productOptionDetails = new ArrayList<>();

@@ -6,16 +6,13 @@ import lombok.*;
 
 import java.util.List;
 
-@Getter
-@Setter
-@AllArgsConstructor
-@NoArgsConstructor
 @Builder
-public class ProductOptionRequest {
+public record ProductOptionRequest (
 
     @NotBlank
-    private String optionName;
+    String optionName,
 
     @NotEmpty
-    private List<String> optionDetails;
-}
+    List<String> optionDetails
+
+) {}

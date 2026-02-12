@@ -1,29 +1,37 @@
 package com.jeeeun.demo.controller.response;
 
+import com.jeeeun.demo.service.member.model.MemberCreateResult;
 import lombok.*;
-import org.springframework.cglib.core.Local;
 
 import java.time.LocalDateTime;
 
-@Getter
-@Setter
-@AllArgsConstructor
-@NoArgsConstructor
 @Builder
-public class MemberCreateResponse {
-    private Integer memberId;
-    private String memberName;
-    private String memberEmail;
-    private String phoneNumber;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+public record MemberCreateResponse (
+    Integer id,
+    String name,
+    String email,
+    String phoneNumber,
+    LocalDateTime createdAt,
+    LocalDateTime updatedAt
+
+) {
+    public static MemberCreateResponse from(MemberCreateResult result) {
+        return MemberCreateResponse.builder()
+                .id(result.id())
+                .name(result.name())
+                .email(result.email())
+                .phoneNumber(result.phoneNumber())
+                .createdAt(result.createdAt())
+                .updatedAt(result.updatedAt())
+                .build();
+    }
 
     // Swagger 용 예시 데이터
     public static MemberCreateResponse example() {
         return MemberCreateResponse.builder()
-                .memberId(1)
-                .memberName("테스트")
-                .memberEmail("test@gmail.com")
+                .id(1)
+                .name("테스트")
+                .email("test@gmail.com")
                 .phoneNumber("010-1234-5678")
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())

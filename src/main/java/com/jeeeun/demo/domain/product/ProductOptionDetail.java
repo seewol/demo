@@ -1,4 +1,4 @@
-package com.jeeeun.demo.domain;
+package com.jeeeun.demo.domain.product;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -18,7 +18,7 @@ public class ProductOptionDetail {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "option_detail_id")
-    private Integer optionDetailId;
+    private Integer id;
 
     // FK
     @ManyToOne(fetch = FetchType.LAZY)
@@ -27,6 +27,6 @@ public class ProductOptionDetail {
 
     // 옵션 내용 (ex. 옵션 설명 color 안의 blue, silver..)
     @Column(name = "option_content", nullable = false, length = 100)
-    private String optionContent;
+    private String description;
 
 }

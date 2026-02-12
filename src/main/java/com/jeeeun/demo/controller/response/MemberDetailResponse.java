@@ -1,38 +1,59 @@
 package com.jeeeun.demo.controller.response;
 
-import lombok.AllArgsConstructor;
+import com.jeeeun.demo.service.member.model.MemberDetailResult;
+import com.jeeeun.demo.service.member.model.ProductSummaryResult;
 import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-@Getter
 @Builder
-@AllArgsConstructor
-@NoArgsConstructor
-public class MemberDetailResponse {
-    Integer memberId;
-    String memberName;
-    String memberEmail;
-    String phoneNumber;
-    ProductSummary productSummary;
-    LocalDateTime createdAt;
-    LocalDateTime updatedAt;
+public record MemberDetailResponse (
 
-    @Getter
+    // 응답 DTO 에서는 @Valid 안 달아도 됨
+    Integer id,
+    String name,
+    String email,
+    String phoneNumber,
+    ProductSummary productSummary,
+    LocalDateTime createdAt,
+    LocalDateTime updatedAt
+
+) {
+
     @Builder
-    @AllArgsConstructor
-    @NoArgsConstructor
-    public static class ProductSummary {
-        Integer productId;
-        String productName;
-        BigDecimal originalPrice;   // 정가
-        BigDecimal salePrice;       // 실제 판매가 (노출가)
-        boolean isDiscounted;       // 할인 여부(boolean은 null X)
-        Integer discountRate;       // 할인율
+    public record ProductSummary (
+        Integer productId,
+        String productName,
+        BigDecimal salePrice,       // 실제 판매가 (노출가)
+        boolean isDiscounted,       // 할인 여부(boolean은 null X)
+        Integer discountRate       // 할인율
+    ) {}
+
+    public static MemberDetailResponse from(MemberDetailResult result) {
+
+        ProductSummaryResult ps = result.productSummary();
+
+        return MemberDetailResponse.builder()
+                .id(result.id())
+                .name(result.name())
+                .email(result.email())
+                .phoneNumber(result.phoneNumber())
+                .productSummary(
+                        ps == null ? null :
+                                ProductSummary.builder()
+                                        .productId(ps.productId())
+                                        .productName(ps.productName())
+                                        .salePrice(ps.salePrice())
+                                        .isDiscounted(ps.isDiscounted())
+                                        .discountRate(ps.discountRate())
+                                        .build()
+                )
+                .createdAt(result.createdAt())
+                .updatedAt(result.updatedAt())
+                .build();
     }
+}
 
     /* ProductSummary 는?
     진짜 테이블이 아닌 응답 DTO 안의 중첩 클래스.
@@ -44,5 +65,3 @@ public class MemberDetailResponse {
     결론! 이렇게 '특정 API 응답에서만 쓰는 구조'는
     → inner static class 로 두어 응집도를 높이는 게 깔끔하다.
     */
-
-}

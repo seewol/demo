@@ -1,21 +1,31 @@
 package com.jeeeun.demo.controller.response;
 
+import com.jeeeun.demo.service.member.model.MemberResult;
 import lombok.*;
 
 import java.time.LocalDateTime;
 
 @Builder
-@Getter
-@Setter
-@AllArgsConstructor
-@NoArgsConstructor
-// 프론트에 내려주는 응답 형태를 정의한 클래스
-public class MemberResponse {
+public record MemberResponse (
 
-    Integer memberId;
-    String memberName;
-    String memberEmail;
-    String phoneNumber;
-    LocalDateTime createdAt;
-    LocalDateTime updatedAt;
+    Integer id,
+    String name,
+    String email,
+    String phoneNumber,
+    LocalDateTime createdAt,
+    LocalDateTime updatedAt
+
+) {
+
+    // Result → Response 변환은 Response 에서 static from(Result) 로 처리
+    public static MemberResponse from(MemberResult result) {
+        return MemberResponse.builder()
+                .id(result.id())
+                .name(result.name())
+                .email(result.email())
+                .phoneNumber(result.phoneNumber())
+                .createdAt(result.createdAt())
+                .updatedAt(result.updatedAt())
+                .build();
+    }
 }

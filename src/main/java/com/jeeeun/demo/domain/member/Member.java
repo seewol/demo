@@ -1,11 +1,9 @@
-package com.jeeeun.demo.domain;
+package com.jeeeun.demo.domain.member;
 
 import com.jeeeun.demo.common.jpa.BaseTimeEntity;
+import com.jeeeun.demo.domain.product.Product;
 import jakarta.persistence.*;
 import lombok.*;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -25,18 +23,18 @@ public class Member extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY) // auto increment
     @Column(name = "member_id", nullable = false)
-    private Integer memberId;
+    private Integer id;
 
     @Column(name = "member_name", nullable = false)
-    private String memberName;
+    private String name;
 
-    @Column(name = "member_email", nullable = false, unique = true)
-    private String memberEmail;
+    @Column(name = "member_email", nullable = true, unique = true)
+    private String email;
 
     @Column(name = "member_pw", nullable = false)
-    private String memberPw;
+    private String password;
 
-    @Column(name = "phone_number", nullable = false, unique = true)
+    @Column(name = "phone_number", nullable = true, unique = true)
     private String phoneNumber;
 
 //    @CreatedDate // 엔티티 최초 저장(insert) 시에만 자동으로 값 채워짐
