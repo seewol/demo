@@ -8,7 +8,7 @@ import java.math.BigDecimal;
 
 @Builder
 public record ProductVariantCreateResult(
-        Integer id,
+        Long id,
         String variantName,
         BigDecimal additionalPrice
 ) {

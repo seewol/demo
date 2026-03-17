@@ -1,5 +1,6 @@
 package com.jeeeun.demo.domain.product;
 
+import com.jeeeun.demo.common.jpa.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -9,7 +10,6 @@ import java.util.List;
 
 @Builder
 @Getter
-@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString(exclude = {"products"})
@@ -21,12 +21,13 @@ public class Category {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "category_id", nullable = false)
-    private Integer id;
+    private Long id;
 
     // 연관 관계에서는 FK가 있는 쪽이 주인
     // 여기서는 Product가 FK(category_id)를 가짐
     // 고로 Product가 주인 = Product.category
 
+    @Builder.Default
     @OneToMany(mappedBy = "category")
     private List<Product> products = new ArrayList<>();
 

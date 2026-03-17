@@ -21,12 +21,26 @@ Spring Boot + Gradle 학습용 프로젝트! 🎉
 ```
 src
 ├─ main
-│ ├─ java/com/jeeeun/demo
-│ │ ├─ controller (API 엔드포인트)
-│ │ ├─ service (비즈니스 로직)
-│ │ ├─ domain (엔티티)
-│ │ └─ repository (JPA Repository)
-│ └─ resources
-│   └─ application.properties (환경 설정)
-└─ test (테스트 코드)
+│  ├─ java/com/jeeeun/demo
+│  │  ├─ common
+│  │  │  ├─ config          # 앱 설정 (JPA, Swagger 등)
+│  │  │  ├─ error           # 공통 예외처리 (ErrorCode, GlobalExceptionHandler 등)
+│  │  │  └─ jpa             # 공통 JPA 설정 (BaseTimeEntity 등)
+│  │  ├─ controller
+│  │  │  ├─ request         # 요청 DTO
+│  │  │  └─ response        # 응답 DTO
+│  │  ├─ domain
+│  │  │  ├─ product         # 상품 엔티티
+│  │  │  └─ user            # 회원 엔티티
+│  │  ├─ external
+│  │  │  └─ google          # Google OAuth2 클라이언트
+│  │  ├─ repository         # JPA Repository
+│  │  ├─ service
+│  │  │  ├─ product/model   # 상품 Command/Result 모델
+│  │  │  └─ user/model      # 회원 Command/Result 모델
+│  │  └─ util               # JWT 등 유틸리티
+│  └─ resources
+│     ├─ application.yml         # 공통 설정
+│     └─ application-local.yml   # 로컬 환경 설정 (gitignore)
+└─ test                          # 테스트 코드
 ```

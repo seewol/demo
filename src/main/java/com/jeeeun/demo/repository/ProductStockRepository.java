@@ -5,7 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
 
-public interface ProductStockRepository extends JpaRepository<ProductStock, Integer> {
+public interface ProductStockRepository extends JpaRepository<ProductStock, Long> {
 
-    Optional<ProductStock> findByProductVariant_Id(Integer id);
+    Optional<ProductStock> findByProductVariant_Id(Long id);
 }

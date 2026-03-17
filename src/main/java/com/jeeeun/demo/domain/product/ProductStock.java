@@ -17,13 +17,13 @@ import lombok.*;
 )
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@ToString(exclude = {"productVariant", "productVariant"})
+@ToString(exclude = {"productVariant"})
 public class ProductStock extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "stock_id", nullable = false)
-    private Integer id;
+    private Long id;
 
     // 단방향
     @OneToOne(fetch = FetchType.LAZY)

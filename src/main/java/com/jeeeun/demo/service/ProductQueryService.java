@@ -38,7 +38,7 @@ public class ProductQueryService {
 
     // 상품 상세 조회에 대한 api 생성
     @Transactional(readOnly = true)
-    public ProductDetailResult getProductDetail(Integer productId) {
+    public ProductDetailResult getProductDetail(Long productId) {
 
         Product product = productRepository.findDetailWithOptions(productId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_PRODUCT));
@@ -49,7 +49,7 @@ public class ProductQueryService {
 
         // 구조 : optionId -> detail 리스트가 되도록 그룹핑
         // ex. 10 → [Red, Blue] / 20 → [S, M]
-        Map<Integer, List<ProductOptionDetail>> detailMap =
+        Map<Long, List<ProductOptionDetail>> detailMap =
                 details.stream().collect(Collectors.groupingBy(d -> d.getProductOption().getId()));
 
         return ProductDetailResult.from(product, images, detailMap);

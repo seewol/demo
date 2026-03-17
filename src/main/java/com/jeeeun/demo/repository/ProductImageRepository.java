@@ -6,12 +6,12 @@ import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
 
-public interface ProductImageRepository extends JpaRepository<ProductImage, Integer> {
+public interface ProductImageRepository extends JpaRepository<ProductImage, Long> {
 
     @Query("""
         select pi from ProductImage pi
         where pi.product.id = :productId
         order by pi.id asc
     """)
-    List<ProductImage> findAllByProductId(Integer productId);
+    List<ProductImage> findAllByProductId(Long productId);
 }

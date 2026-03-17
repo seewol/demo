@@ -18,7 +18,7 @@ public class ProductOptionDetail {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "option_detail_id")
-    private Integer id;
+    private Long id;
 
     // FK
     @ManyToOne(fetch = FetchType.LAZY)

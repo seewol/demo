@@ -1,10 +1,9 @@
 package com.jeeeun.demo.domain.product;
 
 import com.jeeeun.demo.common.jpa.BaseTimeEntity;
-import com.jeeeun.demo.domain.member.Member;
+import com.jeeeun.demo.domain.user.User;
 import jakarta.persistence.*;
 import lombok.*;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -16,7 +15,7 @@ import java.util.List;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@ToString(exclude = {"category", "member", "productImages",
+@ToString(exclude = {"category", "user", "productImages",
         "productOptions", "productVariants"})
 @Entity
 @Table(name = "product")
@@ -25,7 +24,7 @@ public class Product extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "product_id", nullable = false)
-    private Integer id;
+    private Long id;
 
     // Many To One : 다대일 (N:1)
     @ManyToOne(fetch = FetchType.LAZY) // 지연 로딩
@@ -33,8 +32,8 @@ public class Product extends BaseTimeEntity {
     private Category category;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id", nullable = false)
-    private Member member;
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
     // 지연로딩이란?
     // product.getCategory() 호출 전까지 카테고리 쿼리 안 날림.
@@ -55,6 +54,7 @@ public class Product extends BaseTimeEntity {
 //    private BigDecimal originalPrice; // 가격은 BigDecimal 사용
 
     // 할인 여부
+    @Builder.Default
     @Column(name = "is_discounted", nullable = false)
     private boolean isDiscounted = false;
 
@@ -77,18 +77,21 @@ public class Product extends BaseTimeEntity {
 //    private LocalDateTime updatedAt;
 
     @Column(name = "is_deleted", nullable = false)
-    private boolean isDeleted = false;
+    private boolean isDeleted;
 
     // mappedBy ?
     // = 상대 엔티티에서 이 관계를 담당하고 있는 필드명 기재
     // mappedBy 가 붙은 쪽은 연관관계 주인이 아님
 
+    @Builder.Default
     @OneToMany(mappedBy = "product")
     private List<ProductImage> productImages = new ArrayList<>();
 
+    @Builder.Default
     @OneToMany(mappedBy = "product")
     private List<ProductOption> productOptions = new ArrayList<>();
 
+    @Builder.Default
     @OneToMany(mappedBy = "product")
     private List<ProductVariant> productVariants = new ArrayList<>();
 }

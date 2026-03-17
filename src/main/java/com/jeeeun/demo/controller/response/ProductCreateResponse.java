@@ -8,8 +8,8 @@ import java.time.LocalDateTime;
 
 @Builder
 public record ProductCreateResponse (
-    Integer id,
-    Integer categoryId,
+    Long id,
+    Long categoryId,
     String name,
     String description,
     BigDecimal salePrice,
@@ -33,8 +33,8 @@ public record ProductCreateResponse (
 
     public static ProductCreateResponse example() {
         return ProductCreateResponse.builder()
-                .id(1)
-                .categoryId(1)
+                .id(1L) // L 붙여 Long 리터럴 (1은 int 리터럴)
+                .categoryId(1L)
                 .name("후드티")
                 .description("박시한 후드티입니다.")
                 .salePrice(BigDecimal.valueOf(9000))

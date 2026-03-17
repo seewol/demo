@@ -14,7 +14,7 @@ public record StockUpdateRequest (
         @Min(value = 0, message = "음수는 불가합니다.")
         long quantity
 ) {
-        public StockUpdateCommand toCommand(Integer variantId) {
+        public StockUpdateCommand toCommand(Long variantId) {
                 return StockUpdateCommand.builder()
                         .variantId(variantId)
                         .operation(operation)

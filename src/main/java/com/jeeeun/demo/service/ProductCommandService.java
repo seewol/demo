@@ -2,7 +2,7 @@ package com.jeeeun.demo.service;
 
 import com.jeeeun.demo.common.error.BusinessException;
 import com.jeeeun.demo.common.error.ErrorCode;
-import com.jeeeun.demo.domain.member.Member;
+import com.jeeeun.demo.domain.user.User;
 import com.jeeeun.demo.domain.product.*;
 import com.jeeeun.demo.repository.*;
 import com.jeeeun.demo.service.product.model.*;
@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 @Service
 public class ProductCommandService {
 
-    private final MemberRepository memberRepository;
+    private final UserRepository userRepository;
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
     private final ProductImageRepository productImageRepository;
@@ -35,7 +35,7 @@ public class ProductCommandService {
         // 1. 카테고리, 멤버 조회 (FK 검증)
         Category category = categoryRepository.findById(command.categoryId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_CATEGORY));
-        Member member = memberRepository.findById(command.memberId())
+        User user = userRepository.findById(command.userId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_USER));
 
         // ★ 2. 할인 조건부 검증
@@ -55,7 +55,7 @@ public class ProductCommandService {
         // 3. Product 저장
         Product product = Product.builder()
                 .category(category)
-                .member(member)
+                .user(user)
                 .name(command.name().trim())
                 .description(command.description().trim())
                 .salePrice(command.salePrice())
@@ -111,7 +111,7 @@ public class ProductCommandService {
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_PRODUCT));
 
         // 2. optionDetailIds 존재 검증
-        List<Integer> ids = command.optionDetailIds();
+        List<Long> ids = command.optionDetailIds();
 
         // TODO ★ 입력값에 대한 검증은 해당 모델에 validate 함수 만들고 router 에서 호출
 

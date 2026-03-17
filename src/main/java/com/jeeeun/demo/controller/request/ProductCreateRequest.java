@@ -23,10 +23,10 @@ public record ProductCreateRequest (
     // 4. equals, hashCode, toString() 자동생성
 
     @NotNull
-    Integer categoryId,
+    Long categoryId,
 
     @NotNull
-    Integer memberId, // 등록자
+    Long userId, // 등록자
 
     @NotBlank
     String name,
@@ -112,7 +112,7 @@ public record ProductCreateRequest (
     public ProductCreateCommand toCommand() {
         return ProductCreateCommand.builder()
                 .categoryId(categoryId)
-                .memberId(memberId)
+                .userId(userId)
                 .name(name)
                 .description(description)
                 .salePrice(salePrice)

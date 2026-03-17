@@ -1,0 +1,20 @@
+spring:
+  profiles:
+    active: local # 앱 실행 시 local 프로필 활성화
+    # SpringBoot 가 자동으로 application-local.yml 로드
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+    show-sql: true
+    open-in-view: false
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+# https://jerryjerryjerry.tistory.com/121 mysql 세팅
+
+jwt:
+  access-token-validity: 1800000   # 30분
+  refresh-token-validity: 604800000 # 7일

@@ -7,7 +7,7 @@ import java.math.BigDecimal;
 
 @Builder
 public record ProductVariantCreateResponse(
-        Integer id,
+        Long id,
         String variantName,
         BigDecimal additionalPrice
 ) {

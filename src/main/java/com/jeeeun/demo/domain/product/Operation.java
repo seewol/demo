@@ -7,7 +7,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum Operation {
 
-    SET("Set stock quantity"), // 영어로 씀
+    SET("Set stock quantity"),
     INCREASE("Add to stock"),
     DECREASE("Deduct from stock");
 

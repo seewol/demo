@@ -19,7 +19,7 @@ public class ProductImage extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "product_image_id", nullable = false)
-    private Integer id;
+    private Long id;
 
     // FK
     @ManyToOne(fetch = FetchType.LAZY)

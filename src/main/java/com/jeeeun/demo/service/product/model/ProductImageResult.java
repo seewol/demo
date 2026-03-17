@@ -4,7 +4,7 @@ import lombok.Builder;
 
 @Builder
 public record ProductImageResult(
-    Integer id,
+    Long id,
     String imageUrl,
     Integer imageOrder
 ) {}

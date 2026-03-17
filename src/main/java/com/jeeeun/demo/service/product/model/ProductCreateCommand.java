@@ -8,8 +8,8 @@ import java.util.List;
 
 @Builder
 public record ProductCreateCommand(
-    Integer categoryId,
-    Integer memberId,
+    Long categoryId,
+    Long userId,
     String name,
     String description,
     BigDecimal salePrice,

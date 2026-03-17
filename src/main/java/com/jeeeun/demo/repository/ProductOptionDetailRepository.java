@@ -6,13 +6,13 @@ import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
 
-public interface ProductOptionDetailRepository extends JpaRepository<ProductOptionDetail, Integer>, ProductOptionDetailRepositoryCustom {
+public interface ProductOptionDetailRepository extends JpaRepository<ProductOptionDetail, Long>, ProductOptionDetailRepositoryCustom {
 
     @Query("""
         select d from ProductOptionDetail d
         where d.productOption.product.id = :productId
         order by d.productOption.id asc, d.id asc
     """)
-    List<ProductOptionDetail> findAllByProductId(Integer productId);
+    List<ProductOptionDetail> findAllByProductId(Long productId);
 
 }

@@ -7,7 +7,7 @@ import java.util.List;
 
 @Builder
 public record ProductVariantCreateCommand(
-        Integer productId,
-        List<Integer> optionDetailIds,
+        Long productId,
+        List<Long> optionDetailIds,
         BigDecimal additionalPrice
 ) {}

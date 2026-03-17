@@ -8,8 +8,8 @@ import java.time.LocalDateTime;
 
 @Builder
 public record ProductCreateResult(
-        Integer id,
-        Integer categoryId,
+        Long id,
+        Long categoryId,
         String name,
         String description,
         BigDecimal salePrice,

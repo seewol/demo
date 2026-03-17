@@ -11,8 +11,8 @@ import java.util.List;
 @Builder
 public record ProductDetailResponse (
 
-    Integer id,
-    Integer categoryId,
+    Long id,
+    Long categoryId,
     String name,
     String description,
     BigDecimal salePrice,
@@ -28,14 +28,14 @@ public record ProductDetailResponse (
 ) {
     @Builder
     public record ProductImageResponse ( // 상품 상세 전용 이미지
-        Integer id,
+        Long id,
         String imageUrl,
         Integer imageOrder
     ) {}
 
     @Builder
     public record ProductOptionResponse(
-        Integer id,
+        Long id,
         String optionName,
         List<String> optionDetails
         // ★ 프론트는 id 필요 없으니 화면에 찍을 문자열만 필요!

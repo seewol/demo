@@ -5,7 +5,7 @@ import lombok.Builder;
 
 @Builder
 public record StockUpdateCommand(
-        Integer variantId,
+        Long variantId,
         Operation operation,
         long quantity
 ) {}

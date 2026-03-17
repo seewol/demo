@@ -60,7 +60,7 @@ public class ProductController {
     @ApiResponse(responseCode = "200", description = "조회 성공")
     @GetMapping("/products/{productId}")
     public ProductDetailResponse getProduct(
-            @PathVariable Integer productId
+            @PathVariable Long productId
     ) {
         ProductDetailResult result  = productQueryService.getProductDetail(productId);
 
@@ -73,7 +73,7 @@ public class ProductController {
     @ApiResponse(responseCode = "201", description = "등록 성공")
     @PostMapping("/products/{productId}/variants")
     public ProductVariantCreateResponse createVariant(
-            @PathVariable Integer productId,
+            @PathVariable Long productId,
             @Valid @RequestBody ProductVariantCreateRequest request
     ) {
         request.validate(); // 입력 값에 대한 검증을 한 후, 서비스로 넘기기
@@ -89,7 +89,7 @@ public class ProductController {
     @ApiResponse(responseCode = "200", description = "수정 성공")
     @PatchMapping("/variants/{variantId}/stock")
     public StockUpdateResponse updateStock(
-            @PathVariable Integer variantId,
+            @PathVariable Long variantId,
             @Valid @RequestBody StockUpdateRequest request
     ) {
         StockUpdateResult result =
@@ -97,6 +97,7 @@ public class ProductController {
 
         return StockUpdateResponse.from(result);
     }
+
 
     // product PUT
     // 상품 수정

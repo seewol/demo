@@ -14,8 +14,8 @@ import java.util.Map;
 
 @Builder
 public record ProductDetailResult(
-    Integer id,
-    Integer categoryId,
+    Long id,
+    Long categoryId,
     String name,
     String description,
     BigDecimal salePrice,
@@ -33,7 +33,7 @@ public record ProductDetailResult(
     public static ProductDetailResult from(
             Product product,
             List<ProductImage> images,
-            Map<Integer, List<ProductOptionDetail>> detailMap) {
+            Map<Long, List<ProductOptionDetail>> detailMap) {
 
         return ProductDetailResult.builder()
                 .id(product.getId())

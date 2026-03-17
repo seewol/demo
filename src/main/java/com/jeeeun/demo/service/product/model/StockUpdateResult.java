@@ -5,7 +5,7 @@ import lombok.Builder;
 
 @Builder
 public record StockUpdateResult(
-        Integer variantId,
+        Long variantId,
         long stockQuantity
 ) {
     public static StockUpdateResult from(ProductStock stock) {

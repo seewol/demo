@@ -21,7 +21,7 @@ public class ProductOption {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "option_id", nullable = false)
-    private Integer id;
+    private Long id;
 
     // FK
     @ManyToOne(fetch = FetchType.LAZY)
@@ -32,6 +32,7 @@ public class ProductOption {
     @Column(name = "option_name", nullable = false)
     private String name;
 
+    @Builder.Default
     @OneToMany(mappedBy = "productOption")
     private List<ProductOptionDetail> productOptionDetails = new ArrayList<>();
 

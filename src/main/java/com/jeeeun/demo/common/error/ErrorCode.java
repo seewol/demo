@@ -16,7 +16,8 @@ public enum ErrorCode {
     NOT_FOUND_USER(HttpStatus.NOT_FOUND, "등록되지 않은 사용자입니다."),
     DUPLICATE_PHONE_NUMBER(HttpStatus.CONFLICT, "이미 사용 중인 번호입니다."),
     INVALID_PHONE_NUMBER(HttpStatus.BAD_REQUEST, "번호 형식이 올바르지 않습니다."),
-    INVALID_PASSWORD(HttpStatus.BAD_REQUEST, "밀번호가 올바르지 않습니다."),
+    INVALID_PASSWORD(HttpStatus.BAD_REQUEST, "비밀번호가 올바르지 않습니다."),
+    WITHDRAWN_USER(HttpStatus.UNAUTHORIZED, "탈퇴한 사용자입니다."),
 
     // 상품
     CONFLICT_PRODUCT(HttpStatus.CONFLICT, "중복된 상품명입니다."),
@@ -31,7 +32,7 @@ public enum ErrorCode {
     NOT_FOUND_ORDER(HttpStatus.NOT_FOUND, "존재하지 않는 주문 정보입니다."),
 
     // 재고
-    OUT_OF_STOCK(HttpStatus.NOT_FOUND, "상품 재고가 부족합니다."),
+    OUT_OF_STOCK(HttpStatus.CONFLICT, "상품 재고가 부족합니다."),
     INVALID_STOCK_QUANTITY(HttpStatus.BAD_REQUEST, "재고 수량은 0보다 커야 합니다."),
 
     // 카테고리

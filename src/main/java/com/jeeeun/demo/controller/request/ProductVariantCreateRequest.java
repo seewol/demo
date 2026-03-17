@@ -15,7 +15,7 @@ public record ProductVariantCreateRequest(
 
     @NotEmpty
     @Size(min = 1, max = 3) // 조합은 최소 1개 ~ 최대 3개
-    List<Integer> optionDetailIds,
+    List<Long> optionDetailIds,
 
     BigDecimal additionalPrice
 
@@ -30,7 +30,7 @@ public record ProductVariantCreateRequest(
 
     }
 
-    public ProductVariantCreateCommand toCommand(Integer productId) {
+    public ProductVariantCreateCommand toCommand(Long productId) {
 
         BigDecimal price = (additionalPrice == null) ? BigDecimal.ZERO : additionalPrice;
 
