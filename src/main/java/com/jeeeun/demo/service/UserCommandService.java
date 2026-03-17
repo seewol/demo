@@ -122,6 +122,9 @@ public class UserCommandService {
                 .orElseThrow( () -> new BusinessException(ErrorCode.NOT_FOUND_USER));
 
         user.withdraw();
+
+        // 2) credentials 삭제
+        userCredentialsRepository.deleteByUser(user);
     }
 
         /*

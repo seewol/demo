@@ -78,8 +78,8 @@ public class UserController {
 
         // SecurityContext 안에서 현재 로그인한 사람의 userId 꺼내기
         Long userId = (Long) SecurityContextHolder.getContext()
-                .getAuthentication()
-                .getPrincipal();
+                    .getAuthentication()
+                    .getPrincipal();
 
         return UserDetailResponse.from(userQueryService.getUserDetail(userId));
 
@@ -89,14 +89,16 @@ public class UserController {
     // 내 정보 수정 (U)
     @Operation(summary = "내 정보 수정", description = "회원 정보를 수정합니다.")
     @ApiResponse(responseCode = "200", description = "수정 성공")
-    @PatchMapping("/users/{userId}")
+    @PatchMapping("/users/me")
     public UserUpdateResponse updateUser(
-            @PathVariable Long userId,
             @Valid @RequestBody UserUpdateRequest request
     ) {
 
-//        request.validate(); 대신 toCommand() 내에서 검증
+        Long userId = (Long) SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getPrincipal();
 
+        // request.validate(); 대신 toCommand() 내에서 검증
         UserUpdateResult result = userCommandService.updateUser(request.toCommand(userId));
 
         return UserUpdateResponse.from(result);
@@ -105,7 +107,7 @@ public class UserController {
     /*
         HTTP
          ├─ PathVariable(userId)  ← 리소스 식별
-         └─ Request Body            ← 수정 데이터
+         └─ Request Body          ← 수정 데이터
                 ↓
         Controller 에서 합쳐서
                 ↓
@@ -117,11 +119,15 @@ public class UserController {
     // 회원 탈퇴 (D)
     @Operation(summary = "회원 탈퇴", description = "회원을 탈퇴합니다.")
     @ApiResponse(responseCode = "204", description = "회원 탈퇴 성공")
-    @DeleteMapping("/users/{userId}")
+    @DeleteMapping("/users/me")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteUser(
-            @PathVariable Long userId
     ) {
+
+        Long userId = (Long) SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getPrincipal();
+
         userCommandService.deleteUser(userId);
     }
 

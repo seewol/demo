@@ -13,7 +13,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "user_credentials")
+@Table(name = "user_credentials",
+    uniqueConstraints = @UniqueConstraint(columnNames = {"identifier", "provider"}))
 public class UserCredentials {
 
     @Id

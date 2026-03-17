@@ -12,6 +12,10 @@ spring:
     open-in-view: false
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
+  security:
+    user:
+      name: none
+      password: none
 
 # https://jerryjerryjerry.tistory.com/121 mysql 세팅
 
