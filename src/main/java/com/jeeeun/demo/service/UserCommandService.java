@@ -125,6 +125,7 @@ public class UserCommandService {
 
         // 2) credentials 삭제
         userCredentialsRepository.deleteByUser(user);
+
     }
 
         /*

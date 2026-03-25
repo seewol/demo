@@ -15,4 +15,5 @@ public interface UserCredentialsRepository extends JpaRepository<UserCredentials
     Optional<UserCredentials> findByIdentifierAndProvider(String identifier, Provider provider);
 
     void deleteByUser(User user);
+
 }

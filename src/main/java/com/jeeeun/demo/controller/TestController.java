@@ -3,7 +3,7 @@ package com.jeeeun.demo.controller;
 import org.springframework.web.bind.annotation.*;
 
 @RestController // @Controller + @ResponseBody가 합쳐진 것
-public class TestContoller {
+public class TestController {
 
     @GetMapping("/hello")
     public String hello(){
