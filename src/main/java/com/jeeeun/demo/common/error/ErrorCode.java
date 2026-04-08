@@ -18,6 +18,8 @@ public enum ErrorCode {
     INVALID_PHONE_NUMBER(HttpStatus.BAD_REQUEST, "번호 형식이 올바르지 않습니다."),
     INVALID_PASSWORD(HttpStatus.BAD_REQUEST, "비밀번호가 올바르지 않습니다."),
     WITHDRAWN_USER(HttpStatus.UNAUTHORIZED, "탈퇴한 사용자입니다."),
+    INVALID_TOKEN(HttpStatus.BAD_REQUEST, "유효하지 않은 토큰입니다."),
+
 
     // 상품
     CONFLICT_PRODUCT(HttpStatus.CONFLICT, "중복된 상품명입니다."),
@@ -44,8 +46,7 @@ public enum ErrorCode {
     OPTION_DETAIL_REQUIRED(HttpStatus.BAD_REQUEST, "옵션 디테일이 유효하지 않습니다."),
 
     // 조합
-    NOT_FOUND_VARIANT(HttpStatus.NOT_FOUND, "존재하지 않는 조합입니다.")
-    ;
+    NOT_FOUND_VARIANT(HttpStatus.NOT_FOUND, "존재하지 않는 조합입니다.");
 
     private final HttpStatus status;
     private final String message;

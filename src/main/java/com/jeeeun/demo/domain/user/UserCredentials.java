@@ -46,5 +46,4 @@ public class UserCredentials {
     @Column(name = "secret")
     private String secret;
 
-
 }

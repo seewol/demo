@@ -5,9 +5,11 @@ import com.jeeeun.demo.common.error.ErrorCode;
 import com.jeeeun.demo.domain.user.Provider;
 import com.jeeeun.demo.domain.user.User;
 import com.jeeeun.demo.domain.user.UserCredentials;
+import com.jeeeun.demo.domain.user.UserToken;
 import com.jeeeun.demo.external.google.GoogleOAuth2Client;
 import com.jeeeun.demo.repository.UserCredentialsRepository;
 import com.jeeeun.demo.repository.UserRepository;
+import com.jeeeun.demo.repository.UserTokenRepository;
 import com.jeeeun.demo.service.auth.model.GoogleTokenResponse;
 import com.jeeeun.demo.service.auth.model.SignTokenResult;
 import com.jeeeun.demo.service.auth.model.UserSignInCommand;
@@ -17,6 +19,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.Optional;
 
@@ -29,11 +32,13 @@ public class AuthService {
     private final JwtTokenProvider jwtTokenProvider;
     private final PasswordEncoder passwordEncoder;
     private final GoogleOAuth2Client googleOAuth2Client;
+    private final UserTokenRepository userTokenRepository;
 
 
     // 구글 소셜 로그인 (회원가입 + 로그인 통합)
     @Transactional
     public SignTokenResult googleOAuth2(String authorizationCode, String redirectUri) {
+
         // todo 1 : 인가 코드로 구글에서 Access Token 받아오기
         GoogleTokenResponse tokenResponse
                 = googleOAuth2Client.getAccessToken(authorizationCode, redirectUri);
@@ -85,6 +90,8 @@ public class AuthService {
         String accessToken = jwtTokenProvider.createAccessToken(user);
         String refreshToken = jwtTokenProvider.createRefreshToken(user);
 
+        saveRefreshToken(user, refreshToken);
+
         return SignTokenResult.from(accessToken, refreshToken);
 
     }
@@ -95,7 +102,7 @@ public class AuthService {
     public SignTokenResult signIn(UserSignInCommand command) {
 
         // 1. 이메일 + LOCAL 방식으로 인증 정보 조회
-        // UserCredentials 안에 User가 연결되어 있다.
+        // * UserCredentials 안에 User 연결되어 있다.
         UserCredentials credentials = userCredentialsRepository
                 .findByIdentifierAndProvider(command.email(), Provider.LOCAL)
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_USER));
@@ -115,8 +122,45 @@ public class AuthService {
         String accessToken = jwtTokenProvider.createAccessToken(credentials.getUser());
         String refreshToken = jwtTokenProvider.createRefreshToken(credentials.getUser());
 
+        saveRefreshToken(credentials.getUser(), refreshToken);
+
         // 5. 토큰 반환
         return SignTokenResult.from(accessToken, refreshToken);
+
+    }
+
+
+    // Refresh Token 저장용 메서드
+    // 해당 서비스 안에서만 쓰는 내부 동작 메서드
+    private void saveRefreshToken(User user, String refreshToken) {
+        // 기존의 토큰 삭제 (미래에 동일 유저에게 중복 저장하는 것을 방지)
+        userTokenRepository.deleteByUserId(user.getId());
+
+        UserToken userToken = UserToken.from(
+                user,
+                refreshToken,
+                LocalDateTime.now().plusDays(7)
+        );
+
+        userTokenRepository.save(userToken);
+    }
+
+
+    // 쿠키 읽기
+    @Transactional
+    public String refresh(String refreshToken) {
+
+        // todo 1 : Refresh Token JWT 유효성 검증
+        if(!jwtTokenProvider.isValid(refreshToken)) {
+            throw new BusinessException(ErrorCode.INVALID_TOKEN);
+        }
+
+        // todo 2 : DB에 저장된 토큰인지?
+        UserToken userToken = userTokenRepository.findByRefreshToken(refreshToken)
+                .orElseThrow(() -> new BusinessException(ErrorCode.INVALID_TOKEN));
+
+        // todo 3 : 모든 검증 후 "Access Token" 발급
+        return jwtTokenProvider.createAccessToken(userToken.getUser());
     }
 
 }

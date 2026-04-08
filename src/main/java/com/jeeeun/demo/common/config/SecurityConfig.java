@@ -38,8 +38,9 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth ->
                         auth.requestMatchers(
                                 "/auth/sign-in",    // 로컬 로그인
-                                "/auth/sign-in/**",         // 소셜 로그인
-                                "/sign-up",          // 회원가입
+                                "/auth/sign-in/**", // 소셜 로그인
+                                "/auth/refresh",    // 토큰 재발급
+                                "/sign-up",         // 회원가입
                                 "/swagger-ui/**",   // Swagger UI
                                 "/v3/api-docs/**"   // Swagger API 문서
                         ).permitAll()
