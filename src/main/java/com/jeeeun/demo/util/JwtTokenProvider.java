@@ -40,6 +40,7 @@ public class JwtTokenProvider {
     // 리프레시 토큰 만료 시간
     private final long refreshTokenValidity;
 
+
     public JwtTokenProvider(
             // applicaion.yml 정보를 가져옴
             @Value("${jwt.secret}") String secret,
@@ -55,6 +56,7 @@ public class JwtTokenProvider {
         this.accessTokenValidity = accessTokenValidity;
         this.refreshTokenValidity = refreshTokenValidity;
     }
+
 
     // ▼ 토큰 생성
 
@@ -80,8 +82,11 @@ public class JwtTokenProvider {
                 .id(UUID.randomUUID().toString())            // 토큰 고유 ID (jti)
 
                 // Private Claims (내가 정의한 커스텀 클레임)
+                // JWT claim 은 문자열로 저장해야 함.
                 .claim("userEmail", user.getEmail())
                 // .claim("userType", user.getUserType().name())
+                .claim("role", user.getRole().name())
+                // user.getRole() == Role.USER 둘이 같은 enum 객체
                 .claim("tokenType", tokenType)
                 // "ACCESS", "REFRESH" 구분용
 
@@ -89,6 +94,7 @@ public class JwtTokenProvider {
                 .signWith(secretKey, Jwts.SIG.HS256)
                 .compact(); // 위 설정들 전부 조합해 최종 JWT 문자열 생성
     }
+
 
     // ▼ 토큰 검증 & 유틸
 
@@ -130,6 +136,11 @@ public class JwtTokenProvider {
         // .getSubject() : sub 클레임 꺼내기 (String 타입 userId!)
         // Long.parseLong() : String → Long 타입 변환
         // CreateToken() 에서 String.valueOf(user.getIt())로 저장했던 거 반대로 변환
+    }
+
+    public String getRole(String token) {
+        return parseToken(token).get("role", String.class);
+        // .get(.., ..) : role 클레임을 String 타입으로 꺼내기
     }
 
 }

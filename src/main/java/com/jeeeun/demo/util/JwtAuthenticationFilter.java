@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -43,6 +44,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (StringUtils.hasText(token) && jwtTokenProvider.isValid(token)) {
 
             Long userId = jwtTokenProvider.getUserId(token);
+            String role = jwtTokenProvider.getRole(token);
 
             // Spring Security 에게 '해당 사용자가 인증된 사용자'임을 알려주는 객체
             // 이름이 Username,Password 인데 JWT 방식애서도 그냥 이 객체를 사용함
@@ -51,7 +53,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     new UsernamePasswordAuthenticationToken(
                             userId,     // principal (현재 로그인한 사용자 식별자)
                             null,       // credentials (비밀번호 → 토큰 방식은 불필요)
-                            List.of()   // authorities *권한 목록 → 일단은 빈 리스트)
+                            List.of(new SimpleGrantedAuthority("ROLE_" + role))   // authorities *권한 목록)
+                            // Spring Security 내부적으로 "ROLE_" 붙은 것을 권한으로 인식
                     );
 
             SecurityContextHolder.getContext().setAuthentication(authentication);

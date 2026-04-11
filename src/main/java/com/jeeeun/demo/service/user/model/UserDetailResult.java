@@ -1,5 +1,6 @@
 package com.jeeeun.demo.service.user.model;
 
+import com.jeeeun.demo.domain.user.Role;
 import com.jeeeun.demo.domain.user.User;
 import lombok.Builder;
 
@@ -11,6 +12,7 @@ public record UserDetailResult(
         String name,
         String email,
         String phoneNumber,
+        Role role,
         ProductSummaryResult productSummary,
         LocalDateTime createdAt,
         LocalDateTime updatedAt
@@ -26,6 +28,7 @@ public record UserDetailResult(
                 .name(user.getName())
                 .email(user.getEmail())
                 .phoneNumber(user.getPhoneNumber())
+                .role(user.getRole())
                 .productSummary(null)
                 .createdAt(user.getCreatedAt())
                 .updatedAt(user.getUpdatedAt())
@@ -40,6 +43,7 @@ public record UserDetailResult(
                 .name(user.getName())
                 .email(user.getEmail())
                 .phoneNumber(user.getPhoneNumber())
+                .role(user.getRole())
                 .productSummary(productSummaryResult)
                 .createdAt(user.getCreatedAt())
                 .updatedAt(user.getUpdatedAt())

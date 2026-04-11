@@ -38,6 +38,11 @@ public class User extends BaseTimeEntity {
     @Column(name = "phone_number", unique = true)
     private String phoneNumber;
 
+    @Builder.Default                // 빌더로 생성 시에도 기본값 USER 보장
+    @Enumerated(EnumType.STRING)    // DB에 "USER" 처럼 문자열로 저장
+    @Column(name = "role", nullable = false)
+    private Role role = Role.USER;  // 회원가입하면 자동으로 일반 유저
+
     @Builder.Default
     @Column(name = "is_deleted", nullable = false)
     private boolean isDeleted = false;

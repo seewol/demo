@@ -1,5 +1,6 @@
 package com.jeeeun.demo.controller.response;
 
+import com.jeeeun.demo.domain.user.Role;
 import com.jeeeun.demo.service.user.model.UserDetailResult;
 import com.jeeeun.demo.service.user.model.ProductSummaryResult;
 import lombok.Builder;
@@ -15,6 +16,7 @@ public record UserDetailResponse(
     String name,
     String email,
     String phoneNumber,
+    Role role,
     ProductSummary productSummary,
     LocalDateTime createdAt,
     LocalDateTime updatedAt
@@ -39,6 +41,7 @@ public record UserDetailResponse(
                 .name(result.name())
                 .email(result.email())
                 .phoneNumber(result.phoneNumber())
+                .role(result.role())
                 .productSummary(
                         ps == null ? null :
                                 ProductSummary.builder()

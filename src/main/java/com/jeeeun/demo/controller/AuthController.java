@@ -70,8 +70,15 @@ public class AuthController {
     @PostMapping("/auth/refresh")
     public SignTokenView refresh(HttpServletRequest request) {
 
+        Cookie[] cookies = request.getCookies();
+
+        // null 방어
+        if (cookies == null) {
+            throw new BusinessException(ErrorCode.INVALID_TOKEN);
+        }
+
         // todo 1 : 쿠키에서 refreshToken 꺼내기
-        String refreshToken = Arrays.stream(request.getCookies()) // Cookie[]
+        String refreshToken = Arrays.stream(cookies) // Cookie[]
                 .filter(c -> c.getName().equals("refreshToken"))
                 .findFirst()    // 필터링된 것 중 첫 번째 꺼냄. Optional<Cookie> 타입
                 .orElseThrow(() -> new BusinessException(ErrorCode.INVALID_TOKEN))
@@ -86,5 +93,6 @@ public class AuthController {
         // todo 3 : 응답하기
         return new SignTokenView(accessToken);
     }
+
 }
 

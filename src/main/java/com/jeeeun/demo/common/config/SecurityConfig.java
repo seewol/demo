@@ -43,10 +43,9 @@ public class SecurityConfig {
                                 "/sign-up",         // 회원가입
                                 "/swagger-ui/**",   // Swagger UI
                                 "/v3/api-docs/**"   // Swagger API 문서
-                        ).permitAll()
-                        // 위 URL은 토큰 없어도 접근 가능
-                        .anyRequest().authenticated()
-                        // 나머지 모든 요청은 토큰 필요!
+                            ).permitAll()   // 위 URL 들은 토큰 없어도 접근 가능
+                        .requestMatchers("/admin/**").hasRole("ADMIN")  // ADMIN만 접근 가능
+                        .anyRequest().authenticated()   // 나머지 모든 요청은 토큰 필요!
                 )
 
                 .exceptionHandling(exception ->

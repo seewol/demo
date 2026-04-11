@@ -146,7 +146,7 @@ public class AuthService {
     }
 
 
-    // 쿠키 읽기
+    // 쿠키 읽고 Access Token 발급
     @Transactional
     public String refresh(String refreshToken) {
 
