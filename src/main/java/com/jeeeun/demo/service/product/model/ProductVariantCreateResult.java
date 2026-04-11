@@ -1,6 +1,5 @@
 package com.jeeeun.demo.service.product.model;
 
-import com.jeeeun.demo.controller.request.ProductVariantCreateRequest;
 import com.jeeeun.demo.domain.product.ProductVariant;
 import lombok.Builder;
 

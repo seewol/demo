@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
@@ -32,6 +33,7 @@ public class ProductController {
     // 상품 등록 (C)
     @Operation(summary = "상품 등록", description = "상품을 등록합니다.")
     @ApiResponse(responseCode = "201", description = "상품 등록 성공")
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/products")
     public ProductCreateResponse createProduct(
             @Valid @RequestBody ProductCreateRequest request
@@ -71,6 +73,7 @@ public class ProductController {
     // 상품 조합 등록 (C)
     @Operation(summary = "상품 조합 등록", description = "상품 조합을 등록합니다.")
     @ApiResponse(responseCode = "201", description = "등록 성공")
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/products/{productId}/variants")
     public ProductVariantCreateResponse createVariant(
             @PathVariable Long productId,
@@ -87,6 +90,7 @@ public class ProductController {
 
     @Operation(summary = "상품 재고 업데이트", description = "상품 재고를 업데이트합니다.")
     @ApiResponse(responseCode = "200", description = "수정 성공")
+    @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/variants/{variantId}/stock")
     public StockUpdateResponse updateStock(
             @PathVariable Long variantId,
@@ -99,112 +103,11 @@ public class ProductController {
     }
 
 
-    // product PUT
-    // 상품 수정
-//    @PutMapping("/products/{productId}")
-//    public ResponseEntity<String> updateProduct(
-//            @RequestBody ProductRequest request,
-//            @PathVariable Integer productId
-//    ) {
-//        ProductResponse updated = STORE.get(productId);
-//
-//        if (updated != null) {
-//            request.applyTo(updated);
-//            // 사용자한테 받은 요청을 기존 데이터 'updated' 에 반영.
-//        } else {
-//            throw new ResponseStatusException(
-//                    HttpStatus.NOT_FOUND, "수정할 상품이 없습니다."
-//            );
-//        }
-//
-//        return ResponseEntity.ok("상품 수정 성공 [id = " + productId + "]");
-//    }
-
-    // product DELETE
-    // 상품 삭제
-//    @DeleteMapping("/products/{productId}")
-//    public ResponseEntity<String> deleteProduct(
-//            @PathVariable Integer productId
-//    ) {
-//        ProductResponse deleted = STORE.remove(productId);
-//
-//        if (deleted == null) {
-//            throw new ResponseStatusException(
-//                    HttpStatus.NOT_FOUND, "삭제할 상품이 없습니다."
-//            );
-//        }
-//
-//        return ResponseEntity.ok("상품 삭제 성공 [id = " + productId + "]");
-//    }
-
-
-    //    // 상품 목록 조회
-//    @GetMapping("/products")
-//    public List<ProductResponse> getProducts() {
-//        return List.of(
-//                new ProductResponse(
-//                        1,
-//                        "Product A",
-//                        100.0,
-//                        "상품 1 설명",
-//                        "http://example.com/image1",
-//                        LocalDateTime.parse("2025-08-25T22:00:00")
-//                        ),
-//                new ProductResponse(
-//                        2,
-//                        "Product B",
-//                        150.0,
-//                        "상품 2 설명",
-//                        "http://example.com/image2",
-//                        LocalDateTime.parse("2025-08-26T21:00:00")
-//                )
-//        );
-//    }
-
-
-    // product GET
-    // 상품 목록 조회
-//    @GetMapping("/products")
-//    public Collection<ProductResponse> getProducts() {
-//        return STORE.values();
-//    }
-
-    // .values() : 맵에 저장된 값(value)만 꺼내 Collection 인터페이스 형식으로 반환
-
-    /*
-        Map은 Collection의 하위 타입이 아니므로,
-        .values()는 Collection을 돌려주지만 "그건 맵의 값 뷰"
-
-        .keySet() : 모든 키만 반환
-        .entrySet() :  키, 값 쌍을 한 번에 반환
-        └ entrySet()의 반환 타입은 Set<Map.Entry<K, V>>
-        └ 왜냐하면, Map에서 key는 중복될 수 없으니 받으시 Set 컬렉션이 맞음!
-    */
-
     /*
         Collection은 가장 상위 타입
         List, Set, Queue 등 모든 컬렉션의 공통 조상
         중복 여부를 보장하지 않음
     */
-
-
-    // product GET
-    // 상품 상세 조회
-//    @GetMapping("/products/{productId}")
-//    public ProductResponse getProduct(
-//            @PathVariable("productId") Integer productId
-//    ) {
-//        ProductResponse productResponse = STORE.get(productId);
-//
-//        // 키 없으면 null 반환
-//        if (productResponse == null) {
-//            throw new ResponseStatusException(
-//                    HttpStatus.NOT_FOUND, "조회된 상품이 없습니다."
-//            );
-//        }
-//
-//        return productResponse;
-//    }
 
 
     /*
@@ -218,36 +121,6 @@ public class ProductController {
         return ResponseEntity.noContent().build();           // 204 No Content
         return ResponseEntity.created(location).body(body);  // 201 + Location 헤더 + 바디
      */
-
-
-    // 임시 저장소
-    // static이기 때문에 애플리케이션 살아있는 동안 공유, 서버 재시작 시 초기화
-//    private static final HashMap<Integer, ProductResponse> STORE = new HashMap<>();
-    // 동시 요청이 많을 경우 ConcurrentHashMap 고려하라는데 모르겠음.
-    // ConcurrentHashMap → ConcurrentMap → Map을 구현
-    // Map → Collection 상속하지 않음! (둘은 자바 컬렉션 프레임워크 내 형제 느낌)
-
-    // id 시퀀스 흉내
-//    private static Integer seq = 2;
-    // 현재는 단일 스레드 테스트 용으로 적합
-    // 동시성 고려하려면 AtomicInteger 사용이 안전하다는데 모르겠음.
-
-    // 미리 넣어둔 상품
-    // └ 서버 실행 시 미리 저장
-//    static {
-//        STORE.put(1, new ProductResponse(
-//                1, "Product A", 100.0, "상품 1 설명",
-//                "http://example.com/image1",
-//                LocalDateTime.parse("2025-08-25T22:00:00"),
-//                LocalDateTime.parse("2025-08-25T22:00:00")
-//        ));
-//        STORE.put(2, new ProductResponse(
-//                2, "Product B", 300.0, "상품 2 설명",
-//                "http://example.com/image2",
-//                LocalDateTime.parse("2025-08-26T10:00:00"),
-//                LocalDateTime.parse("2025-08-26T10:00:00")
-//        ));
-//    }
 
 
     /*

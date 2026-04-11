@@ -25,22 +25,10 @@ public record ProductCreateResponse (
                 .categoryId(result.categoryId())
                 .name(result.name())
                 .salePrice(result.salePrice())
+                .description(result.description())
                 .isDiscounted(result.isDiscounted())
                 .discountRate(result.discountRate())
                 .createdAt(result.createdAt())
-                .build();
-    }
-
-    public static ProductCreateResponse example() {
-        return ProductCreateResponse.builder()
-                .id(1L) // L 붙여 Long 리터럴 (1은 int 리터럴)
-                .categoryId(1L)
-                .name("후드티")
-                .description("박시한 후드티입니다.")
-                .salePrice(BigDecimal.valueOf(9000))
-                .isDiscounted(true)
-                .discountRate(10)
-                .createdAt(LocalDateTime.now())
                 .build();
     }
 
