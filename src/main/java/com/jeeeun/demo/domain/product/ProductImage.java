@@ -7,12 +7,10 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Builder
 @Getter
-@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString(exclude = {"product"})
 @Entity
-@EntityListeners(AuditingEntityListener.class)
 @Table(name = "product_image")
 public class ProductImage extends BaseTimeEntity {
 

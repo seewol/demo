@@ -12,11 +12,9 @@ import java.util.List;
 
 @Builder
 @Getter
-@Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@ToString(exclude = {"category", "user", "productImages",
-        "productOptions", "productVariants"})
+@ToString(exclude = {"category", "productImages", "productOptions", "productVariants"})
 @Entity
 @Table(name = "product")
 public class Product extends BaseTimeEntity {
@@ -30,10 +28,6 @@ public class Product extends BaseTimeEntity {
     @ManyToOne(fetch = FetchType.LAZY) // 지연 로딩
     @JoinColumn(name = "category_id", nullable = false)
     private Category category;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
 
     // 지연로딩이란?
     // product.getCategory() 호출 전까지 카테고리 쿼리 안 날림.
@@ -76,8 +70,9 @@ public class Product extends BaseTimeEntity {
 //    @Column(name = "updated_at", nullable = false)
 //    private LocalDateTime updatedAt;
 
+    @Builder.Default
     @Column(name = "is_deleted", nullable = false)
-    private boolean isDeleted;
+    private boolean isDeleted = false;
 
     // mappedBy ?
     // = 상대 엔티티에서 이 관계를 담당하고 있는 필드명 기재
@@ -94,4 +89,6 @@ public class Product extends BaseTimeEntity {
     @Builder.Default
     @OneToMany(mappedBy = "product")
     private List<ProductVariant> productVariants = new ArrayList<>();
+
+
 }
