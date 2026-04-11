@@ -2,7 +2,6 @@ package com.jeeeun.demo.service;
 
 import com.jeeeun.demo.common.error.BusinessException;
 import com.jeeeun.demo.common.error.ErrorCode;
-import com.jeeeun.demo.controller.response.ProductResponse;
 import com.jeeeun.demo.domain.product.Product;
 import com.jeeeun.demo.domain.product.ProductImage;
 import com.jeeeun.demo.domain.product.ProductOptionDetail;
@@ -48,7 +47,7 @@ public class ProductQueryService {
         List<ProductOptionDetail> details = productOptionDetailRepository.findAllByProductId(productId);
 
         // 구조 : optionId -> detail 리스트가 되도록 그룹핑
-        // ex. 10 → [Red, Blue] / 20 → [S, M]
+        // ex ≫ 10 → [Red, Blue] / 20 → [S, M]
         Map<Long, List<ProductOptionDetail>> detailMap =
                 details.stream().collect(Collectors.groupingBy(d -> d.getProductOption().getId()));
 

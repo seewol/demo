@@ -2,7 +2,6 @@ package com.jeeeun.demo.service;
 
 import com.jeeeun.demo.common.error.BusinessException;
 import com.jeeeun.demo.common.error.ErrorCode;
-import com.jeeeun.demo.domain.user.User;
 import com.jeeeun.demo.domain.product.*;
 import com.jeeeun.demo.repository.*;
 import com.jeeeun.demo.service.product.model.*;
@@ -18,7 +17,6 @@ import java.util.stream.Collectors;
 @Service
 public class ProductCommandService {
 
-    private final UserRepository userRepository;
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
     private final ProductImageRepository productImageRepository;
@@ -32,11 +30,10 @@ public class ProductCommandService {
     @Transactional
     public ProductCreateResult createProduct(ProductCreateCommand command) {
 
-        // 1. 카테고리, 멤버 조회 (FK 검증)
+        // 1. 카테고리 조회 (FK 검증)
         Category category = categoryRepository.findById(command.categoryId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_CATEGORY));
-        User user = userRepository.findById(command.userId())
-                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_USER));
+
 
         // ★ 2. 할인 조건부 검증
         if (command.isDiscounted()) {
@@ -55,7 +52,6 @@ public class ProductCommandService {
         // 3. Product 저장
         Product product = Product.builder()
                 .category(category)
-                .user(user)
                 .name(command.name().trim())
                 .description(command.description().trim())
                 .salePrice(command.salePrice())
@@ -113,17 +109,15 @@ public class ProductCommandService {
         // 2. optionDetailIds 존재 검증
         List<Long> ids = command.optionDetailIds();
 
-        // TODO ★ 입력값에 대한 검증은 해당 모델에 validate 함수 만들고 router 에서 호출
-
         if (ids.isEmpty() || ids.size() > 3) {
             throw new BusinessException(ErrorCode.INVALID_OPTION_DETAIL_IDS);
         }
+        // TODO ★ 입력값에 대한 검증은 해당 모델에 validate 함수 만들고 router 에서 호출
+
 
         // 3. optionDetail 조회 (DB 에서)
         List<ProductOptionDetail> details       // ┌ 없는 거 빼고 가져오니 개수로 검증
-                = productOptionDetailRepository.findAllById(ids); // command.optionDetailIds()
-
-        // TODO details 빈 리스트인지 아닌지 검사해주는게 좋음
+                = productOptionDetailRepository.findAllById(ids);
 
         if (details.isEmpty() || ids.size() != details.size()) {
             throw new BusinessException(ErrorCode.OPTION_DETAIL_REQUIRED);
@@ -165,10 +159,10 @@ public class ProductCommandService {
         // 7. ProductVariant 엔티티 생성 후 저장
         ProductVariant variant = ProductVariant.builder()
                 .product(product)
-                .optionDetail1(d1)
+                .optionDetail1(d1)          // 얘넨 연관관계 저장용
                 .optionDetail2(d2)
                 .optionDetail3(d3)
-                .variantName(variantName)
+                .variantName(variantName)   // 화면에 보여주기 위한 문자열
                 .additionalPrice(command.additionalPrice())
                 .build();
 
@@ -187,12 +181,11 @@ public class ProductCommandService {
         ProductVariant variant = productVariantRepository.findById(command.variantId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_VARIANT));
 
-        // variantId로 stock 조회 후 재고 설정
+        // 해당 variant stock 조회
 
-        // 1. 없으면 새 재고 row 생성 후 저장              // ┌ Jpa 가 찾을 수 있어야 함.
+        // 1. 없으면 새 재고 row 생성 후 0으로 저장             // ┌ Jpa 가 찾을 수 있어야 함.
         ProductStock stock = productStockRepository.findByProductVariant_Id(command.variantId())
                 .orElseGet(() -> productStockRepository.save(ProductStock.create(variant, 0)));
-                // variant 재고 없으면 new 재고 엔티티를 하나 만들기
 
         // 2. 있으면 operation (SET/INCREASE/DECREASE) 적용
         switch (command.operation()) {

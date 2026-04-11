@@ -1,7 +1,6 @@
 package com.jeeeun.demo.repository;
 
 import com.jeeeun.demo.domain.product.Product;
-import com.jeeeun.demo.service.user.model.ProductSummaryResult;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import java.util.List;
@@ -12,20 +11,6 @@ public interface ProductRepository extends JpaRepository<Product, Long>, Product
     // @Query 는 Spring Data JPA 에서
     // 메서드 이름 기반 쿼리 생성 대신,
     // 직접 작성한 JPQL(엔티티 기준)을 사용한다.
-
-    @Query("""
-       select new com.jeeeun.demo.service.user.model.ProductSummaryResult(
-            p.id,
-            p.name,
-            p.salePrice,
-            p.isDiscounted,
-            p.discountRate
-       )
-       from Product p
-       where p.user.id = :userId and p.isDeleted = false
-       order by p.createdAt desc
-    """)
-    Optional<ProductSummaryResult> findMainSummaryByUserId(Long userId); // :userId 와 자동 매핑
 
     @Query("select p from Product p join fetch p.category")
     List<Product> findAllByCategory();
