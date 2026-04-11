@@ -17,6 +17,7 @@ import lombok.*;
 )
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+// Builder/Setter 없이 create() 메서드로만 강제 생성
 @ToString(exclude = {"productVariant"})
 public class ProductStock extends BaseTimeEntity {
 

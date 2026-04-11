@@ -14,7 +14,6 @@ import java.util.List;
 @NoArgsConstructor
 @ToString(exclude = {"products"})
 @Entity
-@EntityListeners(AuditingEntityListener.class)
 @Table(name = "category")
 public class Category {
 
@@ -37,4 +36,8 @@ public class Category {
     @Column(name = "category_name", nullable = false)
     private String name;
 
+    // 카테고리 이름 변경 메서드
+    public void updatdName(String name) {
+        this.name = name;
+    }
 }

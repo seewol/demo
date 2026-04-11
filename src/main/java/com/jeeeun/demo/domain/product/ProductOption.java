@@ -9,12 +9,10 @@ import java.util.List;
 
 @Builder
 @Getter
-@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString(exclude = {"product", "productOptionDetails"})
 @Entity
-@EntityListeners(AuditingEntityListener.class)
 @Table(name = "product_option")
 public class ProductOption {
 
