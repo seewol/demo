@@ -43,4 +43,33 @@ src
 │     ├─ application.yml         # 공통 설정
 │     └─ application-local.yml   # 로컬 환경 설정 (gitignore)
 └─ test                          # 테스트 코드
+
+
 ```
+
+
+## ✅ 구현 기능
+
+### 👤 Auth
+| Method | URL | 설명 | 인증 |
+|--------|-----|------|------|
+| POST | /sign-up | 회원가입 | ❌ |
+| POST | /auth/sign-in | 로컬 로그인 | ❌ |
+| POST | /auth/sign-in/google | 구글 소셜 로그인 | ❌ |
+| POST | /auth/refresh | 토큰 재발급 | ❌ |
+
+### 👤 User
+| Method | URL | 설명 | 인증 |
+|--------|-----|------|------|
+| GET | /users/me | 내 정보 조회 | ✅ |
+| PATCH | /users/me | 내 정보 수정 | ✅ |
+| DELETE | /users/me | 회원 탈퇴 | ✅ |
+
+### 🛍️ Product
+| Method | URL | 설명 | 인증 |
+|--------|-----|------|------|
+| POST | /products | 상품 등록 | ✅ ADMIN |
+| GET | /products | 상품 목록 조회 (페이징, 검색, 필터) | ❌ |
+| GET | /products/{productId} | 상품 상세 조회 | ❌ |
+| POST | /products/{productId}/variants | 상품 조합 등록 | ✅ ADMIN |
+| PATCH | /variants/{variantId}/stock | 재고 수정 | ✅ ADMIN |
