@@ -7,7 +7,7 @@ import com.jeeeun.demo.repository.UserRepository;
 import com.jeeeun.demo.repository.ProductRepository;
 import com.jeeeun.demo.service.user.model.UserDetailResult;
 import com.jeeeun.demo.service.user.model.UserResult;
-import com.jeeeun.demo.service.user.model.ProductSummaryResult;
+//import com.jeeeun.demo.service.user.model.ProductSummaryResult;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -41,9 +41,9 @@ public class UserQueryService {
         User user = userRepository.findByIdAndIsDeletedFalse(userId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_USER));
 
-        ProductSummaryResult ps = productRepository.findMainSummaryByUserId(userId)
-                .orElse(null); // 상품 없으면 ps 가 null
+//        ProductSummaryResult ps = productRepository.findMainSummaryByUserId(userId)
+//                .orElse(null); // 상품 없으면 ps 가 null
 
-        return UserDetailResult.from(user, ps);
+        return UserDetailResult.from(user);
     }
 }

@@ -11,6 +11,10 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -46,14 +50,15 @@ public class ProductController {
     @Operation(summary = "상품 목록 조회", description = "상품 정보를 조회합니다.")
     @ApiResponse(responseCode = "200", description = "조회 성공")
     @GetMapping("/products")
-    public List<ProductResponse> getProducts() {
-
-        List<ProductResult> results =  productQueryService.getProducts();
-
-        // List<ProductResult> → List<ProductResponse> 변환 과정
-        return results.stream()
-                .map(ProductResponse::from)
-                .toList();
+    public Page<ProductResponse> getProducts(
+            @RequestParam(required = false) String keyword, // required = false → null 허용
+            @RequestParam(required = false) Long categoryId,
+            @RequestParam(required = false) Boolean isDiscounted,
+            @PageableDefault(size = 20, sort = "id", direction = Sort.Direction.DESC) Pageable pageable
+                            // @PageableDefault → ?page=0&size=20 안 보내도 동작
+    ) {
+        return productQueryService.getProducts(keyword, categoryId, isDiscounted, pageable)
+                .map(ProductResponse::from);    // 각 ProductResult → ProductResponse 변환
     }
 
 

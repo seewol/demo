@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -46,8 +47,9 @@ public class SecurityConfig {
                                 "/swagger-ui/**",   // Swagger UI
                                 "/v3/api-docs/**"   // Swagger API 문서
                             ).permitAll()   // 위 URL 들은 토큰 없어도 접근 가능
+                        .requestMatchers(HttpMethod.GET, "/products", "/products/**").permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")  // ADMIN만 접근 가능
-                        .anyRequest().authenticated()   // 나머지 모든 요청은 토큰 필요!
+                        .anyRequest().authenticated()   // 나머지 모든 요청은 로그인 토큰 필요!
                 )
 
                 .exceptionHandling(exception ->
