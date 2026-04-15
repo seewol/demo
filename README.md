@@ -43,9 +43,9 @@ src
 │     ├─ application.yml         # 공통 설정
 │     └─ application-local.yml   # 로컬 환경 설정 (gitignore)
 └─ test                          # 테스트 코드
-
-
 ```
+
+---
 
 
 ## ✅ 구현 기능
@@ -73,3 +73,6 @@ src
 | GET | /products/{productId} | 상품 상세 조회 | ❌ |
 | POST | /products/{productId}/variants | 상품 조합 등록 | ✅ ADMIN |
 | PATCH | /variants/{variantId}/stock | 재고 수정 | ✅ ADMIN |
+
+
+---
