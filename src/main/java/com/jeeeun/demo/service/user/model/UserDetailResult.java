@@ -13,7 +13,8 @@ public record UserDetailResult(
         String email,
         String phoneNumber,
         Role role,
-        ProductSummaryResult productSummary,
+
+//        ProductSummaryResult productSummary,
         LocalDateTime createdAt,
         LocalDateTime updatedAt
 
@@ -29,24 +30,24 @@ public record UserDetailResult(
                 .email(user.getEmail())
                 .phoneNumber(user.getPhoneNumber())
                 .role(user.getRole())
-                .productSummary(null)
+//                .productSummary(null)
                 .createdAt(user.getCreatedAt())
                 .updatedAt(user.getUpdatedAt())
                 .build();
     }
 
-    // * 주 사용 * 상품 요약을 포함한 내 정보 조회
-    public static UserDetailResult from(
-            User user, ProductSummaryResult productSummaryResult) {
-        return UserDetailResult.builder()
-                .id(user.getId())
-                .name(user.getName())
-                .email(user.getEmail())
-                .phoneNumber(user.getPhoneNumber())
-                .role(user.getRole())
-                .productSummary(productSummaryResult)
-                .createdAt(user.getCreatedAt())
-                .updatedAt(user.getUpdatedAt())
-                .build();
-    }
+    // 상품 요약을 포함한 내 정보 조회
+//    public static UserDetailResult from(
+//            User user, ProductSummaryResult productSummaryResult) {
+//        return UserDetailResult.builder()
+//                .id(user.getId())
+//                .name(user.getName())
+//                .email(user.getEmail())
+//                .phoneNumber(user.getPhoneNumber())
+//                .role(user.getRole())
+////                .productSummary(productSummaryResult)
+//                .createdAt(user.getCreatedAt())
+//                .updatedAt(user.getUpdatedAt())
+//                .build();
+//    }
 }

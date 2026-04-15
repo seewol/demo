@@ -11,6 +11,8 @@ import com.jeeeun.demo.repository.ProductRepository;
 import com.jeeeun.demo.service.product.model.ProductDetailResult;
 import com.jeeeun.demo.service.product.model.ProductResult;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,14 +28,17 @@ public class ProductQueryService {
     private final ProductImageRepository productImageRepository;
     private final ProductOptionDetailRepository productOptionDetailRepository;
 
+
     // 상품 목록 조회에 대한 api 생성
     @Transactional(readOnly = true)
-    public List<ProductResult> getProducts() {
-        return productRepository.findAllByCategory()
-                .stream()
-                .map(ProductResult::from)
-                .toList();
+    public Page<ProductResult> getProducts(String keyword, Long categoryId, Boolean isDiscounted, Pageable pageable) {
+
+        // productRepository가 ProductRepositoryCustom 상속중
+        return productRepository.searchProducts(keyword, categoryId, isDiscounted, pageable)
+                .map(ProductResult::from);  // Page 안의 각 Product → ProductResult 변환
+
     }
+
 
     // 상품 상세 조회에 대한 api 생성
     @Transactional(readOnly = true)

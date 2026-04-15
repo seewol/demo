@@ -12,7 +12,6 @@ public record ProductCreateCommand(
     String name,
     String description,
     BigDecimal salePrice,
-
     boolean isDiscounted,
     Integer discountRate,
     LocalDateTime discountStartAt,

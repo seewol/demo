@@ -30,6 +30,7 @@ public record ProductResult(
                 .description(product.getDescription())
                 .salePrice(product.getSalePrice())
                 .isDiscounted(product.isDiscounted())
+                .discountRate(product.getDiscountRate())
                 .discountStartAt(product.getDiscountStartAt())
                 .discountEndAt(product.getDiscountEndAt())
                 .createdAt(product.getCreatedAt())

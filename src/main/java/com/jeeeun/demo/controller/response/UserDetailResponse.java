@@ -2,7 +2,7 @@ package com.jeeeun.demo.controller.response;
 
 import com.jeeeun.demo.domain.user.Role;
 import com.jeeeun.demo.service.user.model.UserDetailResult;
-import com.jeeeun.demo.service.user.model.ProductSummaryResult;
+//import com.jeeeun.demo.service.user.model.ProductSummaryResult;
 import lombok.Builder;
 
 import java.math.BigDecimal;
@@ -34,7 +34,7 @@ public record UserDetailResponse(
 
     public static UserDetailResponse from(UserDetailResult result) {
 
-        ProductSummaryResult ps = result.productSummary();
+//        ProductSummaryResult ps = result.productSummary();
 
         return UserDetailResponse.builder()
                 .id(result.id())
@@ -42,16 +42,16 @@ public record UserDetailResponse(
                 .email(result.email())
                 .phoneNumber(result.phoneNumber())
                 .role(result.role())
-                .productSummary(
-                        ps == null ? null :
-                                ProductSummary.builder()
-                                        .productId(ps.productId())
-                                        .productName(ps.productName())
-                                        .salePrice(ps.salePrice())
-                                        .isDiscounted(ps.isDiscounted())
-                                        .discountRate(ps.discountRate())
-                                        .build()
-                )
+//                .productSummary(
+//                        ps == null ? null :
+//                                ProductSummary.builder()
+//                                        .productId(ps.productId())
+//                                        .productName(ps.productName())
+//                                        .salePrice(ps.salePrice())
+//                                        .isDiscounted(ps.isDiscounted())
+//                                        .discountRate(ps.discountRate())
+//                                        .build()
+//                )
                 .createdAt(result.createdAt())
                 .updatedAt(result.updatedAt())
                 .build();
