@@ -1,4 +1,4 @@
-package com.jeeeun.demo.repository;
+package com.jeeeun.demo.repository.user;
 
 import com.jeeeun.demo.domain.user.User;
 import org.springframework.data.jpa.repository.JpaRepository;

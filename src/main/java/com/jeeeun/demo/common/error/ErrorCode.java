@@ -20,7 +20,6 @@ public enum ErrorCode {
     WITHDRAWN_USER(HttpStatus.UNAUTHORIZED, "탈퇴한 사용자입니다."),
     INVALID_TOKEN(HttpStatus.BAD_REQUEST, "유효하지 않은 토큰입니다."),
 
-
     // 상품
     CONFLICT_PRODUCT(HttpStatus.CONFLICT, "중복된 상품명입니다."),
     NOT_FOUND_PRODUCT(HttpStatus.NOT_FOUND, "등록되지 않은 상품입니다."),

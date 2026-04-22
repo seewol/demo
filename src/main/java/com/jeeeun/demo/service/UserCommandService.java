@@ -5,8 +5,8 @@ import com.jeeeun.demo.common.error.ErrorCode;
 import com.jeeeun.demo.domain.user.Provider;
 import com.jeeeun.demo.domain.user.User;
 import com.jeeeun.demo.domain.user.UserCredentials;
-import com.jeeeun.demo.repository.UserCredentialsRepository;
-import com.jeeeun.demo.repository.UserRepository;
+import com.jeeeun.demo.repository.user.UserCredentialsRepository;
+import com.jeeeun.demo.repository.user.UserRepository;
 import com.jeeeun.demo.service.user.model.UserCreateCommand;
 import com.jeeeun.demo.service.user.model.UserCreateResult;
 import com.jeeeun.demo.service.user.model.UserUpdateCommand;
@@ -16,8 +16,6 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDateTime;
 
 import static org.springframework.util.StringUtils.hasText;
 

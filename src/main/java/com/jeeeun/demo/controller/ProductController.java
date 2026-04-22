@@ -9,6 +9,7 @@ import com.jeeeun.demo.service.ProductQueryService;
 import com.jeeeun.demo.service.product.model.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -25,6 +26,7 @@ import java.util.*;
 // @Controller + @ResponseBody 합쳐진 것
 // 메서드 반환값을 그대로 HTTP 응답 바디(JSON/문자열)로 내려줌.
 // └ Jackson : 객체 → JSON 변환
+@Tag(name = "ProductController", description = "Product CRUD API 엔드포인트")
 public class ProductController {
 
     private final ProductCommandService productCommandService;

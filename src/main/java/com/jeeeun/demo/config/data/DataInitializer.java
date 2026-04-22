@@ -1,7 +1,7 @@
 package com.jeeeun.demo.config.data;
 
 import com.jeeeun.demo.domain.product.Category;
-import com.jeeeun.demo.repository.CategoryRepository;
+import com.jeeeun.demo.repository.product.CategoryRepository;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.ApplicationArguments;
