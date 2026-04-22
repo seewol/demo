@@ -1,4 +1,4 @@
-package com.jeeeun.demo.repository;
+package com.jeeeun.demo.repository.product;
 
 public interface ProductOptionDetailRepositoryCustom {
 

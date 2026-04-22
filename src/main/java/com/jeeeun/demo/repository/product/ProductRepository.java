@@ -1,4 +1,4 @@
-package com.jeeeun.demo.repository;
+package com.jeeeun.demo.repository.product;
 
 import com.jeeeun.demo.domain.product.Product;
 import org.springframework.data.jpa.repository.JpaRepository;

@@ -1,8 +1,9 @@
-package com.jeeeun.demo.repository;
+package com.jeeeun.demo.repository.product;
 
 import com.jeeeun.demo.domain.product.Product;
 import com.jeeeun.demo.domain.product.QCategory;
 import com.jeeeun.demo.domain.product.QProduct;
+import com.jeeeun.demo.repository.product.ProductRepositoryCustom;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;

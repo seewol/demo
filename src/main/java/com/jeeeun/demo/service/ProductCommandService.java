@@ -3,7 +3,7 @@ package com.jeeeun.demo.service;
 import com.jeeeun.demo.common.error.BusinessException;
 import com.jeeeun.demo.common.error.ErrorCode;
 import com.jeeeun.demo.domain.product.*;
-import com.jeeeun.demo.repository.*;
+import com.jeeeun.demo.repository.product.*;
 import com.jeeeun.demo.service.product.model.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
