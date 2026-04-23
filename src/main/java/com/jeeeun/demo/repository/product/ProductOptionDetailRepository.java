@@ -3,6 +3,7 @@ package com.jeeeun.demo.repository.product;
 import com.jeeeun.demo.domain.product.ProductOptionDetail;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
@@ -15,4 +16,10 @@ public interface ProductOptionDetailRepository extends JpaRepository<ProductOpti
     """)
     List<ProductOptionDetail> findAllByProductId(Long productId);
 
+    @Query("""
+        select pod.id
+        from ProductOptionDetail pod
+        where pod.productOption.product.id = :productId
+    """)    // OptionDetail → option → product 타고 올라가야 함.
+    List<Long> findIdsByProductId(@Param("productId") Long productId);
 }

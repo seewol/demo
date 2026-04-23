@@ -112,7 +112,8 @@ public class ProductCommandService {
         if (ids.isEmpty() || ids.size() > 3) {
             throw new BusinessException(ErrorCode.INVALID_OPTION_DETAIL_IDS);
         }
-        // TODO ★ 입력값에 대한 검증은 해당 모델에 validate 함수 만들고 router 에서 호출
+
+        // todo: 입력값에 대한 검증은 해당 모델에 validate 함수 만들고 router 에서 호출
 
 
         // 3. optionDetail 조회 (DB 에서)
@@ -123,7 +124,20 @@ public class ProductCommandService {
             throw new BusinessException(ErrorCode.OPTION_DETAIL_REQUIRED);
         }
 
-        // 4. id 오름차순 정렬
+
+        // 4. todo: optionDetail들이 모두 같은 상품(productId)에 속해있는지 검증
+        // 4-1. productId 안에 유효하게 속한 optionDetailId 목록 한 번에 조회
+        List<Long> validIds = productOptionDetailRepository.findIdsByProductId(command.productId());
+
+        // 4-2. 요청으로 들어온 ids가 위 validIds에 전부 포함되는지 확인
+        // 하나라도 다른 상품에 속해있으면 false 반환
+        boolean isValid = validIds.containsAll(ids);
+
+        if(!isValid) {
+            throw new BusinessException(ErrorCode.INVALID_OPTION_DETAIL_IDS);
+        }
+
+        // 5. id 오름차순 정렬
         // 요청이 [6, 3, 1] 로 와도 [1, 3, 6]으로 통일해 저장하려고 함!
         details.sort(Comparator.comparing(ProductOptionDetail::getId));
                                         /* └ ProductOptionDetail 에서 getId()
@@ -143,12 +157,12 @@ public class ProductCommandService {
                                             조금이라도 로직이 추가되는 경우 람다만 사용할 수 있다.
                                          */
 
-        // 5. 엔티티에 optionDetail 1/2/3 매핑
+        // 6. 엔티티에 optionDetail 1/2/3 매핑
         ProductOptionDetail d1 = details.get(0); // List 인덱스
         ProductOptionDetail d2 = (details.size() >= 2) ? details.get(1) : null;
         ProductOptionDetail d3 = (details.size() == 3) ? details.get(2) : null;
 
-        // 6. 조합명(variantName) 서버에서 생성하기
+        // 7. 조합명(variantName) 서버에서 생성하기
         String variantName = details.stream()
                 .map(ProductOptionDetail::getDescription) // 각 detail 객체에서 description 뽑아 Stream<String>으로 바꿈
                 .collect(Collectors.joining(" / ")); // " / " 구분자로 문자열들 합치기
@@ -156,7 +170,7 @@ public class ProductCommandService {
 
         // ★ Option, OptionDetail 은 상품 등록 때 만들어졌다!
 
-        // 7. ProductVariant 엔티티 생성 후 저장
+        // 8. ProductVariant 엔티티 생성 후 저장
         ProductVariant variant = ProductVariant.builder()
                 .product(product)
                 .optionDetail1(d1)          // 얘넨 연관관계 저장용
@@ -168,7 +182,7 @@ public class ProductCommandService {
 
         ProductVariant saved = productVariantRepository.save(variant);
 
-        // 8. 결과 반환
+        // 9. 결과 반환
         return ProductVariantCreateResult.from(saved);
     }
 
