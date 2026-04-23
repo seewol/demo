@@ -137,6 +137,7 @@ public class ProductCommandService {
             throw new BusinessException(ErrorCode.INVALID_OPTION_DETAIL_IDS);
         }
 
+
         // 5. id 오름차순 정렬
         // 요청이 [6, 3, 1] 로 와도 [1, 3, 6]으로 통일해 저장하려고 함!
         details.sort(Comparator.comparing(ProductOptionDetail::getId));
