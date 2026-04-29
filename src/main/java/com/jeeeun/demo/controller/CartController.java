@@ -1,11 +1,14 @@
 package com.jeeeun.demo.controller;
 
 import com.jeeeun.demo.controller.request.CartItemCreateRequest;
+import com.jeeeun.demo.controller.request.CartItemUpdateRequest;
 import com.jeeeun.demo.controller.response.CartItemCreateResponse;
+import com.jeeeun.demo.controller.response.CartItemUpdateResponse;
 import com.jeeeun.demo.controller.response.CartResponse;
 import com.jeeeun.demo.service.CartCommandService;
 import com.jeeeun.demo.service.CartQueryService;
 import com.jeeeun.demo.service.cart.model.CartItemCreateResult;
+import com.jeeeun.demo.service.cart.model.CartItemUpdateResult;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -36,6 +39,23 @@ public class CartController {
         CartItemCreateResult result = cartCommandService.addCartItem(request.toCommand(userId));
 
         return CartItemCreateResponse.from(result);
+    }
+
+    @Operation(description = "장바구니 아이템 수량 변경")
+    @ApiResponse(responseCode = "200", description = "수량 변경 성공")
+    @PatchMapping("/items/{cartItemId}")
+    public CartItemUpdateResponse updateCartItemQuantity(
+            @PathVariable Long cartItemId,
+            @Valid @RequestBody CartItemUpdateRequest request
+    ) {
+        Long userId = (Long) SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getPrincipal();
+
+        CartItemUpdateResult result = cartCommandService.updateCartItemQuantity(
+                request.toCommand(userId, cartItemId));
+
+        return CartItemUpdateResponse.from(result);
     }
 
     @Operation(description = "내 장바구니 조회")

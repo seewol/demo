@@ -18,6 +18,8 @@ public class CartQueryService {
     private final UserRepository userRepository;
     private final CartRepository cartRepository;
 
+
+    // 내 장바구니 조회
     @Transactional(readOnly = true)
     public CartResult getCart(Long userId) {
 

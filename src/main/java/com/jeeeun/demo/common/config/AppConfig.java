@@ -2,10 +2,12 @@ package com.jeeeun.demo.common.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Configuration
+@EnableScheduling   // ★ 스케줄러 사용을 Spring에 선언 → Spring이 @Scheduled 붙은 메서드 전부 스캔해 등록!
 public class AppConfig {
 
     // ▼ 여기서 Bean 등록해야 AuthService, UserCommandService 등에 주입받아 쓸 수 있음.
@@ -22,5 +24,4 @@ public class AppConfig {
     // 내가 만든 클래스  → @Component 달면 됨 (Spring이 알아서 Bean 등록)
     // 외부 라이브러리   → @Bean으로 직접 등록해야 함 (내가 직접 객체 만들어서 Spring에게 관리 맡김)
     // 외부 라이브러리 클래스는 @Component 못 달아서 @Bean으로 등록!
-
 }
