@@ -45,7 +45,12 @@ public enum ErrorCode {
     OPTION_DETAIL_REQUIRED(HttpStatus.BAD_REQUEST, "옵션 디테일이 유효하지 않습니다."),
 
     // 조합
-    NOT_FOUND_VARIANT(HttpStatus.NOT_FOUND, "존재하지 않는 조합입니다.");
+    NOT_FOUND_VARIANT(HttpStatus.NOT_FOUND, "존재하지 않는 조합입니다."),
+
+    // 장바구니
+    NOT_FOUND_CART(HttpStatus.NOT_FOUND, "장바구니가 존재하지 않습니다."),
+    NOT_FOUND_CART_ITEM(HttpStatus.NOT_FOUND, "장바구니에 존재하지 않는 상품입니다."),
+    FORBIDDEN(HttpStatus.FORBIDDEN, "접근 권한이 없습니다.");
 
     private final HttpStatus status;
     private final String message;
