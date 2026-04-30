@@ -116,7 +116,6 @@ public class CartCommandService {
 
         // ★ 3 : 삭제 처리
         cartItemRepository.delete(cartItem);
-
     }
 
 }
