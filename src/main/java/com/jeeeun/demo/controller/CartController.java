@@ -69,4 +69,17 @@ public class CartController {
 
         return CartResponse.from(cartQueryService.getCart(userId));
     }
+
+    @Operation(description = "장바구니 아이템 삭제")
+    @ApiResponse(responseCode = "200", description = "삭제 성공")
+    @DeleteMapping("/items/{cartItemId}")
+    public void deleteCartItem(
+            @PathVariable Long cartItemId
+    ) {
+        Long userId = (Long) SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getPrincipal();
+
+        cartCommandService.deleteCartItem(userId, cartItemId);
+    }
 }

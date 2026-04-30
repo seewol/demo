@@ -101,21 +101,22 @@ public class CartCommandService {
         return CartItemUpdateResult.from(cartItem);
     }
 
+    // 장바구니 아이템 삭제
+    @Transactional
+    public void deleteCartItem(Long userId, Long cartItemId) {
 
+        // ★ 1 : cartItem 조회
+        CartItem cartItem = cartItemRepository.findById(cartItemId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_CART_ITEM));
 
+        // ★ 2 : 내 카트에 추가된 아이템인지 검증
+        if (!cartItem.getCart().getUser().getId().equals(userId)) {
+            throw new BusinessException(ErrorCode.FORBIDDEN);
+        }
 
+        // ★ 3 : 삭제 처리
+        cartItemRepository.delete(cartItem);
 
-
-
-
-
-
-
-
-
-
-
-
-
+    }
 
 }
