@@ -27,6 +27,7 @@ public record CartItemResult(
         BigDecimal discountedPrice;
 
         if (product.isDiscounted() && product.getDiscountRate() != null) {
+
             // 할인가 (salePrice만 할인 적용 / 추가금은 예외)
             BigDecimal multiplier = BigDecimal.ONE
                     .subtract(BigDecimal.valueOf(product.getDiscountRate())
