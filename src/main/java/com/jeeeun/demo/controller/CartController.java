@@ -14,6 +14,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,6 +29,7 @@ public class CartController {
 
     @Operation(description = "장바구니 아이템 추가")
     @ApiResponse(responseCode = "201", description = "추가 성공")
+    @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/items")
     public CartItemCreateResponse addCartItem(
             @Valid @RequestBody CartItemCreateRequest request
