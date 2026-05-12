@@ -24,6 +24,9 @@ public enum ErrorCode {
     CONFLICT_PRODUCT(HttpStatus.CONFLICT, "중복된 상품명입니다."),
     NOT_FOUND_PRODUCT(HttpStatus.NOT_FOUND, "등록되지 않은 상품입니다."),
 
+    // 상품 이미지
+    NOT_FOUND_PRODUCT_IMAGE(HttpStatus.NOT_FOUND, "존재하지 않는 이미지입니다."),
+
     // 할인
     INVALID_DISCOUNT_RATE(HttpStatus.BAD_REQUEST, "할인 적용 시 할인율은 필수입니다."),
     INVALID_DISCOUNT_PERIOD(HttpStatus.BAD_REQUEST, "할인 기간이 올바르지 않습니다."),
@@ -31,6 +34,7 @@ public enum ErrorCode {
     // 주문
     CONFLICT_ORDER(HttpStatus.CONFLICT, "중복된 주문 요청입니다."),
     NOT_FOUND_ORDER(HttpStatus.NOT_FOUND, "존재하지 않는 주문 정보입니다."),
+    CANNOT_CANCEL_ORDER(HttpStatus.BAD_REQUEST, "취소할 수 없는 주문 상태입니다."),
 
     // 재고
     OUT_OF_STOCK(HttpStatus.CONFLICT, "상품 재고가 부족합니다."),
@@ -50,6 +54,7 @@ public enum ErrorCode {
     // 장바구니
     NOT_FOUND_CART(HttpStatus.NOT_FOUND, "장바구니가 존재하지 않습니다."),
     NOT_FOUND_CART_ITEM(HttpStatus.NOT_FOUND, "장바구니에 존재하지 않는 상품입니다."),
+
     FORBIDDEN(HttpStatus.FORBIDDEN, "접근 권한이 없습니다.");
 
     private final HttpStatus status;

@@ -16,6 +16,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -39,6 +40,7 @@ public class ProductController {
     // 상품 등록 (C)
     @Operation(summary = "상품 등록", description = "상품을 등록합니다.")
     @ApiResponse(responseCode = "201", description = "상품 등록 성공")
+    @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/products")
     public ProductCreateResponse createProduct(
@@ -65,7 +67,7 @@ public class ProductController {
 
 
     // 단일 상품 조회 (상품 상세 조회)
-    @Operation(summary = "단일 상품 조회", description = "상품 정보를 조회합니다.")
+    @Operation(summary = "단일 상품 조회", description = "상품 상세 정보를 조회합니다.")
     @ApiResponse(responseCode = "200", description = "조회 성공")
     @GetMapping("/products/{productId}")
     public ProductDetailResponse getProduct(
@@ -80,6 +82,7 @@ public class ProductController {
     // 상품 조합 등록 (C)
     @Operation(summary = "상품 조합 등록", description = "상품 조합을 등록합니다.")
     @ApiResponse(responseCode = "201", description = "등록 성공")
+    @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/products/{productId}/variants")
     public ProductVariantCreateResponse createVariant(

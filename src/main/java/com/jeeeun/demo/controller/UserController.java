@@ -40,6 +40,7 @@ public class UserController {
     // 회원 가입 (C)
     @Operation(summary = "회원 가입", description = "회원을 등록합니다.")
     @ApiResponse(responseCode = "201", description = "회원 등록 성공")
+    @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/sign-up")
     public UserCreateResponse signUp(
             @Valid @RequestBody UserCreateRequest request
