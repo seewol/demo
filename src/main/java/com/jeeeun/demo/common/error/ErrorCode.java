@@ -34,6 +34,7 @@ public enum ErrorCode {
     // 주문
     CONFLICT_ORDER(HttpStatus.CONFLICT, "중복된 주문 요청입니다."),
     NOT_FOUND_ORDER(HttpStatus.NOT_FOUND, "존재하지 않는 주문 정보입니다."),
+    CANNOT_CANCEL_ORDER(HttpStatus.BAD_REQUEST, "취소할 수 없는 주문 상태입니다."),
 
     // 재고
     OUT_OF_STOCK(HttpStatus.CONFLICT, "상품 재고가 부족합니다."),

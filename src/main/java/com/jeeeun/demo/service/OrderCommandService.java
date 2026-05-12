@@ -15,6 +15,7 @@ import com.jeeeun.demo.repository.product.ProductImageRepository;
 import com.jeeeun.demo.repository.product.ProductStockRepository;
 import com.jeeeun.demo.repository.user.CartItemRepository;
 import com.jeeeun.demo.repository.user.UserRepository;
+import com.jeeeun.demo.service.order.model.OrderCancelResult;
 import com.jeeeun.demo.service.order.model.OrderCreateCommand;
 import com.jeeeun.demo.service.order.model.OrderCreateResult;
 import lombok.RequiredArgsConstructor;
@@ -131,6 +132,7 @@ public class OrderCommandService {
         return OrderCreateResult.from(order);
     }
 
+
     // 할인 여부 확인 & 적용 후 실결제금액 계산
     private BigDecimal calculateDiscountedPrice(CartItem cartItem) {
 
@@ -157,5 +159,39 @@ public class OrderCommandService {
         return salePrice.add(additionalPrice != null ? additionalPrice : BigDecimal.ZERO);
 
     }
+
+
+    // 주문 취소
+    @Transactional
+    public OrderCancelResult cancelOrder(Long orderId, Long userId) {
+
+        // ★ 1 : 주문 조회
+        Order order = orderRepository.findWithItemsById(orderId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_ORDER));
+
+        // ★ 2 : 본인 주문인지 검증
+        if(!order.getUser().getId().equals(userId)) {
+            throw new BusinessException(ErrorCode.FORBIDDEN);
+        }
+
+        // ★ 3 : 취소 가능 상태인지 검증 + 주문 상태 변경 (CANCELLED)
+        order.cancel();
+
+        // ★ 4 : 취소한 재고만큼 복구
+        for (OrderItem item : order.getOrderItems()) {
+
+            productStockRepository
+                    .findByProductVariant_Id(item.getProductVariant().getId())
+                    .ifPresent(stock -> stock.increase(item.getQuantity()));
+                    // 재고 row 있으면 복구, 없으면 스킵
+        }
+
+        // note : 재고 없으면 에러 띄우는 방식
+        // .orElseThrow(()-> new BusinessException(ErrorCode.OUT_OF_STOCK));
+        // stock.increase(item.getQuantity());
+
+        return OrderCancelResult.from(order);
+    }
+
 
 }

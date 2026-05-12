@@ -1,12 +1,14 @@
 package com.jeeeun.demo.controller;
 
 import com.jeeeun.demo.controller.request.OrderCreateRequest;
+import com.jeeeun.demo.controller.response.OrderCancelResponse;
 import com.jeeeun.demo.controller.response.OrderCreateResponse;
 import com.jeeeun.demo.controller.response.OrderDetailResponse;
 import com.jeeeun.demo.controller.response.OrderResponse;
 import com.jeeeun.demo.repository.order.OrderRepository;
 import com.jeeeun.demo.service.OrderCommandService;
 import com.jeeeun.demo.service.OrderQueryService;
+import com.jeeeun.demo.service.order.model.OrderCancelResult;
 import com.jeeeun.demo.service.order.model.OrderCreateResult;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -85,20 +87,22 @@ public class OrderController {
     }
 
 
-//    // ★ 주문 취소
-//    // PATCH /orders/{orderId}/cancel
-//    @Operation(description = "주문 취소")
-//    @ApiResponse(responseCode = "200", description = "주문 취소 성공")
-//    @PatchMapping("/{orderId}/cancel")
-//    public OrderCancelResponse cancelOrder(
-//            @PathVariable Long orderId
-//    ) {
-//
-//        Long userId = (Long) SecurityContextHolder.getContext()
-//                .getAuthentication()
-//                .getPrincipal();
-//
-//        return null;
-//    }
+    // ★ 주문 취소
+    // PATCH /orders/{orderId}/cancel
+    @Operation(summary = "주문 취소", description = "주문 취소 후 재고를 복구합니다.")
+    @ApiResponse(responseCode = "200", description = "주문 취소 성공")
+    @PatchMapping("/{orderId}/cancel")
+    public OrderCancelResponse cancelOrder(
+            @PathVariable Long orderId
+    ) {
+
+        Long userId = (Long) SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getPrincipal();
+
+        OrderCancelResult result = orderCommandService.cancelOrder(orderId, userId);
+
+        return OrderCancelResponse.from(result);
+    }
 
 }
