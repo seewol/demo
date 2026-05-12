@@ -4,16 +4,21 @@ import com.jeeeun.demo.common.error.BusinessException;
 import com.jeeeun.demo.common.error.ErrorCode;
 import com.jeeeun.demo.domain.order.Order;
 import com.jeeeun.demo.domain.order.OrderItem;
+import com.jeeeun.demo.domain.product.Product;
+import com.jeeeun.demo.domain.product.ProductImage;
 import com.jeeeun.demo.domain.product.ProductStock;
+import com.jeeeun.demo.domain.product.ProductVariant;
 import com.jeeeun.demo.domain.user.CartItem;
 import com.jeeeun.demo.domain.user.User;
 import com.jeeeun.demo.repository.order.OrderRepository;
+import com.jeeeun.demo.repository.product.ProductImageRepository;
 import com.jeeeun.demo.repository.product.ProductStockRepository;
 import com.jeeeun.demo.repository.user.CartItemRepository;
 import com.jeeeun.demo.repository.user.UserRepository;
 import com.jeeeun.demo.service.order.model.OrderCreateCommand;
 import com.jeeeun.demo.service.order.model.OrderCreateResult;
 import lombok.RequiredArgsConstructor;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,10 +35,11 @@ public class OrderCommandService {
     private final UserRepository userRepository;
     private final CartItemRepository cartItemRepository;
     private final ProductStockRepository productStockRepository;
+    private final ProductImageRepository productImageRepository;
 
     // 주문 생성
     @Transactional
-    public OrderCreateResult createOrder(OrderCreateCommand command) {
+    public OrderCreateResult createOrder(@NonNull OrderCreateCommand command) {
 
         // ★ 1 : 유저 조회
         User user = userRepository.findByIdAndIsDeletedFalse(command.userId())
@@ -81,18 +87,37 @@ public class OrderCommandService {
         for (int i = 0; i < cartItems.size(); i++) {
             CartItem cartItem = cartItems.get(i);
 
+            ProductVariant variant = cartItem.getProductVariant();
+            Product product = variant.getProduct();
+
             // 정가 : 주문 시점 가격 고정 (스냅샷 의미)
-            BigDecimal unitPrice = cartItem.getProductVariant().getProduct().getSalePrice();
+            BigDecimal unitPrice = product.getSalePrice()
+                    .add(variant.getAdditionalPrice() != null ? variant.getAdditionalPrice() : BigDecimal.ZERO);
 
             // 할인가 계산
             BigDecimal discountedPrice = calculateDiscountedPrice(cartItem);
 
+            // 썸네일 조회
+            String thumbnailUrl = productImageRepository.findThumbnailByProductId(product.getId())
+                    .map(ProductImage::getImageUrl)
+                    .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_PRODUCT_IMAGE));
+
             // ★ OrderItem 생성 → Order에 추가
             // cascade = ALL 이라 Order 저장시 OrderItem 자동 저장
             order.getOrderItems().add(
-                    OrderItem.from(order, cartItem.getProductVariant(),
-                            cartItem.getQuantity(), unitPrice, discountedPrice)
+                    OrderItem.from(
+                            order,
+                            variant,
+                            cartItem.getQuantity(),
+                            product.getName(),
+                            variant.getVariantName(),
+                            unitPrice,
+                            discountedPrice,
+                            thumbnailUrl
+                    )
             );
+            // note : 주문 생성 시점에 상품명, 조합명, 썸네일 스냅샷으로 저장
+            // 조회 시 DB 추가 조회 없이 바로 꺼내 사용할 수 있다.
 
             // ★ 6 : 재고 차감
             stocks.get(i).decrease(cartItem.getQuantity());

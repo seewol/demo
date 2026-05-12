@@ -2,16 +2,26 @@ package com.jeeeun.demo.controller;
 
 import com.jeeeun.demo.controller.request.OrderCreateRequest;
 import com.jeeeun.demo.controller.response.OrderCreateResponse;
+import com.jeeeun.demo.controller.response.OrderDetailResponse;
+import com.jeeeun.demo.controller.response.OrderResponse;
+import com.jeeeun.demo.repository.order.OrderRepository;
 import com.jeeeun.demo.service.OrderCommandService;
+import com.jeeeun.demo.service.OrderQueryService;
 import com.jeeeun.demo.service.order.model.OrderCreateResult;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RequiredArgsConstructor
 @RestController
@@ -20,6 +30,8 @@ import org.springframework.web.bind.annotation.*;
 public class OrderController {
 
     private final OrderCommandService orderCommandService;
+    private final OrderQueryService orderQueryService;
+    private final OrderRepository orderRepository;
 
     // ★ 주문 생성 (C)
     @Operation(description = "주문 생성")
@@ -38,38 +50,41 @@ public class OrderController {
         return OrderCreateResponse.from(result);
     }
 
-//
-//    // ★ 내 주문 목록 조회
-//    // GET /orders
-//    @Operation(description = "주문 목록 조회")
-//    @ApiResponse(responseCode = "200", description = "주문 목록 조회 성공")
-//    @GetMapping
-//    public List<OrderResponse> getOrders() {
-//
-//        Long userId = (Long) SecurityContextHolder.getContext()
-//                .getAuthentication()
-//                .getPrincipal();
-//
-//        return null;
-//    }
-//
-//
-//    // ★ 내 주문 상세 조회
-//    // GET /orders/{orderId}
-//    @Operation(description = "주문 상세 조회")
-//    @ApiResponse(responseCode = "200", description = "주문 상세 조회 성공")
-//    @GetMapping("/{orderId}")
-//    public OrderDetailResponse getOrder(
-//            @PathVariable Long orderId
-//    ) {
-//
-//        Long userId = (Long) SecurityContextHolder.getContext()
-//                .getAuthentication()
-//                .getPrincipal();
-//
-//        return null;
-//    }
-//
+
+    // ★ 내 주문 목록 조회
+    // GET /orders
+    @Operation(description = "주문 목록 조회")
+    @ApiResponse(responseCode = "200", description = "주문 목록 조회 성공")
+    @GetMapping
+    public Page<OrderResponse> getOrders(
+            @PageableDefault(size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable pageable
+    ) {
+        Long userId = (Long) SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getPrincipal();
+
+        return orderQueryService.getOrders(userId, pageable)
+                .map(OrderResponse::from);
+    }
+
+
+    // ★ 내 주문 상세 조회
+    // GET /orders/{orderId}
+    @Operation(description = "주문 상세 조회")
+    @ApiResponse(responseCode = "200", description = "주문 상세 조회 성공")
+    @GetMapping("/{orderId}")
+    public OrderDetailResponse getOrder(
+            @PathVariable Long orderId
+    ) {
+
+        Long userId = (Long) SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getPrincipal();
+
+        return OrderDetailResponse.from(orderQueryService.getOrder(userId, orderId));
+    }
+
+
 //    // ★ 주문 취소
 //    // PATCH /orders/{orderId}/cancel
 //    @Operation(description = "주문 취소")

@@ -30,6 +30,14 @@ public class OrderItem extends BaseTimeEntity {
     @JoinColumn(name = "product_variant_id", nullable = false)
     private ProductVariant productVariant;
 
+    // 주문 시점 상품명 (스냅샷)
+    @Column(name = "product_name", nullable = false)
+    private String productName;
+
+    // 주문 시점 조합명 (스냅샷)
+    @Column(name = "product_variant_name", nullable = false)
+    private String productVariantName;
+
     @Column(name = "quantity", nullable = false)
     private long quantity;
 
@@ -41,16 +49,25 @@ public class OrderItem extends BaseTimeEntity {
     @Column(name = "discounted_price", nullable = false)
     private BigDecimal discountedPrice;
 
+    // 주문 시점 상품 대표 이미지 URL (스냅샷)
+    @Column(name = "thumbnail_url")
+    private String thumbnailUrl;
+
     public static OrderItem from(
             Order order, ProductVariant variant, long quantity,
-            BigDecimal unitPrice, BigDecimal discountedPrice
+            String productName, String productVariantName,
+            BigDecimal unitPrice, BigDecimal discountedPrice, String thumbnailUrl
     ) {
         OrderItem item = new OrderItem();
         item.order = order;
         item.productVariant = variant;
         item.quantity = quantity;
+        item.productName = productName;
+        item.productVariantName = productVariantName;
         item.unitPrice = unitPrice;
         item.discountedPrice = discountedPrice;
+        item.thumbnailUrl = thumbnailUrl;
+
         return item;
     }
 
