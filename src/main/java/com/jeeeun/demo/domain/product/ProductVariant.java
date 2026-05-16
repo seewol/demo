@@ -6,10 +6,8 @@ import lombok.*;
 
 import java.math.BigDecimal;
 
-@Builder
 @Getter
-@AllArgsConstructor
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
 @ToString(exclude = {"product", "optionDetail1", "optionDetail2",
         "optionDetail3"})
@@ -47,4 +45,21 @@ public class ProductVariant extends BaseTimeEntity {
     @Column(name = "additional_price")
     private BigDecimal additionalPrice;
 
+    public static ProductVariant from(
+            Product product,
+            ProductOptionDetail optionDetail1,
+            ProductOptionDetail optionDetail2,
+            ProductOptionDetail optionDetail3,
+            String variantName,
+            BigDecimal additionalPrice
+    ) {
+        ProductVariant variant = new ProductVariant();
+        variant.product = product;
+        variant.optionDetail1 = optionDetail1;
+        variant.optionDetail2 = optionDetail2;
+        variant.optionDetail3 = optionDetail3;
+        variant.variantName = variantName;
+        variant.additionalPrice = additionalPrice;
+        return variant;
+    }
 }

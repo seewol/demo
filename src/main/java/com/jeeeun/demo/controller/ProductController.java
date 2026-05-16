@@ -27,6 +27,7 @@ import java.util.*;
 // @Controller + @ResponseBody 합쳐진 것
 // 메서드 반환값을 그대로 HTTP 응답 바디(JSON/문자열)로 내려줌.
 // └ Jackson : 객체 → JSON 변환
+@RequestMapping("/products")
 @Tag(name = "ProductController", description = "Product CRUD API 엔드포인트")
 public class ProductController {
 
@@ -42,7 +43,7 @@ public class ProductController {
     @ApiResponse(responseCode = "201", description = "상품 등록 성공")
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("hasRole('ADMIN')")
-    @PostMapping("/products")
+    @PostMapping
     public ProductCreateResponse createProduct(
             @Valid @RequestBody ProductCreateRequest request
     ) {
@@ -53,7 +54,7 @@ public class ProductController {
     // 상품 목록 조회 (R)
     @Operation(summary = "상품 목록 조회", description = "상품 정보를 조회합니다.")
     @ApiResponse(responseCode = "200", description = "조회 성공")
-    @GetMapping("/products")
+    @GetMapping
     public Page<ProductResponse> getProducts(
             @RequestParam(required = false) String keyword, // required = false → null 허용
             @RequestParam(required = false) Long categoryId,
@@ -69,7 +70,7 @@ public class ProductController {
     // 단일 상품 조회 (상품 상세 조회)
     @Operation(summary = "단일 상품 조회", description = "상품 상세 정보를 조회합니다.")
     @ApiResponse(responseCode = "200", description = "조회 성공")
-    @GetMapping("/products/{productId}")
+    @GetMapping("/{productId}")
     public ProductDetailResponse getProduct(
             @PathVariable Long productId
     ) {
@@ -84,7 +85,7 @@ public class ProductController {
     @ApiResponse(responseCode = "201", description = "등록 성공")
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("hasRole('ADMIN')")
-    @PostMapping("/products/{productId}/variants")
+    @PostMapping("/{productId}/variants")
     public ProductVariantCreateResponse createVariant(
             @PathVariable Long productId,
             @Valid @RequestBody ProductVariantCreateRequest request
@@ -95,21 +96,6 @@ public class ProductController {
                 = productCommandService.createVariant(request.toCommand(productId));
 
         return ProductVariantCreateResponse.from(result);
-    }
-
-
-    @Operation(summary = "상품 재고 업데이트", description = "상품 재고를 업데이트합니다.")
-    @ApiResponse(responseCode = "200", description = "수정 성공")
-    @PreAuthorize("hasRole('ADMIN')")
-    @PatchMapping("/variants/{variantId}/stock")
-    public StockUpdateResponse updateStock(
-            @PathVariable Long variantId,
-            @Valid @RequestBody StockUpdateRequest request
-    ) {
-        StockUpdateResult result =
-                productCommandService.updateStock(request.toCommand(variantId));
-
-        return StockUpdateResponse.from(result);
     }
 
 

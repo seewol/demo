@@ -172,14 +172,9 @@ public class ProductCommandService {
         // ★ Option, OptionDetail 은 상품 등록 때 만들어졌다!
 
         // 8. ProductVariant 엔티티 생성 후 저장
-        ProductVariant variant = ProductVariant.builder()
-                .product(product)
-                .optionDetail1(d1)          // 얘넨 연관관계 저장용
-                .optionDetail2(d2)
-                .optionDetail3(d3)
-                .variantName(variantName)   // 화면에 보여주기 위한 문자열
-                .additionalPrice(command.additionalPrice())
-                .build();
+        ProductVariant variant = ProductVariant.from(
+                product, d1, d2, d3, variantName, command.additionalPrice()
+        );
 
         ProductVariant saved = productVariantRepository.save(variant);
 
