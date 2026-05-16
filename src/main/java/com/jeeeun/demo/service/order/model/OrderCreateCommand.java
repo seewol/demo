@@ -8,7 +8,8 @@ import java.util.List;
 public record OrderCreateCommand(
 
         Long userId,
-        List<Long> cartItemIds
+        List<Long> cartItemIds,
+        String impUid   // 포트원 결제 고유번호
 
 ) {
 }

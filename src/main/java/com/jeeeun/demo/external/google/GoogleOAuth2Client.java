@@ -21,6 +21,7 @@ import java.util.Map;
 @Component
 @RequiredArgsConstructor
 public class GoogleOAuth2Client {
+
     private final GoogleAuthProperties googleAuthProperties;
 
     // 구글 OAuth2 토큰 발급하는 URL

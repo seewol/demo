@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 public record OrderCreateResult(
 
         Long orderId,
-        OrderStatus status,     // 주문 상태 (생성 직후에는 PENDING)
+        OrderStatus status,     // 주문 상태 (결제 완료 후 생성되므로 PAID)
         BigDecimal totalPrice,  // 총 주문 금액
         LocalDateTime createdAt  // 주문 생성 시각
 

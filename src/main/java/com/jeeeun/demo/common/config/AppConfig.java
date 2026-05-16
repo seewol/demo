@@ -21,7 +21,9 @@ public class AppConfig {
         // passwordEncoder.matches() 이용해 검증만 가능.
     }
 
+
     // 내가 만든 클래스  → @Component 달면 됨 (Spring이 알아서 Bean 등록)
     // 외부 라이브러리   → @Bean으로 직접 등록해야 함 (내가 직접 객체 만들어서 Spring에게 관리 맡김)
     // 외부 라이브러리 클래스는 @Component 못 달아서 @Bean으로 등록!
+
 }

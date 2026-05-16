@@ -39,12 +39,15 @@ public class Order extends BaseTimeEntity {
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderItem> orderItems = new ArrayList<>();
 
+    @Column(name = "imp_uid")
+    private String impUid;
 
-    public static Order from(User user, BigDecimal totalPrice) {
+    public static Order from(User user, BigDecimal totalPrice, String impUid) {
         Order order = new Order();
         order.user = user;
-        order.status = OrderStatus.PENDING; // 생성 시 기본 값은 '주문 완료'
+        order.status = OrderStatus.PAID; // 포트원 결제 검증 통과 후 생성되므로 PAID
         order.totalPrice = totalPrice;
+        order.impUid = impUid;
         return order;
     }
 

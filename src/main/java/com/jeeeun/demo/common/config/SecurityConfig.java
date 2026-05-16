@@ -14,6 +14,11 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.List;
 
 @EnableMethodSecurity   // 메서드 레벨 보안 어노테이션 활성화 (프로젝트 전체에 적용되는 설정)
 @Configuration          // 설정 클래스임을 Spring에게 알리는 역할 (내부 @Bean 메서드를 읽어 Bean으로 등록해줌)
@@ -31,6 +36,9 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 // CSRF = 타 사이트에서우리 서버로 요청을 위조하는 공격
                 // 브라우저 기반 (세션, 쿠키)일 때 필요 → 난 JWT 방식이라 토큰 인증이라 필요 X (끄기)
+
+                // ▼ CORS 설정
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
 
                 // ▼ 세션 비활성화
                 .sessionManagement(session ->
@@ -78,6 +86,19 @@ public class SecurityConfig {
 
         return httpSecurity.build();
 
+    }
+
+    // CORS 설정 - 로컬 HTML 파일에서 localhost:8080으로 요청 허용
+    private CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration config = new CorsConfiguration();
+        config.setAllowedOrigins(List.of("*"));         // 모든 출처 허용 (테스트용)
+        config.setAllowedMethods(List.of("*"));         // 모든 HTTP 메서드 허용
+        config.setAllowedHeaders(List.of("*"));         // 모든 헤더 허용
+        config.setAllowCredentials(false);                  // * 사용 시 false 필수
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", config);
+        return source;
     }
 
 }
