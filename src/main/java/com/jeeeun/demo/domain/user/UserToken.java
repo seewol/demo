@@ -1,7 +1,6 @@
 package com.jeeeun.demo.domain.user;
 
 import com.jeeeun.demo.common.jpa.BaseTimeEntity;
-import com.jeeeun.demo.controller.request.LocalSignInRequest;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -10,8 +9,7 @@ import java.time.LocalDateTime;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor
-@Builder
+@Table(name = "user_token")
 public class UserToken extends BaseTimeEntity {
 
     @Id
@@ -28,15 +26,17 @@ public class UserToken extends BaseTimeEntity {
     @Column(nullable = false)
     private LocalDateTime expiresAt;
 
+
     // DTO든 엔티티든 상관없이 '객체 생성' 책임을
     // 해당 클래스 안으로 숨기는 게 중요함.
     // from() 은 DTO 전용이 아닌 '생성 패턴'
+
     public static UserToken from(User user, String refreshToken, LocalDateTime expiresAt) {
-        return UserToken.builder()
-                .user(user)
-                .refreshToken(refreshToken)
-                .expiresAt(expiresAt)
-                .build();
+        UserToken token = new UserToken();
+        token.user = user;
+        token.refreshToken = refreshToken;
+        token.expiresAt = expiresAt;
+        return token;
     }
 
 }

@@ -1,17 +1,12 @@
 package com.jeeeun.demo.domain.user;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 // 가입 방식 저장용 테이블
 
-@Builder
 @Getter
-@NoArgsConstructor
-@AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
 @Table(name = "user_credentials",
     uniqueConstraints = @UniqueConstraint(columnNames = {"identifier", "provider"}))
@@ -31,11 +26,6 @@ public class UserCredentials {
     @Column(name = "provider", nullable = false)
     private Provider provider;
 
-    // 구글 로그인 = 구글 고유 ID (identifier와 같은 값)
-    // 일반(로컬) 로그인 = null (필요 없으니까)
-    @Column(name ="provider_id")
-    private String providerId;
-
     // 로그인 식별자
     // 일반(로컬) = 이메일, 구글 = 구글 고유 ID
     @Column(name = "identifier")
@@ -46,4 +36,24 @@ public class UserCredentials {
     @Column(name = "secret")
     private String secret;
 
+
+    // 로컬 로그인용
+    public static UserCredentials ofLocal(User user, String identifier, String secret) {
+        UserCredentials uc = new UserCredentials();
+        uc.user = user;
+        uc.provider = Provider.LOCAL;
+        uc.identifier = identifier;
+        uc.secret = secret;
+        return uc;
+    }
+
+    // 구글 로그인용
+    public static UserCredentials ofGoogle(User user, String googleId) {
+        UserCredentials uc = new UserCredentials();
+        uc.user = user;
+        uc.provider = Provider.GOOGLE;
+        uc.identifier = googleId;
+        uc.secret = null;
+        return uc;
+    }
 }

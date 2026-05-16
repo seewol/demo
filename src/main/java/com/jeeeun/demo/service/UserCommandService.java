@@ -44,21 +44,13 @@ public class UserCommandService {
         try {
             // 1. User 저장 (비밀번호 제외)
             User saved = userRepository.save(
-                    User.builder()
-                            .name(command.name())
-                            .email(command.email())
-                            .phoneNumber(command.phoneNumber())
-                            .build()
+                    User.from(command.name(), command.email(), command.phoneNumber())
             );
 
             // 2. UserCredentials 저장 (비밀번호는 여기!)
             userCredentialsRepository.save(
-                    UserCredentials.builder()
-                            .user(saved)
-                            .provider(Provider.LOCAL)
-                            .identifier(command.email())
-                            .secret(passwordEncoder.encode(command.password()))
-                            .build()
+                UserCredentials.ofLocal(
+                        saved, command.email(), passwordEncoder.encode(command.password()))
             );
 
             // UserCredentials 에는 user_id(FK) 가 필요한데,

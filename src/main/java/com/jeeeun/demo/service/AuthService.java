@@ -69,21 +69,13 @@ public class AuthService {
         } else {
             // todo 3-2 : 가입 X → 새로 회원가입 후 로그인
             // User, UserCredentials 같이 생성
-            user = User.builder()
-                    .email(email)
-                    .name(name)
-                    .build();
-            userRepository.save(user);
+
+            // 구글은 phoneNumber 없어서 null 넘김
+            user = userRepository.save(User.from(name, email, null));
 
             // 구글 로그인은 비밀번호 없음 : secret = null
-            UserCredentials credentials = UserCredentials.builder()
-                    .user(user)
-                    .provider(Provider.GOOGLE)
-                    .identifier(googleId)   // 구글 고유 ID를 identifier 저장
-                    .secret(null)           // 소셜 로그인은 우리 DB에 비밀번호 없음
-                    .build();
+            userCredentialsRepository.save(UserCredentials.ofGoogle(user, googleId));
 
-            userCredentialsRepository.save(credentials);
         }
 
         // todo 4 : JWT 토큰 발급 후 리턴

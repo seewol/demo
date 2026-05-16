@@ -8,11 +8,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Getter
-@Builder
-@AllArgsConstructor
+@Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 // 아무런 매개변수가 없는 생성자를 생성하되 다른 패키지에 소속된 클래스는 접근을 불허
-@Entity
 @Table(name = "cart")
 public class Cart extends BaseTimeEntity {
 
@@ -32,7 +30,6 @@ public class Cart extends BaseTimeEntity {
     // from() 안에서 new Cart() 할 때 = new ArrayList<>() 초기화가 보장되기 때문에
     // 사실상 없어도 되지만 관례상 List 필드에는 붙여두는 게 좋겠다.
 
-    @Builder.Default                                        // 부모 없는 자식 자동 삭제
     @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CartItem> cartItems = new ArrayList<>();
 
@@ -41,7 +38,6 @@ public class Cart extends BaseTimeEntity {
         cart.user = user;
         return cart;
     }
-
 
     // ★
     // Cart는 User와 달리 회원가입 시 서버에서 자동으로 생성된다.
