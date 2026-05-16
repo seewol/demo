@@ -1,11 +1,9 @@
 package com.jeeeun.demo.controller;
 
-import com.jeeeun.demo.controller.request.UserCreateRequest;
 import com.jeeeun.demo.controller.request.UserUpdateRequest;
 import com.jeeeun.demo.controller.response.*;
 import com.jeeeun.demo.service.UserCommandService;
 import com.jeeeun.demo.service.UserQueryService;
-import com.jeeeun.demo.service.user.model.UserCreateResult;
 import com.jeeeun.demo.service.user.model.UserResult;
 import com.jeeeun.demo.service.user.model.UserUpdateResult;
 import io.swagger.v3.oas.annotations.Operation;
@@ -21,13 +19,13 @@ import java.util.List;
 
 @RequiredArgsConstructor // final 붙은 애들만 생성자 만들어 줌.
 @RestController
+@RequestMapping("/users")
 @Tag(name = "UserController", description = "User CRUD API 엔드포인트")
 // API 엔드 포인트 담당
 public class UserController {
 
     private final UserCommandService userCommandService;
     private final UserQueryService userQueryService;
-
 
     /*
         -- 전체 흐름
@@ -36,26 +34,10 @@ public class UserController {
                       [JSON]  ←  [UserResponse DTO]  ←  [User Entity]
      */
 
-
-    // 회원 가입 (C)
-    @Operation(summary = "회원 가입", description = "회원을 등록합니다.")
-    @ApiResponse(responseCode = "201", description = "회원 등록 성공")
-    @ResponseStatus(HttpStatus.CREATED)
-    @PostMapping("/sign-up")
-    public UserCreateResponse signUp(
-            @Valid @RequestBody UserCreateRequest request
-    ) {
-
-        UserCreateResult result = userCommandService.signUp(request.toCommand());
-
-        return UserCreateResponse.from(result);
-    }
-
-
     // 멤버 목록 조회 (R)
     @Operation(summary = "회원 목록 조회", description = "회원 전체 목록을 조회합니다.")
     @ApiResponse(responseCode = "200", description = "조회 성공")
-    @GetMapping("/users")
+    @GetMapping
     public List<UserResponse> getUsers() {
 
         List<UserResult> results = userQueryService.getUsers();
@@ -74,7 +56,7 @@ public class UserController {
     // 토큰에서 userId 꺼내기
     @Operation(summary = "내 정보 조회", description = "회원 정보를 조회합니다.")
     @ApiResponse(responseCode = "200", description = "조회 성공")
-    @GetMapping("/users/me")
+    @GetMapping("/me")
     public UserDetailResponse getUser() {
 
         // SecurityContext 안에서 현재 로그인한 사람의 userId 꺼내기
@@ -90,7 +72,7 @@ public class UserController {
     // 내 정보 수정 (U)
     @Operation(summary = "내 정보 수정", description = "회원 정보를 수정합니다.")
     @ApiResponse(responseCode = "200", description = "수정 성공")
-    @PatchMapping("/users/me")
+    @PatchMapping("/me")
     public UserUpdateResponse updateUser(
             @Valid @RequestBody UserUpdateRequest request
     ) {
@@ -120,7 +102,7 @@ public class UserController {
     // 회원 탈퇴 (D)
     @Operation(summary = "회원 탈퇴", description = "회원을 탈퇴합니다.")
     @ApiResponse(responseCode = "204", description = "회원 탈퇴 성공")
-    @DeleteMapping("/users/me")
+    @DeleteMapping("/me")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteUser(
     ) {

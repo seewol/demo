@@ -4,29 +4,49 @@ import com.jeeeun.demo.common.error.BusinessException;
 import com.jeeeun.demo.common.error.ErrorCode;
 import com.jeeeun.demo.controller.request.GoogleSignInRequest;
 import com.jeeeun.demo.controller.request.LocalSignInRequest;
+import com.jeeeun.demo.controller.request.UserCreateRequest;
 import com.jeeeun.demo.controller.response.SignTokenView;
+import com.jeeeun.demo.controller.response.UserCreateResponse;
 import com.jeeeun.demo.service.AuthService;
+import com.jeeeun.demo.service.UserCommandService;
 import com.jeeeun.demo.service.auth.model.SignTokenResult;
+import com.jeeeun.demo.service.user.model.UserCreateResult;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
 
 @RequiredArgsConstructor
 @RestController
+@RequestMapping("/auth")
 public class AuthController {
 
+    private final UserCommandService userCommandService;
     private final AuthService authService;
 
+    // 회원 가입
+    @Operation(summary = "회원 가입", description = "회원을 등록합니다.")
+    @ApiResponse(responseCode = "201", description = "회원 등록 성공")
+    @ResponseStatus(HttpStatus.CREATED)
+    @PostMapping("/sign-up")
+    public UserCreateResponse signUp(
+            @Valid @RequestBody UserCreateRequest request
+    ) {
+
+        UserCreateResult result = userCommandService.signUp(request.toCommand());
+
+        return UserCreateResponse.from(result);
+    }
+
     @Operation(summary = "로컬 로그인", description = "이메일, 비밀번호로 로그인 후 JWT 발급")
-    @PostMapping("/auth/sign-in")
+    @PostMapping("/sign-in")
     public SignTokenView signIn(
             @Valid @RequestBody LocalSignInRequest request,
             HttpServletResponse response    // 쿠키 쓰려면 필요
@@ -40,7 +60,7 @@ public class AuthController {
 
 
     @Operation(summary = "구글 소셜 로그인", description = "Google OAuth2 access token으로 로그인/회원가입을 처리하고 JWT를 발급")
-    @PostMapping("/auth/sign-in/google")
+    @PostMapping("/sign-in/google")
     public SignTokenView googleSignIn(
             @Valid @RequestBody GoogleSignInRequest request,
             HttpServletResponse response
@@ -67,7 +87,7 @@ public class AuthController {
 
 
     @Operation(summary = "토큰 재발급", description = "Refresh Token 쿠키로 새 Access Token 발급")
-    @PostMapping("/auth/refresh")
+    @PostMapping("/refresh")
     public SignTokenView refresh(HttpServletRequest request) {
 
         Cookie[] cookies = request.getCookies();

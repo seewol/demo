@@ -48,10 +48,7 @@ public class SecurityConfig {
                 // ▼ URL별 접근 권한 설정
                 .authorizeHttpRequests(auth ->
                         auth.requestMatchers(
-                                "/auth/sign-in",    // 로컬 로그인
-                                "/auth/sign-in/**", // 소셜 로그인
-                                "/auth/refresh",    // 토큰 재발급
-                                "/sign-up",         // 회원가입
+                                "/auth/**",         // AuthController 내 모든 엔드포인트 커버
                                 "/swagger-ui/**",   // Swagger UI
                                 "/v3/api-docs/**"   // Swagger API 문서
                             ).permitAll()   // 위 URL 들은 토큰 없어도 접근 가능
