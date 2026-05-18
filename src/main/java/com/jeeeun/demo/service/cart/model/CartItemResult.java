@@ -15,9 +15,10 @@ public record CartItemResult(
         String variantName,
         BigDecimal salePrice,
         BigDecimal discountedPrice,
-        long quantity
+        long quantity,
+        boolean isSoldOut
 ) {
-    public static CartItemResult from(CartItem cartItem) {
+    public static CartItemResult from(CartItem cartItem, boolean isSoldOut) {
 
         Product product = cartItem.getProductVariant().getProduct();
         BigDecimal additionalPrice = cartItem.getProductVariant().getAdditionalPrice();
@@ -52,6 +53,7 @@ public record CartItemResult(
                 .salePrice(product.getSalePrice())
                 .discountedPrice(discountedPrice)
                 .quantity(cartItem.getQuantity())
+                .isSoldOut(isSoldOut)
                 .build();
     }
 }
