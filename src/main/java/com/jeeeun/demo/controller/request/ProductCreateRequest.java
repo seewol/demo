@@ -49,6 +49,10 @@ public record ProductCreateRequest (
     LocalDateTime discountStartAt,
     LocalDateTime discountEndAt,
 
+    // @Min은 null일 경우 검증 스킵
+    @Min(value = 1, message = "최대 구매 수량은 1개 이상이어야 합니다.")
+    Integer maxPurchaseQuantity,
+
     // 이미지 리스트
     @Valid // <---- 추가 (아래 중첩 레코드 있는 경우에)
     @NotEmpty
@@ -72,6 +76,7 @@ public record ProductCreateRequest (
                 .discountRate(discountRate)
                 .discountStartAt(discountStartAt)
                 .discountEndAt(discountEndAt)
+                .maxPurchaseQuantity(maxPurchaseQuantity)
                 .images(images.stream()
                         .map(image -> ProductCreateCommand.ProductImageCommand.builder()
                                 .imageUrl(image.imageUrl()) // record 라 image.imageUrl()

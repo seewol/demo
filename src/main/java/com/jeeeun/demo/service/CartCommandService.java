@@ -2,6 +2,7 @@ package com.jeeeun.demo.service;
 
 import com.jeeeun.demo.common.error.BusinessException;
 import com.jeeeun.demo.common.error.ErrorCode;
+import com.jeeeun.demo.domain.product.Product;
 import com.jeeeun.demo.domain.product.ProductStock;
 import com.jeeeun.demo.domain.product.ProductVariant;
 import com.jeeeun.demo.domain.user.Cart;
@@ -56,15 +57,19 @@ public class CartCommandService {
         CartItem cartItem = cartItemRepository.findByCartAndProductVariant(cart, variant)
                 .orElseGet(() -> CartItem.from(cart, variant, 0L)); // long quantity
 
-        // ★ 4-1 : 카트에 담긴 기존 수량 + 신규 추가 수량이 재고를 초과 → 예외 처리
-        long totalQuantity = cartItem.getQuantity() + command.quantity();
-        // note : 신규 추가 수량보다 재고가 적어도 함께 걸러짐 → (0 + 신규 추가 수량) > 재고
-        if (totalQuantity > stock.getQuantity()) {
+        // ★ 4-1 : 1인당 최대 구매 수량 검증 + 수량 추가
+        // Product에 maxPurchaseQuantity 설정되어 있으면, 그 값까지만 허용
+        // null이면, 제한 없음 (addQuantity 내부에서 검증 스킵)
+        Product product = variant.getProduct();
+
+        cartItem.addQuantity(command.quantity(), product.getMaxPurchaseQuantity());
+
+        // ★ 4-2 : 카트에 담긴 총 수량의 재고 초과 여부 확인
+        // 구매 제한 검증, 재고 검증은 별개!
+        // ex) maxPurchaseQuantity = 5, 재고 = 3 → 재고 부족으로 막혀야 함.
+        if (cartItem.getQuantity() > stock.getQuantity()) {
             throw new BusinessException(ErrorCode.OUT_OF_STOCK);
         }
-
-        // ★ 5 : 수량 업데이트 (기존 수량 + 새로 추가하는 수량)
-        cartItem.updateQuantity(cartItem.getQuantity() + command.quantity());
 
         cartItemRepository.save(cartItem);
 
@@ -90,13 +95,15 @@ public class CartCommandService {
                         cartItem.getProductVariant().getId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.OUT_OF_STOCK));
 
-        // ★ 4 : 변경하려는 수량이 재고를 초과하는지 확인
+        // ★ 4 : 1인당 최대 구매 수량 검증 + 수량 변경
+        Product product = cartItem.getProductVariant().getProduct();
+
+        cartItem.updateQuantity(command.quantity(), product.getMaxPurchaseQuantity());
+
+        // ★ 4-1 : 변경하려는 수량의 재고 초과 여부 확인
         if (command.quantity() > stock.getQuantity()) {
             throw new BusinessException(ErrorCode.OUT_OF_STOCK);
         }
-
-        // ★ 5 : 수량 변경
-        cartItem.updateQuantity(command.quantity());
 
         return CartItemUpdateResult.from(cartItem);
     }
