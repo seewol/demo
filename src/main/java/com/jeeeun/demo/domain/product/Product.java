@@ -62,13 +62,10 @@ public class Product extends BaseTimeEntity {
     @Column(name = "discount_end_at")
     private LocalDateTime discountEndAt;
 
-//    @CreatedDate
-//    @Column(name = "created_at", nullable = false, updatable = false)
-//    private LocalDateTime createdAt;
-//
-//    @LastModifiedDate
-//    @Column(name = "updated_at", nullable = false)
-//    private LocalDateTime updatedAt;
+    // 1인당 최대 구매 수량 (null → 제한 없음)
+    // ex) exclusive 상품 → maxPurchaseQuantity = 1
+    @Column(name = "max_purchase_quantity")
+    private Integer maxPurchaseQuantity;
 
     @Builder.Default
     @Column(name = "is_deleted", nullable = false)
@@ -89,6 +86,5 @@ public class Product extends BaseTimeEntity {
     @Builder.Default
     @OneToMany(mappedBy = "product")
     private List<ProductVariant> productVariants = new ArrayList<>();
-
 
 }

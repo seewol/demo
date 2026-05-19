@@ -16,6 +16,7 @@ public record ProductCreateCommand(
     Integer discountRate,
     LocalDateTime discountStartAt,
     LocalDateTime discountEndAt,
+    Integer maxPurchaseQuantity,
 
     // Request → Command 변환 시 매핑(map) 해 주면 됨!
     List<ProductImageCommand> images,

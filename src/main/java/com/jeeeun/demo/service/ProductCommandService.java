@@ -59,6 +59,7 @@ public class ProductCommandService {
                 .discountRate(command.discountRate())
                 .discountStartAt(command.discountStartAt())
                 .discountEndAt(command.discountEndAt())
+                .maxPurchaseQuantity(command.maxPurchaseQuantity())
                 .isDeleted(false)
                 .build();
 

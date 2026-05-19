@@ -55,6 +55,7 @@ public enum ErrorCode {
     // 장바구니
     NOT_FOUND_CART(HttpStatus.NOT_FOUND, "장바구니가 존재하지 않습니다."),
     NOT_FOUND_CART_ITEM(HttpStatus.NOT_FOUND, "장바구니에 존재하지 않는 상품입니다."),
+    EXCEEDED_PURCHASE_LIMIT(HttpStatus.BAD_REQUEST, "1인당 최대 구매 수량을 초과했습니다."),
 
     FORBIDDEN(HttpStatus.FORBIDDEN, "접근 권한이 없습니다.");
 
