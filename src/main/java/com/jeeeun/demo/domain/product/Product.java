@@ -1,9 +1,12 @@
 package com.jeeeun.demo.domain.product;
 
+import com.jeeeun.demo.common.error.BusinessException;
+import com.jeeeun.demo.common.error.ErrorCode;
 import com.jeeeun.demo.common.jpa.BaseTimeEntity;
 import com.jeeeun.demo.domain.user.User;
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.security.core.parameters.P;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -87,4 +90,118 @@ public class Product extends BaseTimeEntity {
     @OneToMany(mappedBy = "product")
     private List<ProductVariant> productVariants = new ArrayList<>();
 
+
+    // ★ 상품 기본 정보 수정 (비즈니스 규칙 3가지 검증)
+    public void updateProduct(
+            Category category,
+            String name,
+            String description,
+            BigDecimal salePrice,
+            Boolean isDiscounted,
+            Integer discountRate,
+            LocalDateTime discountStartAt,
+            LocalDateTime discountEndAt,
+            Integer maxPurchaseQuantity
+    ) {
+        // ★ 1: 삭제된 상품 수정 불가
+        if (this.isDeleted) {
+            throw new BusinessException(ErrorCode.ALREADY_DELETED_PRODUCT);
+        }
+
+        // null 아닌 필드만 수정 (PATCH 방식)
+        if (category != null) {
+            this.category = category;
+        }
+        if (name != null) {
+            this.name = name;
+        }
+        if (description != null) {
+            this.description = description;
+        }
+        if (salePrice != null) {
+            this.salePrice = salePrice;
+        }
+        if (maxPurchaseQuantity != null) {
+            this.maxPurchaseQuantity = maxPurchaseQuantity;
+        }
+
+        // ★ 할인 관련 필드는 묶어서 처리
+        // 일단 isDiscounted가 넘어왔으면 할인 상태 변경할 의도가 있는 것
+        if (isDiscounted != null) {
+            this.isDiscounted = isDiscounted;
+
+            if (isDiscounted) {
+
+                // ★ 2: 할인 적용 시 '할인율' 필수
+                Integer finalRate = (discountRate != null) ? discountRate : this.discountRate;
+                if (finalRate == null) {
+                    throw new BusinessException(ErrorCode.INVALID_DISCOUNT_RATE);
+                }
+                this.discountRate = finalRate;
+
+                // ★ 3: 할인 적용 시 '할인 기간' 필수
+                LocalDateTime finalStart = (discountStartAt != null) ? discountStartAt : this.discountStartAt;
+                LocalDateTime finalEnd = (discountEndAt != null) ? discountEndAt : this.discountEndAt;
+                if (finalStart == null || finalEnd == null) {
+                    throw new BusinessException(ErrorCode.INVALID_DISCOUNT_PERIOD);
+                }
+                // 종료일이 시작일보다 이전일 경우 예외
+                if (finalStart.isAfter(finalEnd)) {
+                    throw new BusinessException(ErrorCode.INVALID_DISCOUNT_PERIOD);
+                }
+                this.discountStartAt = finalStart;
+                this.discountEndAt = finalEnd;
+
+            } else {
+
+                // 할인 해제 (isDiscounted = false)
+                // 할인 관련 필드 모두 초기화
+                this.discountRate = null;
+                this.discountStartAt = null;
+                this.discountEndAt = null;
+
+            }
+
+        } else {
+            // isDiscounted 안 보낸 경우 → 할인율 / 기간만 개별적으로 수정 가능
+            if (discountRate != null) {
+                this.discountRate = discountRate;
+            }
+            if (discountStartAt != null) {
+                this.discountStartAt = discountStartAt;
+            }
+            if (discountEndAt != null) {
+                this.discountEndAt = discountEndAt;
+            }
+        }
+
+    }
+
+
+    // ★ 상품 삭제 (soft delete)
+    public void delete() {
+        // 이미 삭제됐으면 예외, 아니면 삭제
+        if (this.isDeleted) {
+            throw new BusinessException(ErrorCode.ALREADY_DELETED_PRODUCT);
+        }
+        this.isDeleted = true;
+    }
+
+
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

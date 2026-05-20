@@ -1,9 +1,11 @@
 package com.jeeeun.demo.controller;
 
 import com.jeeeun.demo.controller.request.ProductCreateRequest;
+import com.jeeeun.demo.controller.request.ProductUpdateRequest;
 import com.jeeeun.demo.controller.request.ProductVariantCreateRequest;
 import com.jeeeun.demo.controller.request.StockUpdateRequest;
 import com.jeeeun.demo.controller.response.*;
+import com.jeeeun.demo.repository.product.ProductRepository;
 import com.jeeeun.demo.service.ProductCommandService;
 import com.jeeeun.demo.service.ProductQueryService;
 import com.jeeeun.demo.service.product.model.*;
@@ -33,6 +35,7 @@ public class ProductController {
 
     private final ProductCommandService productCommandService;
     private final ProductQueryService productQueryService;
+    private final ProductRepository productRepository;
 
     // responseCode
     // 200 : 요청 성공, 201 : 서버에 새로운 리소스 생성 성공
@@ -41,7 +44,7 @@ public class ProductController {
     // 상품 등록 (C)
     @Operation(summary = "상품 등록", description = "상품을 등록합니다.")
     @ApiResponse(responseCode = "201", description = "상품 등록 성공")
-    @ResponseStatus(HttpStatus.CREATED)
+    @ResponseStatus(HttpStatus.CREATED) // 응답코드 명시적으로 바꿈
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public ProductCreateResponse createProduct(
@@ -77,6 +80,32 @@ public class ProductController {
         ProductDetailResult result  = productQueryService.getProductDetail(productId);
 
         return ProductDetailResponse.from(result);
+    }
+
+
+    // 상품 수정 (U)
+    // 수정된 내용은 상품 재조회로 확인하면 됨
+    @Operation(summary = "상품 수정", description = "상품 기본 정보를 수정합니다.")
+    @ApiResponse(responseCode = "200", description = "수정 성공")
+    @PreAuthorize("hasRole('ADMIN')")
+    @PatchMapping("/{productId}")   // 전체 교체 아닌 부분 수정이라 PUT 말고 PATCH
+    public void updateProduct(
+            @PathVariable Long productId,
+            @Valid @RequestBody ProductUpdateRequest request
+    ) {
+        productCommandService.updateProduct(request.toCommand(productId));
+    }
+
+
+    // 상품 삭제 (D)
+    @Operation(summary = "상품 삭제", description = "상품을 삭제합니다. (soft delete)")
+    @ApiResponse(responseCode = "200", description = "삭제 성공")
+    @PreAuthorize("hasRole('ADMIN')")
+    @DeleteMapping("/{productId}")
+    public void deleteProduct(
+            @PathVariable Long productId
+    ) {
+        productCommandService.deleteProduct(productId);
     }
 
 

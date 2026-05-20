@@ -23,6 +23,7 @@ public enum ErrorCode {
     // 상품
     CONFLICT_PRODUCT(HttpStatus.CONFLICT, "중복된 상품명입니다."),
     NOT_FOUND_PRODUCT(HttpStatus.NOT_FOUND, "등록되지 않은 상품입니다."),
+    ALREADY_DELETED_PRODUCT(HttpStatus.BAD_REQUEST, "이미 삭제된 상품입니다."),
 
     // 상품 이미지
     NOT_FOUND_PRODUCT_IMAGE(HttpStatus.NOT_FOUND, "존재하지 않는 이미지입니다."),
