@@ -99,6 +99,59 @@ public class ProductCommandService {
     }
 
 
+    // 상품 수정에 대한 api
+    @Transactional
+    public void updateProduct(ProductUpdateCommand command) {
+
+        // 1. 상품 조회
+        Product product = productRepository.findById(command.productId())
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_PRODUCT));
+
+        // 2. 카테고리 변경 요청 있을 시, 카테고리 조회
+        // categoryId가 null이면 변경 없음 → null 그대로 넘겨 기존 값 유지
+        Category category = null;
+        if (command.categoryId() != null) {
+            category = categoryRepository.findById(command.categoryId())
+                    .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_CATEGORY));
+        }
+
+        // 3. 도메인 메소드 호출
+        // 왜냐! 비즈니스 규칙 검증은 도메인인 Product가 담당하니까!
+        product.updateProduct(
+                category,
+                command.name(),
+                command.description(),
+                command.salePrice(),
+                command.isDiscounted(),
+                command.discountRate(),
+                command.discountStartAt(),
+                command.discountEndAt(),
+                command.maxPurchaseQuantity()
+        );
+
+        // NOTE : save() 호출 안 하는 이유
+        // @Transactional 안에서 JPA가 관리하는 엔티티 필드가 변경되면
+        // 트랜잭션 커밋 시점에 자동으로 UPDATE 쿼리가 날아감 (*더티 체킹)
+        // 그래서 명시적으로 repository.save() 호출할 필요가 없음
+
+    }
+
+
+    // 상품 삭제에 대한 api
+    @Transactional
+    public void deleteProduct(Long productId) {
+
+        // 1. 상품 조회
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_PRODUCT));
+
+        // 2. 도메인 메서드 호출
+        product.delete();
+
+        // updateProduct()처럼 더티 체킹으로 isDeleted = true 자동 반영
+    }
+
+
     // variants 등록에 대한 api
     @Transactional
     public ProductVariantCreateResult createVariant(ProductVariantCreateCommand command) {
