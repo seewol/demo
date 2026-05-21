@@ -21,7 +21,7 @@ public record ProductCreateResponse (
 
     public static ProductCreateResponse from(ProductCreateResult result) {
         return ProductCreateResponse.builder()
-                .id(result.id())
+                .id(result.productId())
                 .categoryId(result.categoryId())
                 .name(result.name())
                 .salePrice(result.salePrice())

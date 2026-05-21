@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 
 @Builder
 public record ProductCreateResult(
-        Long id,
+        Long productId,
         Long categoryId,
         String name,
         String description,
@@ -19,7 +19,7 @@ public record ProductCreateResult(
 ) {
     public static ProductCreateResult from(Product product) {
         return ProductCreateResult.builder()
-                .id(product.getId())
+                .productId(product.getId())
                 .categoryId(product.getCategory().getId())
                 .name(product.getName())
                 .description(product.getDescription())

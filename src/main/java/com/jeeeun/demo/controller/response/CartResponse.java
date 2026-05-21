@@ -8,12 +8,12 @@ import java.util.List;
 
 @Builder
 public record CartResponse(
-    Long cartId,
+    Long id,
     List<CartItemResult> items
 ) {
     public static CartResponse from(CartResult result) {
         return CartResponse.builder()
-                .cartId(result.cartId())
+                .id(result.cartId())
                 .items(result.items())
                 .build();
     }

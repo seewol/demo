@@ -8,14 +8,14 @@ import java.time.LocalDateTime;
 @Builder
 public record OrderCancelResponse(
 
-        Long orderId,
+        Long id,
         String status,  // CANCELLED 고정
         LocalDateTime updatedAt
 
 ) {
     public static OrderCancelResponse from(OrderCancelResult result) {
         return OrderCancelResponse.builder()
-                .orderId(result.orderId())
+                .id(result.orderId())
                 .status(result.status())
                 .updatedAt(result.updatedAt())
                 .build();

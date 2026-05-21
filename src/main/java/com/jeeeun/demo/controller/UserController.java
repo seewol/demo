@@ -35,7 +35,7 @@ public class UserController {
      */
 
     // 멤버 목록 조회 (R)
-    @Operation(summary = "회원 목록 조회", description = "회원 전체 목록을 조회합니다.")
+    @Operation(summary = "회원 목록 조회")
     @ApiResponse(responseCode = "200", description = "조회 성공")
     @GetMapping
     public List<UserResponse> getUsers() {
@@ -54,7 +54,7 @@ public class UserController {
 
     // 내 정보 조회 (회원 상세 조회) (R)
     // 토큰에서 userId 꺼내기
-    @Operation(summary = "내 정보 조회", description = "회원 정보를 조회합니다.")
+    @Operation(summary = "내 정보 조회")
     @ApiResponse(responseCode = "200", description = "조회 성공")
     @GetMapping("/me")
     public UserDetailResponse getUser() {
@@ -70,7 +70,7 @@ public class UserController {
 
 
     // 내 정보 수정 (U)
-    @Operation(summary = "내 정보 수정", description = "회원 정보를 수정합니다.")
+    @Operation(summary = "내 정보 수정")
     @ApiResponse(responseCode = "200", description = "수정 성공")
     @PatchMapping("/me")
     public UserUpdateResponse updateUser(
@@ -100,7 +100,7 @@ public class UserController {
      */
 
     // 회원 탈퇴 (D)
-    @Operation(summary = "회원 탈퇴", description = "회원을 탈퇴합니다.")
+    @Operation(summary = "회원 탈퇴")
     @ApiResponse(responseCode = "204", description = "회원 탈퇴 성공")
     @DeleteMapping("/me")
     @ResponseStatus(HttpStatus.NO_CONTENT)

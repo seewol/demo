@@ -5,13 +5,13 @@ import lombok.Builder;
 
 @Builder
 public record CartItemCreateResponse(
-        Long cartItemId,
+        Long id,
         Long variantId,
         long quantity
 ) {
     public static CartItemCreateResponse from(CartItemCreateResult result) {
         return CartItemCreateResponse.builder()
-                .cartItemId(result.cartItemId())
+                .id(result.cartItemId())
                 .variantId(result.variantId())
                 .quantity(result.quantity())
                 .build();

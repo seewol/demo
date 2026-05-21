@@ -5,7 +5,7 @@ import lombok.Builder;
 @Builder
 public record UserUpdateCommand(
 
-        Long id,
+        Long userId,
         String name,
         String phoneNumber
 

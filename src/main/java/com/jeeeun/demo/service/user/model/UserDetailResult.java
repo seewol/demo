@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 
 @Builder
 public record UserDetailResult(
-        Long id,
+        Long userId,
         String name,
         String email,
         String phoneNumber,
@@ -25,7 +25,7 @@ public record UserDetailResult(
     // 상품 요약을 제외한 내 정보 조회
     public static UserDetailResult from(User user) {
         return UserDetailResult.builder()
-                .id(user.getId())
+                .userId(user.getId())
                 .name(user.getName())
                 .email(user.getEmail())
                 .phoneNumber(user.getPhoneNumber())
@@ -40,7 +40,7 @@ public record UserDetailResult(
 //    public static UserDetailResult from(
 //            User user, ProductSummaryResult productSummaryResult) {
 //        return UserDetailResult.builder()
-//                .id(user.getId())
+//                .userId(user.getId())
 //                .name(user.getName())
 //                .email(user.getEmail())
 //                .phoneNumber(user.getPhoneNumber())

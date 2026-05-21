@@ -36,7 +36,7 @@ public class OrderController {
     private final OrderRepository orderRepository;
 
     // ★ 주문 생성 (C)
-    @Operation(description = "주문 생성")
+    @Operation(summary = "주문 생성")
     @ApiResponse(responseCode = "201", description = "주문 생성 성공")
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
@@ -55,7 +55,7 @@ public class OrderController {
 
     // ★ 내 주문 목록 조회
     // GET /orders
-    @Operation(description = "주문 목록 조회")
+    @Operation(summary = "주문 목록 조회")
     @ApiResponse(responseCode = "200", description = "주문 목록 조회 성공")
     @GetMapping
     public Page<OrderResponse> getOrders(
@@ -72,7 +72,7 @@ public class OrderController {
 
     // ★ 내 주문 상세 조회
     // GET /orders/{orderId}
-    @Operation(description = "주문 상세 조회")
+    @Operation(summary = "주문 상세 조회")
     @ApiResponse(responseCode = "200", description = "주문 상세 조회 성공")
     @GetMapping("/{orderId}")
     public OrderDetailResponse getOrder(

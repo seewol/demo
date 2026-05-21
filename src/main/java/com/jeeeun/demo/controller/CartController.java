@@ -27,7 +27,7 @@ public class CartController {
     private final CartCommandService cartCommandService;
     private final CartQueryService cartQueryService;
 
-    @Operation(description = "장바구니 아이템 추가")
+    @Operation(summary = "장바구니 아이템 추가")
     @ApiResponse(responseCode = "201", description = "추가 성공")
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/items")
@@ -43,7 +43,7 @@ public class CartController {
         return CartItemCreateResponse.from(result);
     }
 
-    @Operation(description = "장바구니 아이템 수량 변경")
+    @Operation(summary = "장바구니 아이템 수량 변경")
     @ApiResponse(responseCode = "200", description = "수량 변경 성공")
     @PatchMapping("/items/{cartItemId}")
     public CartItemUpdateResponse updateCartItemQuantity(
@@ -60,7 +60,7 @@ public class CartController {
         return CartItemUpdateResponse.from(result);
     }
 
-    @Operation(description = "내 장바구니 조회")
+    @Operation(summary = "내 장바구니 조회")
     @ApiResponse(responseCode = "200", description = "조회 성공")
     @GetMapping
     public CartResponse getCart() {
@@ -72,7 +72,7 @@ public class CartController {
         return CartResponse.from(cartQueryService.getCart(userId));
     }
 
-    @Operation(description = "장바구니 아이템 삭제")
+    @Operation(summary = "장바구니 아이템 삭제")
     @ApiResponse(responseCode = "200", description = "삭제 성공")
     @DeleteMapping("/items/{cartItemId}")
     public void deleteCartItem(

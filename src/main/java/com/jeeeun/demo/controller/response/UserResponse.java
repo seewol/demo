@@ -20,7 +20,7 @@ public record UserResponse(
     // Result → Response 변환은 Response 에서 static from(Result) 로 처리
     public static UserResponse from(UserResult result) {
         return UserResponse.builder()
-                .id(result.id())
+                .id(result.userId())
                 .name(result.name())
                 .email(result.email())
                 .phoneNumber(result.phoneNumber())

@@ -11,7 +11,7 @@ import java.util.List;
 @Builder
 public record OrderDetailResponse(
 
-        Long orderId,
+        Long id,
         OrderStatus orderStatus,
         BigDecimal totalPrice,
         LocalDateTime createdAt,
@@ -31,7 +31,7 @@ public record OrderDetailResponse(
 
     public static OrderDetailResponse from(OrderDetailResult result) {
         return OrderDetailResponse.builder()
-                .orderId(result.orderId())
+                .id(result.orderId())
                 .orderStatus(result.orderStatus())
                 .totalPrice(result.totalPrice())
                 .createdAt(result.createdAt())

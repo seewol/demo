@@ -20,7 +20,7 @@ public class VariantController {
 
     private final ProductCommandService productCommandService;
 
-    @Operation(summary = "상품 재고 업데이트", description = "상품 재고를 업데이트합니다.")
+    @Operation(summary = "상품 재고 업데이트")
     @ApiResponse(responseCode = "200", description = "수정 성공")
     @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/{variantId}/stock")

@@ -14,7 +14,7 @@ import java.util.Map;
 
 @Builder
 public record ProductDetailResult(
-    Long id,
+    Long productId,
     Long categoryId,
     String name,
     String description,
@@ -36,7 +36,7 @@ public record ProductDetailResult(
             Map<Long, List<ProductOptionDetail>> detailMap) {
 
         return ProductDetailResult.builder()
-                .id(product.getId())
+                .productId(product.getId())
                 .categoryId(product.getCategory().getId())
                 .name(product.getName())
                 .description(product.getDescription())
@@ -49,7 +49,7 @@ public record ProductDetailResult(
                         images.stream()
                                 .sorted(Comparator.comparing(ProductImage::getImageOrder))
                                 .map(img -> ProductImageResult.builder()
-                                        .id(img.getId())
+                                        .imageId(img.getId())
                                         .imageUrl(img.getImageUrl())
                                         .imageOrder(img.getImageOrder())
                                         .build())
@@ -59,12 +59,12 @@ public record ProductDetailResult(
                         product.getProductOptions().stream()
                                 .sorted(Comparator.comparing(ProductOption::getId))
                                 .map(opt -> ProductOptionResult.builder()
-                                        .id(opt.getId())
+                                        .optionId(opt.getId())
                                         .optionName(opt.getName())
                                         .optionDetails(          // 옵션 하나의 id와 그에 해당하는 detail 리스트 꺼내. 없으면 List.of()로 빈 리스트 줘.
                                                 detailMap.getOrDefault(opt.getId(), List.of()).stream()
                                                         .map(detail -> ProductOptionDetailResult.builder()
-                                                                .id(detail.getId())
+                                                                .optionDetailId(detail.getId())
                                                                 .description(detail.getDescription())
                                                                 .build())
                                                         .toList()

@@ -17,7 +17,7 @@ public record UserUpdateResponse(
 
     public static UserUpdateResponse from(UserUpdateResult result) {
         return UserUpdateResponse.builder()
-                .id(result.id())
+                .id(result.userId())
                 .email(result.email())
                 .name(result.name())
                 .phoneNumber(result.phoneNumber())
