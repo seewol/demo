@@ -4,7 +4,7 @@ import lombok.Builder;
 
 @Builder
 public record ProductOptionDetailResult(
-    Long id,
+    Long optionDetailId,
     String description
 ) {
 }

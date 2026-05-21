@@ -43,7 +43,7 @@ public record ProductDetailResponse (
 
     public static ProductDetailResponse from(ProductDetailResult result) {
         return ProductDetailResponse.builder()
-                .id(result.id())
+                .id(result.productId())
                 .categoryId(result.categoryId())
                 .name(result.name())
                 .description(result.description())
@@ -55,7 +55,7 @@ public record ProductDetailResponse (
                 .images(
                         result.images().stream()
                                 .map(img -> ProductImageResponse.builder()
-                                        .id(img.id())
+                                        .id(img.imageId())
                                         .imageUrl(img.imageUrl())
                                         .imageOrder(img.imageOrder())
                                         .build())
@@ -64,7 +64,7 @@ public record ProductDetailResponse (
                 .options(
                         result.options().stream()
                                 .map(opt -> ProductOptionResponse.builder()
-                                        .id(opt.id())
+                                        .id(opt.optionId())
                                         .optionName(opt.optionName())
                                         .optionDetails(
                                                 opt.optionDetails().stream()

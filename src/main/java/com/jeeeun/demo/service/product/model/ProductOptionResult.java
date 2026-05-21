@@ -6,7 +6,7 @@ import java.util.List;
 
 @Builder
 public record ProductOptionResult(
-    Long id,
+    Long optionId,
     String optionName,
     List<ProductOptionDetailResult> optionDetails
 ) {

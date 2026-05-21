@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 
 @Builder
 public record UserCreateResult(
-    Long id,
+    Long userId,
     String name,
     String email,
     String phoneNumber,
@@ -17,7 +17,7 @@ public record UserCreateResult(
 ) {
     public static UserCreateResult from(User User) {
         return UserCreateResult.builder()
-                .id(User.getId())
+                .userId(User.getId())
                 .name(User.getName())
                 .email(User.getEmail())
                 .phoneNumber(User.getPhoneNumber())

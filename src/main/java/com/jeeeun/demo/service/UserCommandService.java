@@ -71,7 +71,7 @@ public class UserCommandService {
     public UserUpdateResult updateUser(UserUpdateCommand command) {
 
         // 1) 수정 대상 조회
-        User updated = userRepository.findByIdAndIsDeletedFalse(command.id())
+        User updated = userRepository.findByIdAndIsDeletedFalse(command.userId())
                 .orElseThrow( () -> new BusinessException(ErrorCode.NOT_FOUND_USER));
 
         // 2) phoneNumber 수정 (Request.toCommand()에서 정규화/검증 완료)

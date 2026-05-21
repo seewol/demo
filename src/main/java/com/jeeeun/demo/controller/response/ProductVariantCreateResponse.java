@@ -17,7 +17,7 @@ public record ProductVariantCreateResponse(
         // 필드가 적을 때는 굳이 Builder 안 쓰기도 함
         // 외려, 생성자 호출이 가장 명확!
         return new ProductVariantCreateResponse(
-                result.id(),
+                result.variantId(),
                 result.variantName(),
                 result.additionalPrice()
         );

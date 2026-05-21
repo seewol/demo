@@ -37,7 +37,7 @@ public record UserDetailResponse(
 //        ProductSummaryResult ps = result.productSummary();
 
         return UserDetailResponse.builder()
-                .id(result.id())
+                .id(result.userId())
                 .name(result.name())
                 .email(result.email())
                 .phoneNumber(result.phoneNumber())

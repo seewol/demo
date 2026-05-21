@@ -42,7 +42,7 @@ public class ProductController {
 
 
     // 상품 등록 (C)
-    @Operation(summary = "상품 등록", description = "상품을 등록합니다.")
+    @Operation(summary = "상품 등록")
     @ApiResponse(responseCode = "201", description = "상품 등록 성공")
     @ResponseStatus(HttpStatus.CREATED) // 응답코드 명시적으로 바꿈
     @PreAuthorize("hasRole('ADMIN')")
@@ -55,7 +55,7 @@ public class ProductController {
 
 
     // 상품 목록 조회 (R)
-    @Operation(summary = "상품 목록 조회", description = "상품 정보를 조회합니다.")
+    @Operation(summary = "상품 목록 조회")
     @ApiResponse(responseCode = "200", description = "조회 성공")
     @GetMapping
     public Page<ProductResponse> getProducts(
@@ -71,7 +71,7 @@ public class ProductController {
 
 
     // 단일 상품 조회 (상품 상세 조회)
-    @Operation(summary = "단일 상품 조회", description = "상품 상세 정보를 조회합니다.")
+    @Operation(summary = "단일 상품 조회")
     @ApiResponse(responseCode = "200", description = "조회 성공")
     @GetMapping("/{productId}")
     public ProductDetailResponse getProduct(
@@ -85,7 +85,7 @@ public class ProductController {
 
     // 상품 수정 (U)
     // 수정된 내용은 상품 재조회로 확인하면 됨
-    @Operation(summary = "상품 수정", description = "상품 기본 정보를 수정합니다.")
+    @Operation(summary = "상품 수정")
     @ApiResponse(responseCode = "200", description = "수정 성공")
     @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/{productId}")   // 전체 교체 아닌 부분 수정이라 PUT 말고 PATCH
@@ -98,7 +98,7 @@ public class ProductController {
 
 
     // 상품 삭제 (D)
-    @Operation(summary = "상품 삭제", description = "상품을 삭제합니다. (soft delete)")
+    @Operation(summary = "상품 삭제", description = "soft delete로 처리됩니다.")
     @ApiResponse(responseCode = "200", description = "삭제 성공")
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{productId}")
@@ -110,7 +110,7 @@ public class ProductController {
 
 
     // 상품 조합 등록 (C)
-    @Operation(summary = "상품 조합 등록", description = "상품 조합을 등록합니다.")
+    @Operation(summary = "상품 조합 등록")
     @ApiResponse(responseCode = "201", description = "등록 성공")
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("hasRole('ADMIN')")

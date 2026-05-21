@@ -32,7 +32,7 @@ public class AuthController {
     private final AuthService authService;
 
     // 회원 가입
-    @Operation(summary = "회원 가입", description = "회원을 등록합니다.")
+    @Operation(summary = "회원 가입")
     @ApiResponse(responseCode = "201", description = "회원 등록 성공")
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/sign-up")

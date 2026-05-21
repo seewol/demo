@@ -33,7 +33,7 @@ public record UserUpdateRequest(
         }
 
         return UserUpdateCommand.builder()
-                .id(userId)
+                .userId(userId)
                 .name(name)
                 .phoneNumber(normalizedPhone)
                 .build();
