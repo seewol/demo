@@ -1,5 +1,6 @@
 package com.jeeeun.demo.controller;
 
+import com.jeeeun.demo.controller.request.DirectOrderCreateRequest;
 import com.jeeeun.demo.controller.request.OrderCreateRequest;
 import com.jeeeun.demo.controller.response.OrderCancelResponse;
 import com.jeeeun.demo.controller.response.OrderCreateResponse;
@@ -21,6 +22,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -35,7 +37,7 @@ public class OrderController {
     private final OrderQueryService orderQueryService;
     private final OrderRepository orderRepository;
 
-    // ★ 주문 생성 (C)
+    // ★ 주문 생성 - 장바구니 (C)
     @Operation(summary = "주문 생성")
     @ApiResponse(responseCode = "201", description = "주문 생성 성공")
     @ResponseStatus(HttpStatus.CREATED)
@@ -48,6 +50,26 @@ public class OrderController {
                 .getPrincipal();
 
         OrderCreateResult result = orderCommandService.createOrder(request.toCommand(userId));
+
+        return OrderCreateResponse.from(result);
+    }
+
+
+    // ★ 주문 생성 - 바로구매 (C)
+    @Operation(summary = "바로구매", description = "장바구니 거치지 않는 주문입니다.")
+    @ApiResponse(responseCode = "201", description = "바로구매 성공")
+    @ResponseStatus(HttpStatus.CREATED)
+    @PostMapping("/direct")
+    public OrderCreateResponse createDirectOrder(
+            @Valid @RequestBody DirectOrderCreateRequest request
+    ) {
+        Long userId = (Long) SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getPrincipal();
+
+        OrderCreateResult result = orderCommandService.createDirectOrder(
+                request.toCommand(userId));
 
         return OrderCreateResponse.from(result);
     }
