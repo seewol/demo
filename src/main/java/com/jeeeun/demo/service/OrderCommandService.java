@@ -77,6 +77,13 @@ public class OrderCommandService {
 
             for (CartItem cartItem : cartItems) {
 
+                // 삭제된 상품인지 확인 (장바구니에 담은 후 삭제됐을 수 있음!)
+                Product cartProduct = cartItem.getProductVariant().getProduct();
+
+                if (cartProduct.isDeleted()) {
+                    throw new BusinessException(ErrorCode.ALREADY_DELETED_PRODUCT);
+                }
+
                 // 해당 cartItem의 variant 재고 조회 (차감은 재고 검증 이후 6번에서!)
                 ProductStock stock = productStockRepository
                         .findByProductVariant_Id(cartItem.getProductVariant().getId())
