@@ -43,7 +43,7 @@ public class OrderCommandService {
 
     // 주문 생성 (장바구니)
     @Transactional
-    public OrderCreateResult createOrder(@NonNull OrderCreateCommand command) {
+    public OrderCreateResult createOrder(OrderCreateCommand command) {
 
         // ★ 1 : 포트원 결제 검증
         PortOnePaymentResponse.PortOnePaymentBody payment =

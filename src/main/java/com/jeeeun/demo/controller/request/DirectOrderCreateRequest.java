@@ -16,7 +16,7 @@ public record DirectOrderCreateRequest(
         // 구매할 수량
         @NotNull
         @Min(value = 1, message = "최소 구매 수량은 1개입니다.")
-        long quantity,
+        Long quantity,
 
         // 포트원 결제 고유번호
         @NotBlank(message = "결제 정보가 누락되었습니다.")

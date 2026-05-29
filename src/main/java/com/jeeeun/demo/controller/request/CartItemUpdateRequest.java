@@ -2,8 +2,8 @@ package com.jeeeun.demo.controller.request;
 
 import com.jeeeun.demo.service.cart.model.CartItemUpdateCommand;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
-import lombok.NonNull;
 
 @Builder
 public record CartItemUpdateRequest(
@@ -14,9 +14,9 @@ public record CartItemUpdateRequest(
         // 재고 관리 (ADMIN) → += 개념  "재고 50개 추가"
         // 장바구니 수량 변경 (USER) → = 개념  "이 수량으로 바꿔치기"
 
-        @NonNull
+        @NotNull
         @Min(1)
-        long quantity
+        Long quantity
 
 ) {
     public CartItemUpdateCommand toCommand(Long userId, Long cartItemId) {
