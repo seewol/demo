@@ -2,13 +2,16 @@ package com.jeeeun.demo.controller;
 
 import com.jeeeun.demo.controller.request.CartItemCreateRequest;
 import com.jeeeun.demo.controller.request.CartItemUpdateRequest;
+import com.jeeeun.demo.controller.request.CartMergeRequest;
 import com.jeeeun.demo.controller.response.CartItemCreateResponse;
 import com.jeeeun.demo.controller.response.CartItemUpdateResponse;
+import com.jeeeun.demo.controller.response.CartMergeResponse;
 import com.jeeeun.demo.controller.response.CartResponse;
 import com.jeeeun.demo.service.CartCommandService;
 import com.jeeeun.demo.service.CartQueryService;
 import com.jeeeun.demo.service.cart.model.CartItemCreateResult;
 import com.jeeeun.demo.service.cart.model.CartItemUpdateResult;
+import com.jeeeun.demo.service.cart.model.CartMergeResult;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -16,6 +19,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RequiredArgsConstructor
@@ -83,5 +87,20 @@ public class CartController {
                 .getPrincipal();
 
         cartCommandService.deleteCartItem(userId, cartItemId);
+    }
+
+    @Operation(summary = "비로그인 장바구니 머지", description = "로그인 후, 로컬스토리지에 담았던 장바구니를 서버 장바구니와 합칩니다.")
+    @ApiResponse(responseCode = "200", description = "merge 성공")
+    @PostMapping("/merge")
+    public CartMergeResponse mergeCart(
+            @Valid @RequestBody CartMergeRequest request
+    ) {
+        Long userId = (Long) SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getPrincipal();
+
+        CartMergeResult result = cartCommandService.mergeCart(request.toCommand(userId));
+
+        return CartMergeResponse.from(result);
     }
 }

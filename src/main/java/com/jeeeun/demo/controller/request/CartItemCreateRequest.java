@@ -11,9 +11,9 @@ public record CartItemCreateRequest(
         @NotNull
         Long variantId,
 
-        @NotNull
+        @NotNull(message = "수량을 입력하세요.")
         @Min(value = 1)
-        long quantity
+        Long quantity
 ) {
 
     // userId는 컨트롤러에서 인증 정보 꺼내서 넘겨줄 것

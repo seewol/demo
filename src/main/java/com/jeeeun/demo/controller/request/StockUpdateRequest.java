@@ -11,8 +11,9 @@ public record StockUpdateRequest (
         @NotNull
         Operation operation, // SET, INCREASE, DECREASE
 
+        @NotNull(message = "수량을 입력하세요.")
         @Min(value = 0, message = "음수는 불가합니다.")
-        long quantity
+        Long quantity
 ) {
         public StockUpdateCommand toCommand(Long variantId) {
                 return StockUpdateCommand.builder()
