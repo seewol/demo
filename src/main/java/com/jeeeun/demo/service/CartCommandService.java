@@ -13,13 +13,12 @@ import com.jeeeun.demo.repository.product.ProductVariantRepository;
 import com.jeeeun.demo.repository.user.CartItemRepository;
 import com.jeeeun.demo.repository.user.CartRepository;
 import com.jeeeun.demo.repository.user.UserRepository;
-import com.jeeeun.demo.service.cart.model.CartItemCreateCommand;
-import com.jeeeun.demo.service.cart.model.CartItemCreateResult;
-import com.jeeeun.demo.service.cart.model.CartItemUpdateCommand;
-import com.jeeeun.demo.service.cart.model.CartItemUpdateResult;
+import com.jeeeun.demo.service.cart.model.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Optional;
 
 @RequiredArgsConstructor
 @Service
@@ -108,6 +107,7 @@ public class CartCommandService {
         return CartItemUpdateResult.from(cartItem);
     }
 
+
     // 장바구니 아이템 삭제
     @Transactional
     public void deleteCartItem(Long userId, Long cartItemId) {
@@ -123,6 +123,76 @@ public class CartCommandService {
 
         // ★ 3 : 삭제 처리
         cartItemRepository.delete(cartItem);
+    }
+
+
+    // 비로그인 장바구니 → 로그인 후 merge
+    @Transactional
+    public CartMergeResult mergeCart(CartMergeCommand command) {
+
+        // ★ 1 : 유저 조회
+        User user = userRepository.findByIdAndIsDeletedFalse(command.userId())
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_USER));
+
+        // ★ 2 : 장바구니 조회 → 없으면 새로 생성
+        Cart cart = cartRepository.findByUser(user)
+                .orElseGet(() -> cartRepository.save(Cart.from(user)));
+
+        int mergedCount = 0;
+
+        for (CartMergeCommand.Item item : command.items()) {
+
+            // ★ 3 : variant 조회 → 없으면 스킵 (비로그인 중 삭제된 상품 대비)
+            Optional<ProductVariant> variantOpt = productVariantRepository.findById(item.variantId());
+            if (variantOpt.isEmpty()) {
+                continue; // 루프 벗어나기
+            }
+            ProductVariant variant = variantOpt.get();
+
+            // ★ 4 : 재고 → 품절이면 스킵
+            Optional<ProductStock> stockOpt = productStockRepository.findByProductVariant_Id(item.variantId());
+            if (stockOpt.isEmpty() || stockOpt.get().getQuantity() == 0) {
+                continue;
+            }
+
+            Product product = variant.getProduct();
+
+            // ★ 5 : 기존 장바구니 내 같은 variant 있는지 확인
+            Optional<CartItem> existingOpt = cartItemRepository.findByCartAndProductVariant(cart, variant);
+
+            if (existingOpt.isPresent()) {
+                // ★ 5-1 : 기존 재고 있으면 수량 합산 → 한도 / 재고 초과시 스킵
+                try {
+                    CartItem existing = existingOpt.get();
+                    long newQuantity = existing.getQuantity() + item.quantity();
+                    if (newQuantity > stockOpt.get().getQuantity()) {
+                        continue;
+                    }
+                    existing.addQuantity(item.quantity(), product.getMaxPurchaseQuantity());
+                } catch (BusinessException e) {
+                    continue;
+                }
+
+            } else {
+                // ★ 5-2 : 기존 재고 없으면 새 아이템 추가 → 재고 초과 시 스킵
+                if (item.quantity() > stockOpt.get().getQuantity()) {
+                    continue;
+                }
+
+                // ★ 구매 한도 초과할 경우 스킵
+                Integer maxPurchaseQuantity = product.getMaxPurchaseQuantity();
+                if (maxPurchaseQuantity != null && item.quantity() > maxPurchaseQuantity) {
+                    continue;
+                }
+
+                CartItem newItem = CartItem.from(cart, variant, item.quantity());
+                cartItemRepository.save(newItem);
+            }
+
+            mergedCount++;
+        }
+
+        return CartMergeResult.from(mergedCount);
     }
 
 }

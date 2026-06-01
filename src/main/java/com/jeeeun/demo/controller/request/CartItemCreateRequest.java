@@ -11,7 +11,7 @@ public record CartItemCreateRequest(
         @NotNull
         Long variantId,
 
-        @NotNull
+        @NotNull(message = "수량을 입력하세요.")
         @Min(value = 1)
         Long quantity
 ) {

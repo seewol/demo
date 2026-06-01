@@ -14,7 +14,7 @@ public record CartItemUpdateRequest(
         // 재고 관리 (ADMIN) → += 개념  "재고 50개 추가"
         // 장바구니 수량 변경 (USER) → = 개념  "이 수량으로 바꿔치기"
 
-        @NotNull
+        @NotNull(message = "수량을 입력하세요.")
         @Min(1)
         Long quantity
 

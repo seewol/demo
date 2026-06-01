@@ -14,7 +14,7 @@ public record DirectOrderCreateRequest(
         Long variantId,
 
         // 구매할 수량
-        @NotNull
+        @NotNull(message = "수량을 입력하세요.")
         @Min(value = 1, message = "최소 구매 수량은 1개입니다.")
         Long quantity,
 
