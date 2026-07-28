@@ -14,7 +14,6 @@ _"상품 정보가 바뀌면 주문 내역은?".._<br/>
 
 <br/>
 
----
 
 ## 💼 Tech Stack
 
@@ -33,7 +32,7 @@ _"상품 정보가 바뀌면 주문 내역은?".._<br/>
 
 <br/>
 
----
+
 
 ## 📂 Package Structure
 
@@ -67,7 +66,7 @@ src/main/java/com/jeeeun/demo
 
 <br/>
 
----
+
 
 ## 🛠️ 구현 기능
 
@@ -119,7 +118,7 @@ src/main/java/com/jeeeun/demo
 
 <br/>
 
----
+
 
 ## 💡 설계 고민 방향
 
@@ -204,7 +203,7 @@ public void cancel() {
 
 <br/>
 
----
+
 
 ## 🔥 트러블슈팅
 
@@ -218,7 +217,7 @@ URL 뒤에 파라미터를 붙여 해결했지만, 외부 API는 정책 변경�
 
 <br/>
 
----
+
 
 ## 🗂️ ERD
 
@@ -243,7 +242,7 @@ Product
 
 <br/>
 
----
+
 
 ## ⬜ 진행 예정
 
