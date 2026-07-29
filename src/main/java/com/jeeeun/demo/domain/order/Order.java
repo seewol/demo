@@ -3,6 +3,7 @@ package com.jeeeun.demo.domain.order;
 import com.jeeeun.demo.common.error.BusinessException;
 import com.jeeeun.demo.common.error.ErrorCode;
 import com.jeeeun.demo.common.jpa.BaseTimeEntity;
+import com.jeeeun.demo.domain.shipping.Shipping;
 import com.jeeeun.demo.domain.user.User;
 import jakarta.persistence.*;
 import lombok.*;
@@ -13,7 +14,7 @@ import java.util.List;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@ToString(exclude = {"user", "orderItems"}) // 연관 관계 무한 루프 방지!
+@ToString(exclude = {"user", "orderItems", "shipping"}) // 연관 관계 무한 루프 방지!
 @Entity
 @Table(name = "orders") // order → SQL 예약어
 public class Order extends BaseTimeEntity {
@@ -39,8 +40,13 @@ public class Order extends BaseTimeEntity {
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderItem> orderItems = new ArrayList<>();
 
+    // Order : Shipping → 1:1 관계 (FK는 Shipping이 들고 있음, mappedBy = 주인 아님을 표시)
+    @OneToOne(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Shipping shipping;
+
     @Column(name = "imp_uid")
     private String impUid;
+
 
     public static Order from(User user, BigDecimal totalPrice, String impUid) {
         Order order = new Order();
@@ -59,6 +65,14 @@ public class Order extends BaseTimeEntity {
         }
         this.status = OrderStatus.CANCELLED;
     }
+
+
+    // ★ 연관관계 편의 메서드 ─ Shipping.from() 내부에서만 호출
+    // 단순히 양방향 연관관계를 잇는 용도이므로 "규칙"이 없다. (고로 예외 처리도 없음)
+    public void assignShipping(Shipping shipping) {
+        this.shipping = shipping;
+    }
+
 
     // NOTE : ▼ 도메인 메서드 방식
     // "취소 가능한지"를 Order 스스로가 알고 있도록 함

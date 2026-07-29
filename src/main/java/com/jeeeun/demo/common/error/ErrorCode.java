@@ -38,6 +38,11 @@ public enum ErrorCode {
     CANNOT_CANCEL_ORDER(HttpStatus.BAD_REQUEST, "취소할 수 없는 주문 상태입니다."),
     INVALID_PAYMENT(HttpStatus.BAD_REQUEST, "결제 정보가 유효하지 않습니다."),
 
+    // 배송
+    CANNOT_DELAY_SHIPPING(HttpStatus.BAD_REQUEST, "지연 처리를 할 수 없는 배송 상태입니다."),
+    CANNOT_START_SHIPPING(HttpStatus.BAD_REQUEST, "배송을 시작할 수 없는 상태입니다."),
+    CANNOT_COMPLETE_DELIVERY(HttpStatus.BAD_REQUEST, "배송을 완료할 수 없는 상태입니다."),
+
     // 재고
     OUT_OF_STOCK(HttpStatus.CONFLICT, "상품 재고가 부족합니다."),
     INVALID_STOCK_QUANTITY(HttpStatus.BAD_REQUEST, "재고 수량은 0보다 커야 합니다."),
