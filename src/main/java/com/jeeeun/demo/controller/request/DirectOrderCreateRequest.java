@@ -1,6 +1,7 @@
 package com.jeeeun.demo.controller.request;
 
 import com.jeeeun.demo.service.order.model.DirectOrderCreateCommand;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -20,7 +21,11 @@ public record DirectOrderCreateRequest(
 
         // 포트원 결제 고유번호
         @NotBlank(message = "결제 정보가 누락되었습니다.")
-        String impUid
+        String impUid,
+
+        @NotNull(message = "배송지 정보를 입력해주세요")
+        @Valid
+        ShippingRequest shipping
 ) {
 
     public DirectOrderCreateCommand toCommand(Long userId) {
@@ -29,6 +34,7 @@ public record DirectOrderCreateRequest(
                 .variantId(variantId)
                 .quantity(quantity)
                 .impUid(impUid)
+                .shipping(shipping.toCommand())
                 .build();
     }
 }
