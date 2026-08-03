@@ -8,7 +8,7 @@ import org.springframework.http.HttpStatus;
 @RequiredArgsConstructor
 public enum ErrorCode {
     // 공통
-    INTERNAL_SERVER_ERROR (HttpStatus.INTERNAL_SERVER_ERROR, "내부 서버 오류입니다."),
+    INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "내부 서버 오류입니다."),
     BAD_REQUEST(HttpStatus.BAD_REQUEST, "잘못된 요청입니다."),
 
     // 유저
@@ -39,6 +39,7 @@ public enum ErrorCode {
     INVALID_PAYMENT(HttpStatus.BAD_REQUEST, "결제 정보가 유효하지 않습니다."),
 
     // 배송
+    NOT_FOUND_SHIPPING(HttpStatus.NOT_FOUND, "존재하지 않는 배송 정보입니다."),
     CANNOT_DELAY_SHIPPING(HttpStatus.BAD_REQUEST, "지연 처리를 할 수 없는 배송 상태입니다."),
     CANNOT_START_SHIPPING(HttpStatus.BAD_REQUEST, "배송을 시작할 수 없는 상태입니다."),
     CANNOT_COMPLETE_DELIVERY(HttpStatus.BAD_REQUEST, "배송을 완료할 수 없는 상태입니다."),
@@ -67,6 +68,7 @@ public enum ErrorCode {
 
     private final HttpStatus status;
     private final String message;
+
 }
 
 
