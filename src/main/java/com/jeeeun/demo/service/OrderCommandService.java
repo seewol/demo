@@ -8,6 +8,8 @@ import com.jeeeun.demo.domain.product.Product;
 import com.jeeeun.demo.domain.product.ProductImage;
 import com.jeeeun.demo.domain.product.ProductStock;
 import com.jeeeun.demo.domain.product.ProductVariant;
+import com.jeeeun.demo.domain.shipping.Shipping;
+import com.jeeeun.demo.domain.shipping.ShippingPolicy;
 import com.jeeeun.demo.domain.user.CartItem;
 import com.jeeeun.demo.domain.user.User;
 import com.jeeeun.demo.external.portone.PortOneClient;
@@ -19,12 +21,12 @@ import com.jeeeun.demo.repository.user.CartItemRepository;
 import com.jeeeun.demo.repository.user.UserRepository;
 import com.jeeeun.demo.service.order.model.*;
 import lombok.RequiredArgsConstructor;
-import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -104,9 +106,12 @@ public class OrderCommandService {
                 // note : 9,000원 * 2개 = 18,000원 → totalPrice에 더하기
             }
 
-            // ★ 4-1 : 실 결제된 금액 == 계산한 totalPrice 검증
+            // ★ 4-1 : 배송비 계산 후, 실 결제된 금액 == (상품합계 + 배송비) 검증
             // 금액 조작을 방지하기 위해 반드시 검증이 필요하다.
-            if (paidAmount.compareTo(totalPrice) != 0) {
+            BigDecimal shippingFee = ShippingPolicy.calculateFee(totalPrice);   // 배송비 계산
+            BigDecimal payAmount = totalPrice.add(shippingFee);
+
+            if (paidAmount.compareTo(payAmount) != 0) {
                 throw new BusinessException(ErrorCode.INVALID_PAYMENT);
             }
             // BigDecimal 값은 compareTo()로 비교해야 함.
@@ -114,6 +119,19 @@ public class OrderCommandService {
 
             // ★ 5 : Order 생성
             Order order = orderRepository.save(Order.from(user, totalPrice, payment.impUid()));
+
+            // ★ 5-1 : Shipping 생성 (Order와 1:1 연관 관계, cascade로 자동 저장됨!)
+            Shipping.from(
+                    order,
+                    command.shipping().receiverName(),
+                    command.shipping().receiverPhone(),
+                    command.shipping().zipCode(),
+                    command.shipping().address(),
+                    command.shipping().addressDetail(),
+                    command.shipping().deliveryRequest(),
+                    shippingFee,
+                    LocalDate.now().plusDays(2) // 발송예정일 = 주문일 + 2일
+            );
 
             // ★ 6 : OrderItem 생성 및 재고 차감
             for (int i = 0; i < cartItems.size(); i++) {
@@ -249,8 +267,11 @@ public class OrderCommandService {
             BigDecimal totalPrice = discountedPrice
                     .multiply(BigDecimal.valueOf(command.quantity()));
 
-            // ★ 6-1 : 실 결제 금액 == 계산 금액 검증
-            if (paidAmount.compareTo(totalPrice) != 0) {
+            // ★ 6-1 : 배송비 계산 후, 실 결제 금액 == (상품합계 + 배송비) 검증
+            BigDecimal shippingFee = ShippingPolicy.calculateFee(totalPrice);   // 배송비 계산
+            BigDecimal payAmount = totalPrice.add(shippingFee);
+
+            if (paidAmount.compareTo(payAmount) != 0) {
                 throw new BusinessException(ErrorCode.INVALID_PAYMENT);
             }
 
@@ -261,6 +282,19 @@ public class OrderCommandService {
 
             // ★ 8 : Order 생성
             Order order = orderRepository.save(Order.from(user, totalPrice, payment.impUid()));
+
+            // ★ 8-1 : Shipping 생성 (cascade로 자동 저장)
+            Shipping.from(
+                    order,
+                    command.shipping().receiverName(),
+                    command.shipping().receiverPhone(),
+                    command.shipping().zipCode(),
+                    command.shipping().address(),
+                    command.shipping().addressDetail(),
+                    command.shipping().deliveryRequest(),
+                    shippingFee,
+                    LocalDate.now().plusDays(2) // 발송예정일 = 주문일 + 2일
+            );
 
             // ★ 9 : OrderItem 생성
             order.getOrderItems().add(

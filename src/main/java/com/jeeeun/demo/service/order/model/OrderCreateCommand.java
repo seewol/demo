@@ -9,7 +9,8 @@ public record OrderCreateCommand(
 
         Long userId,
         List<Long> cartItemIds,
-        String impUid   // 포트원 결제 고유번호
+        String impUid,              // 포트원 결제 고유번호
 
+        ShippingCommand shipping    // 배송지 정보
 ) {
 }

@@ -7,6 +7,7 @@ public record DirectOrderCreateCommand(
         Long userId,
         Long variantId,
         long quantity,
-        String impUid
+        String impUid,
+        ShippingCommand shipping
 ) {
 }
