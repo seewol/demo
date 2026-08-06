@@ -192,6 +192,7 @@ public class OrderCommandService {
 
 
     // 주문 생성 (바로구매)
+    @Transactional
     public OrderCreateResult createDirectOrder(DirectOrderCreateCommand command) {
 
         // ★ 1 : 포트원 결제 검증

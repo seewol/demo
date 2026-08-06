@@ -14,14 +14,14 @@ import org.springframework.web.bind.annotation.*;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/admin/shippings")
+@RequestMapping("/shippings")
 @Tag(name = "ShippingController", description = "관리자용 배송 상태 변경 API 엔드포인트")
 public class ShippingController {
 
     private final ShippingCommandService shippingCommandService;
 
     // ★ 배송 시작 처리
-    // PATCH /admin/shippings/{shippingId}/ship
+    // PATCH /shippings/{shippingId}/ship
     @Operation(summary = "배송 시작 처리")
     @ApiResponse(responseCode = "200", description = "배송 시작 처리 성공")
     @PreAuthorize("hasRole('ADMIN')")
@@ -35,7 +35,7 @@ public class ShippingController {
     }
 
     // ★ 발송 지연 처리
-    // PATCH /admin/shippings/{shippingId}/delay
+    // PATCH /shippings/{shippingId}/delay
     @Operation(summary = "발송 지연 처리", description = "지연 사유 & 발송 예정일을 새로 입력받아 배송 상태를 DELAYED로 변경합니다. ")
     @ApiResponse(responseCode = "200", description = "발송 지연 처리 성공")
     @PreAuthorize("hasRole('ADMIN')")
@@ -50,7 +50,7 @@ public class ShippingController {
     }
 
     // ★ 배송 완료 처리
-    // PATCH /admin/shippings/{shippingId}/deliver
+    // PATCH /shippings/{shippingId}/deliver
     @Operation(summary = "배송 완료 처리")
     @ApiResponse(responseCode = "200", description = "배송 완료 처리 성공")
     @PreAuthorize("hasRole('ADMIN')")

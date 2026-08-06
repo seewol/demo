@@ -29,10 +29,13 @@ public class ShippingCommandService {
         // 규칙 위반일 경우 도메인 메서드가 알아서 예외 던짐
         shipping.ship();
 
+        // ★ saveAndFlush로 즉시 DB 반영 → updatedAt이 이 시점 값으로 갱신됨
+        Shipping saved = shippingRepository.saveAndFlush(shipping);
+
         // 3 : save() 명시적 호출 안 해도 됨
         // @Transactional 안에서 조회한 엔티티는 '영속 상태'라,
         // 필드 값만 바꾸면 커밋 시점에 JPA가 자동으로 UPDATE 쿼리 날림 (더티 체킹)
-        return ShippingStatusResult.from(shipping);
+        return ShippingStatusResult.from(saved);
 
     }
 
@@ -59,7 +62,9 @@ public class ShippingCommandService {
 
         shipping.delay(command.reason(), command.newExpectedShipDate());
 
-        return ShippingStatusResult.from(shipping);
+        Shipping saved = shippingRepository.saveAndFlush(shipping);
+
+        return ShippingStatusResult.from(saved);
     }
 
 
@@ -72,6 +77,8 @@ public class ShippingCommandService {
 
         shipping.deliver();
 
-        return ShippingStatusResult.from(shipping);
+        Shipping saved = shippingRepository.saveAndFlush(shipping);
+
+        return ShippingStatusResult.from(saved);
     }
 }
