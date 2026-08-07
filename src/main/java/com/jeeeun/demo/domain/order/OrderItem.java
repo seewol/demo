@@ -60,6 +60,10 @@ public class OrderItem extends BaseTimeEntity {
     @Column(name = "order_item_status", nullable = false)
     private OrderItemStatus status;
 
+    // 취소된 수량 (누적) → 부분취소가 여러 번 일어날 수 있으므로 계속 더해짐
+    @Column(name ="cancelled_quantity", nullable = false)
+    private long cancelledQuantity;
+
 
     public static OrderItem from(
             Order order, ProductVariant variant, long quantity,
@@ -76,17 +80,32 @@ public class OrderItem extends BaseTimeEntity {
         item.discountedPrice = discountedPrice;
         item.thumbnailUrl = thumbnailUrl;
         item.status = OrderItemStatus.ORDERED;
+        item.cancelledQuantity = 0L;
 
         return item;
     }
 
 
-    // ★ 아이템 단위 취소 ─ 이미 취소된 아이템은 재취소 불가
-    public void cancel() {
+    // ★ 아이템 부분(수량 단위) 취소 ─ 이미 취소된 아이템은 재취소 불가
+    public void cancel(long cancelQuantity) {
+
         if (this.status == OrderItemStatus.CANCELLED) {
             throw new BusinessException(ErrorCode.ALREADY_CANCELLED_ORDER_ITEM);
         }
-        this.status = OrderItemStatus.CANCELLED;
+
+        long remainingQuantity = this.quantity - cancelledQuantity;
+
+        // cancelQuantity : 이번에 취소할 수량. 남은 수량을 넘거나 0 이하면 예외
+        if (cancelQuantity <= 0 || cancelQuantity > remainingQuantity) {
+            throw new BusinessException(ErrorCode.INVALID_CANCEL_QUANTITY);
+        }
+
+        this.cancelledQuantity += cancelQuantity;
+
+        // 취소 후, '누적 취소 수량 = 전체 수량'이면 CANCELLED, 아니면 PARTIALLY_CANCELLED
+        this.status = (this.cancelledQuantity == this.quantity)
+                ? OrderItemStatus.CANCELLED
+                : OrderItemStatus.PARTIALLY_CANCELLED;
     }
 
 }
