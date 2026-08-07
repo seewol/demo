@@ -57,13 +57,45 @@ public class Order extends BaseTimeEntity {
         return order;
     }
 
-
+    // ★ 주문 상품 전체 취소
     public void cancel() {
         // 취소는 PENDING, PAID 상태에서만 가능
         if (this.getStatus() != OrderStatus.PENDING && this.getStatus() != OrderStatus.PAID) {
             throw new BusinessException(ErrorCode.CANNOT_CANCEL_ORDER);
         }
         this.status = OrderStatus.CANCELLED;
+    }
+
+
+    // NOTE : 서비스에서 orderItem.cancel() 직접 안부르고, Order.cancelItem() 하는 이유
+    // Order가 OrderItem을 소유한 '루트'이고 상품 하나가 취소됐을 때,
+    // '나머지 상품들도 다 취소됐는지' 판단해 Order 전체 상태를 바꾸는 규칙은
+    // OrderItem 혼자서 알 수 없고, Order만 알 수 있는 정보이기 때문이다.
+    // → 고로 해당 판단 로직은 Order가 갖고 있음이 마땅!
+
+    // ★ 주문 상품 부분 취소 (아이템 단위)
+    // 1 : 취소 대상 아이템을 찾아서 자신 규칙대로 취소할 것 (OrderItem.cancel())
+    // 2 : 취소 후 남은 아이템이 전부 취소 상태면 Order 전체도 자동으로 CANCELLED 전환
+    public void cancelItem(Long orderItemId) {
+
+        if(this.status != OrderStatus.PENDING && this.status != OrderStatus.PAID) {
+            throw new BusinessException(ErrorCode.CANNOT_CANCEL_ORDER);
+        }
+
+        OrderItem targetItem = this.orderItems.stream()
+                .filter(item -> item.getId().equals(orderItemId))
+                .findFirst()
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_ORDER_ITEM));
+
+        targetItem.cancel();
+
+        boolean allCancelled = this.orderItems.stream()
+                .allMatch(item -> item.getStatus() == OrderItemStatus.CANCELLED);
+
+        if (allCancelled) {
+            this.status = OrderStatus.CANCELLED;
+        }
+
     }
 
 

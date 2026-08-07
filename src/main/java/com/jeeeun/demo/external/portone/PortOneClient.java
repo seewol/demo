@@ -8,7 +8,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
+import java.math.BigDecimal;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 @Slf4j
 @Component
@@ -70,17 +73,26 @@ public class PortOneClient {
     }
 
 
-    // ★ 3: imp_uid로 환불 요청
-    // PAID 상태 주문 취소 시, 포트원에 환불 요청을 보내야만 실 결제가 취소된다.
+    // ★ 3: imp_uid로 환불 요청 (전액 환불) ─ 3-1과 오버로딩
     public void cancelPayment(String impUid) {
+        cancelPayment(impUid, null);
+    }
+
+
+    // ★ 3-1: imp_uid로 환불 요청 (부분 환불)
+    // PAID 상태 주문 취소 시, 포트원에 환불 요청을 보내야만 실 결제가 취소된다.
+    // amount → null이면 전액 취소, 값이 있으면 해당 금액만큼만 부분 취소!
+    public void cancelPayment(String impUid, BigDecimal amount) {
 
         String accessToken = getAccessToken();
 
-        // 포트원이 요구하는 요청 바디
-        Map<String, String> body = Map.of(
-                "imp_uid", impUid,
-                "reason", "주문 취소"    // 취소 사유 (포트원 콘솔에서 확인 가능)
-        );
+        // amount는 있을 수도, 없을 수도 있다. → 불변인 Map.of() 대신 가변 Map 사용
+        Map<String, Object> body = new HashMap<>();
+        body.put("imp_uid", impUid);
+        body.put("reason", "주문 취소");
+        if (amount != null) {   // 조건부로 값을 넣어야 해서 가변 HashMap을 쓴 거다.
+            body.put("amount", amount);
+        }
 
         RestClient.create()
                 .post()
@@ -88,7 +100,7 @@ public class PortOneClient {
                 .header("Authorization", accessToken)
                 .body(body)
                 .retrieve()
-                .toBodilessEntity();    // 응답 바디 필요 없을 때 사용
+                .toBodilessEntity();
     }
 
 }
