@@ -42,26 +42,35 @@ _"상품 정보가 바뀌면 주문 내역은?".._<br/>
 src/main/java/com/jeeeun/demo
 ├── common
 │   ├── config          # Security, Swagger, Scheduler 등
-│   ├── error           # ErrorCode, GlobalExceptionHandler
-│   └── jpa             # BaseTimeEntity
-├── controller
-│   ├── request         # 요청 DTO
-│   └── response        # 응답 DTO
+│   ├── error            # ErrorCode, GlobalExceptionHandler
+│   └── jpa               # BaseTimeEntity
+├── config
+│   └── data              # 초기 더미 데이터 생성 (DataInitializer)
+├── controller             # Auth/User/Product/Variant/Cart/Order/Shipping 컨트롤러
+│   ├── request            # 요청 DTO
+│   └── response           # 응답 DTO
 ├── domain
-│   ├── product         # 상품 관련 엔티티
-│   ├── user            # 회원/장바구니 엔티티
-│   └── order           # 주문 엔티티
+│   ├── order               # 주문/주문아이템 엔티티
+│   ├── product              # 상품/조합/재고 관련 엔티티
+│   ├── shipping              # 배송 엔티티
+│   └── user                   # 회원/장바구니 엔티티
 ├── external
-│   ├── google          # Google OAuth2 클라이언트
-│   └── portone         # PortOne 결제 클라이언트
+│   ├── google                 # Google OAuth2 클라이언트
+│   └── portone                 # PortOne 결제 클라이언트
 ├── repository
-├── service
+│   ├── order
+│   ├── product
+│   ├── shipping
+│   └── user
+├── service                     # Auth/User/Product/Cart/Order/Shipping 서비스
 │   ├── auth/model
-│   ├── user/model
-│   ├── product/model
 │   ├── cart/model
-│   └── order/model     # Command/Result 패턴
-└── util                # JWT, 예외 클래스
+│   ├── order/model              # Command/Result 패턴
+│   ├── product/model
+│   ├── shipping/model
+│   └── user/model
+└── util                          # JWT Provider/Filter
+    └── exception                 # 커스텀 인증 예외
 ```
 
 <br/>
@@ -75,7 +84,7 @@ src/main/java/com/jeeeun/demo
 ### 👤 Auth
 | Method | URL | 설명 | 인증 |
 |--------|-----|------|------|
-| POST | /sign-up | 회원가입 | ❌ |
+| POST | /auth/sign-up | 회원가입 | ❌ |
 | POST | /auth/sign-in | 로컬 로그인 | ❌ |
 | POST | /auth/sign-in/google | 구글 소셜 로그인 | ❌ |
 | POST | /auth/refresh | 토큰 재발급 | ❌ |
@@ -115,6 +124,7 @@ src/main/java/com/jeeeun/demo
 | GET | /orders | 주문 목록 조회 | ✅ |
 | GET | /orders/{orderId} | 주문 상세 조회 | ✅ |
 | PATCH | /orders/{orderId}/cancel | 주문 취소 + 재고 복구 | ✅ |
+| PATCH | /orders/{orderId}/items/{orderItemId}/cancel | 아이템 단위 부분 취소 (수량 지정) + 재고 복구 + 부분환불 | ✅ |
 
 ### 🚚 Shipping
 | Method | URL | 설명 | 인증 |
@@ -223,6 +233,31 @@ URL 뒤에 파라미터를 붙여 해결했지만, 외부 API는 정책 변경�
 
 <br/>
 
+### MySQL ENUM 컬럼, 새 값 추가해도 DDL에 자동 반영 안 됨
+아이템 부분취소에 `PARTIALLY_CANCELLED` 상태를 추가했는데, 저장 시점에
+`Data truncated for column 'order_item_status'` 에러가 났어요.  
+알고 보니 `@Enumerated(EnumType.STRING)`을 써도, `ddl-auto: update` 모드에서는
+이미 존재하는 컬럼의 MySQL 네이티브 ENUM 제약조건까지는 자동으로 안 넓혀지더라고요.  
+컴파일은 멀쩡하고 런타임에만 터지는 케이스라 처음엔 당황했는데,
+`ALTER TABLE ... MODIFY COLUMN`으로 허용값을 직접 늘려서 해결했습니다.
+
+<br/>
+
+### 부분취소 + 전체취소 조합 시 재고 중복 복구
+아이템을 개별로 부분취소한 뒤 남은 아이템까지 전체취소하면, 전체취소 로직이
+이미 복구된 수량까지 또 복구해버리는 버그가 있었어요.  
+`quantity - cancelledQuantity`로 실제 남은 수량만 계산해서 복구하도록 고쳤습니다.
+
+<br/>
+
+### `/sign-up` 경로, 문서와 실제 라우팅 불일치
+README와 SecurityConfig 둘 다 `/sign-up`으로 문서화돼 있었는데,
+`AuthController`가 클래스 레벨에 `@RequestMapping("/auth")`를 갖고 있어서
+실제 경로는 `/auth/sign-up`이었어요. 테스트 중 401(권한 없음) → 404(경로 없음)로
+이어지는 과정에서 발견해서, 문서를 실제 라우팅 기준으로 정정했습니다.
+
+<br/>
+
 
 
 ## 🗂️ ERD
@@ -235,7 +270,8 @@ User
 ├── Cart
 │   └── CartItem ─────────────────── ProductVariant
 └── Order
-    └── OrderItem (스냅샷 저장) ───── ProductVariant
+    ├── OrderItem (스냅샷 저장) ───── ProductVariant
+    └── Shipping
 
 Product
 ├── Category
@@ -253,8 +289,9 @@ Product
 ## ⬜ 진행 예정
 
 **리팩토링**
-- [ ] 배송비 + 배송 도메인
-- [ ] 아이템 단위 부분 취소
+- [x] 배송비 + 배송 도메인
+- [x] 아이템 단위 부분 취소 (라인 단위 → 수량 단위로 확장 완료)
+- [ ] 주문상세에 아이템별 취소상태 노출 (OrderItemResult/OrderDetailItemResult에 orderItemId·status·cancelledQuantity 추가, cancelOrder()도 아이템별 상태 반영하도록 확장)
 - [ ] 장바구니 + 주문상세 additionalPrice 분리 표시
 - [ ] cancelOrder reason 파라미터화
 - [ ] 무통장입금 (가상계좌) + Webhook

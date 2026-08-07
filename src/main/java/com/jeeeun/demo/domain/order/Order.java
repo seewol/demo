@@ -74,9 +74,9 @@ public class Order extends BaseTimeEntity {
     // → 고로 해당 판단 로직은 Order가 갖고 있음이 마땅!
 
     // ★ 주문 상품 부분 취소 (아이템 단위)
-    // 1 : 취소 대상 아이템을 찾아서 자신 규칙대로 취소할 것 (OrderItem.cancel())
+    // 1 : 취소 대상 아이템을 찾아서 자신 규칙대로 취소할 것 (OrderItem.cancel(cancelQuantity))
     // 2 : 취소 후 남은 아이템이 전부 취소 상태면 Order 전체도 자동으로 CANCELLED 전환
-    public void cancelItem(Long orderItemId) {
+    public void cancelItem(Long orderItemId, long cancelQuantity) {
 
         if(this.status != OrderStatus.PENDING && this.status != OrderStatus.PAID) {
             throw new BusinessException(ErrorCode.CANNOT_CANCEL_ORDER);
@@ -87,7 +87,7 @@ public class Order extends BaseTimeEntity {
                 .findFirst()
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_ORDER_ITEM));
 
-        targetItem.cancel();
+        targetItem.cancel(cancelQuantity);
 
         boolean allCancelled = this.orderItems.stream()
                 .allMatch(item -> item.getStatus() == OrderItemStatus.CANCELLED);

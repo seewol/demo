@@ -11,6 +11,8 @@ public record OrderItemCancelResponse(
         Long orderItemId,
         String itemStatus,
         String orderStatus,
+        long cancelledQuantity,
+        long remainingQuantity,
         LocalDateTime updatedAt
 
 ) {
@@ -19,6 +21,8 @@ public record OrderItemCancelResponse(
                 .orderItemId(result.orderItemId())
                 .itemStatus(result.itemStatus())
                 .orderStatus(result.orderStatus())
+                .cancelledQuantity(result.cancelledQuantity())
+                .remainingQuantity(result.remainingQuantity())
                 .updatedAt(result.updatedAt())
                 .build();
     }
