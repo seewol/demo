@@ -2,15 +2,13 @@ package com.jeeeun.demo.controller;
 
 import com.jeeeun.demo.controller.request.DirectOrderCreateRequest;
 import com.jeeeun.demo.controller.request.OrderCreateRequest;
-import com.jeeeun.demo.controller.response.OrderCancelResponse;
-import com.jeeeun.demo.controller.response.OrderCreateResponse;
-import com.jeeeun.demo.controller.response.OrderDetailResponse;
-import com.jeeeun.demo.controller.response.OrderResponse;
+import com.jeeeun.demo.controller.response.*;
 import com.jeeeun.demo.repository.order.OrderRepository;
 import com.jeeeun.demo.service.OrderCommandService;
 import com.jeeeun.demo.service.OrderQueryService;
 import com.jeeeun.demo.service.order.model.OrderCancelResult;
 import com.jeeeun.demo.service.order.model.OrderCreateResult;
+import com.jeeeun.demo.service.order.model.OrderItemCancelResult;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -125,6 +123,24 @@ public class OrderController {
         OrderCancelResult result = orderCommandService.cancelOrder(orderId, userId);
 
         return OrderCancelResponse.from(result);
+    }
+
+
+    // ★ 주문 아이템 단위 부분 취소
+    @Operation(summary = "주문 아이템 부분 취소", description = "아이템 단위로 취소 후, 해당 재고를 복구합니다.")
+    @ApiResponse(responseCode = "200", description = "주문 아이템 취소 성공")
+    @PatchMapping("/{orderId}/items/{orderItemId}/cancel")
+    public OrderItemCancelResponse cancelOrderItem(
+            @PathVariable Long orderId,
+            @PathVariable Long orderItemId
+    ) {
+        Long userId = (Long) SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getPrincipal();
+
+        OrderItemCancelResult result = orderCommandService.cancelOrderItem(orderId, orderItemId, userId);
+
+        return OrderItemCancelResponse.from(result);
     }
 
 }

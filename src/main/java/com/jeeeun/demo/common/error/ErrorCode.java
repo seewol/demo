@@ -37,6 +37,8 @@ public enum ErrorCode {
     NOT_FOUND_ORDER(HttpStatus.NOT_FOUND, "존재하지 않는 주문 정보입니다."),
     CANNOT_CANCEL_ORDER(HttpStatus.BAD_REQUEST, "취소할 수 없는 주문 상태입니다."),
     INVALID_PAYMENT(HttpStatus.BAD_REQUEST, "결제 정보가 유효하지 않습니다."),
+    NOT_FOUND_ORDER_ITEM(HttpStatus.NOT_FOUND, "존재하지 않는 주문 상품입니다."),
+    ALREADY_CANCELLED_ORDER_ITEM(HttpStatus.BAD_REQUEST, "이미 취소된 주문 상품입니다."),
 
     // 배송
     NOT_FOUND_SHIPPING(HttpStatus.NOT_FOUND, "존재하지 않는 배송 정보입니다."),

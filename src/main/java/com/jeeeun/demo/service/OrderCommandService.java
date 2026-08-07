@@ -4,6 +4,7 @@ import com.jeeeun.demo.common.error.BusinessException;
 import com.jeeeun.demo.common.error.ErrorCode;
 import com.jeeeun.demo.domain.order.Order;
 import com.jeeeun.demo.domain.order.OrderItem;
+import com.jeeeun.demo.domain.order.OrderItemStatus;
 import com.jeeeun.demo.domain.product.Product;
 import com.jeeeun.demo.domain.product.ProductImage;
 import com.jeeeun.demo.domain.product.ProductStock;
@@ -378,6 +379,13 @@ public class OrderCommandService {
         // ★ 5 : 취소한 재고만큼 복구
         for (OrderItem item : order.getOrderItems()) {
 
+            // 부분 취소로 이미 복구된 아이템은 건너뜀 (전체취소 시 재고 중복 복구를 방지)
+            // cancelOrderItem()으로 개별 취소된 아이템은
+            // 재고가 이미 복구된 상태이므로 '다시 복구하면 중복!'
+            if (item.getStatus() == OrderItemStatus.CANCELLED) {
+                continue;
+            }
+
             productStockRepository
                     .findByProductVariant_Id(item.getProductVariant().getId())
                     .ifPresent(stock -> stock.increase(item.getQuantity()));
@@ -389,6 +397,50 @@ public class OrderCommandService {
         // stock.increase(item.getQuantity());
 
         return OrderCancelResult.from(order);
+    }
+
+
+    // 주문 아이템 단위 부분 취소
+    @Transactional
+    public OrderItemCancelResult cancelOrderItem(Long orderId, Long orderItemId, Long userId) {
+
+        // ★ 1 : 주문 조회 (아이템 fetch join)
+        Order order = orderRepository.findWithItemsById(orderId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_ORDER));
+
+        // ★ 2 : 본인 주문인지 검증
+        if (!order.getUser().getId().equals(userId)) {
+            throw new BusinessException(ErrorCode.FORBIDDEN);
+        }
+
+        // ★ 3 : '취소 대상 아이템'을 미리 확보
+        // order.cancelItem() 전에 확보해야, '환불 금액 계산 + Result' 생성에 쓸 수 있다.
+        // (order.getOrderItem() 안의 객체와 동일한 참조이기 때문에, cancelItem() 호출 후에도
+        // targetItem 안의 상태가 CANCELLED로 같이 바뀌어 있을 것)
+        OrderItem targetItem = order.getOrderItems().stream()
+                .filter(item -> item.getId().equals(orderItemId))
+                .findFirst()
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_ORDER_ITEM));
+
+        // ★ 4 : 도메인 규칙 검증 + 상태 변경 (전부 취소 시 Order도 자동 CANCELLED)
+        order.cancelItem(orderItemId);
+
+        // ★ 5 : PAID였던 주문 → 취소한 아이템의 금액만큼 포트원에 부분 환불 요청
+        if (order.getImpUid() != null) {
+            BigDecimal refundAmount = targetItem.getDiscountedPrice()
+                    .multiply(BigDecimal.valueOf(targetItem.getQuantity()));
+            portOneClient.cancelPayment(order.getImpUid(), refundAmount);
+        }
+
+        // ★ 6 : 취소한 아이템만큼만 재고 복구
+        productStockRepository
+                .findByProductVariant_Id(targetItem.getProductVariant().getId())
+                .ifPresent(stock -> stock.increase(targetItem.getQuantity()));
+
+        // ★ 7 : flush ─ updateAt이 응답에 바로 반영되도록!
+        orderRepository.saveAndFlush(order);
+
+        return OrderItemCancelResult.from(order, targetItem);
     }
 
 }

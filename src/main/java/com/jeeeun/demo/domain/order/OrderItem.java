@@ -1,5 +1,7 @@
 package com.jeeeun.demo.domain.order;
 
+import com.jeeeun.demo.common.error.BusinessException;
+import com.jeeeun.demo.common.error.ErrorCode;
 import com.jeeeun.demo.common.jpa.BaseTimeEntity;
 import com.jeeeun.demo.domain.product.ProductVariant;
 import jakarta.persistence.*;
@@ -53,6 +55,12 @@ public class OrderItem extends BaseTimeEntity {
     @Column(name = "thumbnail_url")
     private String thumbnailUrl;
 
+    // 아이템 상태 (default = ORDERED, 부분 취소 시 CANCELLED로 변경)
+    @Enumerated(EnumType.STRING)
+    @Column(name = "order_item_status", nullable = false)
+    private OrderItemStatus status;
+
+
     public static OrderItem from(
             Order order, ProductVariant variant, long quantity,
             String productName, String productVariantName,
@@ -67,8 +75,18 @@ public class OrderItem extends BaseTimeEntity {
         item.unitPrice = unitPrice;
         item.discountedPrice = discountedPrice;
         item.thumbnailUrl = thumbnailUrl;
+        item.status = OrderItemStatus.ORDERED;
 
         return item;
+    }
+
+
+    // ★ 아이템 단위 취소 ─ 이미 취소된 아이템은 재취소 불가
+    public void cancel() {
+        if (this.status == OrderItemStatus.CANCELLED) {
+            throw new BusinessException(ErrorCode.ALREADY_CANCELLED_ORDER_ITEM);
+        }
+        this.status = OrderItemStatus.CANCELLED;
     }
 
 }

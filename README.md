@@ -116,6 +116,12 @@ src/main/java/com/jeeeun/demo
 | GET | /orders/{orderId} | 주문 상세 조회 | ✅ |
 | PATCH | /orders/{orderId}/cancel | 주문 취소 + 재고 복구 | ✅ |
 
+### 🚚 Shipping
+| Method | URL | 설명 | 인증 |
+|--------|-----|------|------|
+| PATCH | /shippings/{shippingId}/ship | 배송 시작 처리 | ✅ ADMIN |
+| PATCH | /shippings/{shippingId}/delay | 발송 지연 처리 | ✅ ADMIN |
+| PATCH | /shippings/{shippingId}/deliver | 배송 완료 처리 | ✅ ADMIN |
 <br/>
 
 
