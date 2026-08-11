@@ -28,7 +28,9 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RequiredArgsConstructor
 @Service
@@ -366,22 +368,31 @@ public class OrderCommandService {
             throw new BusinessException(ErrorCode.FORBIDDEN);
         }
 
-        // ★ 3 : 취소 가능 상태인지 검증 + 주문 상태 변경 (CANCELLED)
+        // ★ 3 : 재고 복구용 '잔여 수량'을 order.cancel() 호출 전 미리 캡쳐 (key: orderItemId)
+        // → order.cancel()이 cancelledQuantity를 다 채워서, 그 이후에 계산하면 항상 0이 나옴
+        Map<Long, Long> remainingByItemId = new HashMap<>();
+        for (OrderItem item : order.getOrderItems()) {
+            long remainingQuantity = item.getQuantity() - item.getCancelledQuantity();
+            if (remainingQuantity > 0) {
+                remainingByItemId.put(item.getId(), remainingQuantity);
+            }
+        }
+
+        // ★ 4 : 취소 가능 상태인지 검증 + 주문 상태 변경 (CANCELLED)
         order.cancel();
 
-        // ★ 4 : PAID 상태의 주문 → 포트원에 환불 요청
+        // ★ 5 : PAID 상태의 주문 → 포트원에 환불 요청
         // PENDING은 결제 전이기 때문에 환불이 불필요.
         if (order.getImpUid() != null) {
             portOneClient.cancelPayment(order.getImpUid());
         }
 
-        // ★ 5 : 취소한 재고만큼 복구
-        // 부분취소로 이미 복구된 수량 제외, 남은 수량만큼만 복구
+        // ★ 6 : 3에서 미리 캡쳐해둔 잔여 수량만큼 재고 복구
         for (OrderItem item : order.getOrderItems()) {
-
-            long remainingQuantity = item.getQuantity() - item.getCancelledQuantity();
-
-            if (remainingQuantity <= 0) {
+            Long remainingQuantity = remainingByItemId.get(item.getId());
+            // '키가 없을 수 있다' 그러므고 Long(Wrapper)로 받아서 null 체크!
+            // 그리고 Map<> 안에 들어가는 타입(제네릭)은 원시 타입 사용 불가
+            if (remainingQuantity == null) {
                 continue;   // 이미 전량 취소됐으므로, 복구할 재고가 없음
             }
 

@@ -1,6 +1,7 @@
 package com.jeeeun.demo.service.order.model;
 
 import com.jeeeun.demo.domain.order.Order;
+import com.jeeeun.demo.domain.order.OrderItemStatus;
 import com.jeeeun.demo.domain.order.OrderStatus;
 import com.jeeeun.demo.domain.shipping.Shipping;
 import com.jeeeun.demo.domain.shipping.ShippingStatus;
@@ -27,11 +28,14 @@ public record OrderDetailResult(
     // 상품 상세
     @Builder
     public record OrderDetailItemResult(
+            Long orderItemId,
             String productName,
             String variantName,
             long quantity,
             BigDecimal unitPrice,
-            String thumbnailUrl
+            String thumbnailUrl,
+            OrderItemStatus status,
+            long cancelledQuantity
     ) {}
 
     // 배송 상세
@@ -78,11 +82,14 @@ public record OrderDetailResult(
                 .createdAt(order.getCreatedAt())
                 .items(order.getOrderItems().stream()
                         .map(item -> OrderDetailItemResult.builder()
+                                .orderItemId(item.getId())
                                 .productName(item.getProductName())
                                 .variantName(item.getProductVariantName())
                                 .quantity(item.getQuantity())
                                 .unitPrice(item.getUnitPrice())
                                 .thumbnailUrl(item.getThumbnailUrl())
+                                .status(item.getStatus())
+                                .cancelledQuantity(item.getCancelledQuantity())
                                 .build())
                         .toList()
                 )

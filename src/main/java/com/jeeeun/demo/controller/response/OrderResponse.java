@@ -1,5 +1,6 @@
 package com.jeeeun.demo.controller.response;
 
+import com.jeeeun.demo.domain.order.OrderItemStatus;
 import com.jeeeun.demo.domain.order.OrderStatus;
 import com.jeeeun.demo.service.order.model.OrderResult;
 import lombok.Builder;
@@ -23,11 +24,14 @@ public record OrderResponse(
     // 주문 목록에서 보여주는 상품 요약
     @Builder
     public record OrderItemResponse(
-            String productName,     // 상품명
-            String productVariantName,     // 조합명 (ex. "white / M")
-            long quantity,       // 수량
-            BigDecimal unitPrice,   // 단가
-            String thumbnailUrl     // 대표 이미지 URL
+            Long orderItemId,           // 부분취소 API 호출 시 필요
+            String productName,         // 상품명
+            String productVariantName,  // 조합명 (ex. "white / M")
+            long quantity,              // 수량
+            BigDecimal unitPrice,       // 단가
+            String thumbnailUrl,        // 대표 이미지 URL
+            OrderItemStatus status,
+            long cancelledQuantity
     ) {}
 
     public static OrderResponse from(OrderResult result) {
@@ -39,11 +43,14 @@ public record OrderResponse(
                 .items(
                         result.items().stream()
                                 .map(item -> OrderItemResponse.builder()
+                                        .orderItemId(item.orderItemId())
                                         .productName(item.productName())
                                         .productVariantName(item.productVariantName())
                                         .quantity(item.quantity())
                                         .unitPrice(item.unitPrice())
                                         .thumbnailUrl(item.thumbnailUrl())
+                                        .status(item.status())
+                                        .cancelledQuantity(item.cancelledQuantity())
                                         .build())
                                 .toList()
                 )

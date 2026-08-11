@@ -127,6 +127,17 @@ public class Shipping extends BaseTimeEntity {
         this.deliveredAt = LocalDateTime.now();
     }
 
+
+    // ★ 배송 취소 ─ PREPARING / DELAYED 상태에서만 가능 (Order.cancel()에서 호출됨)
+    // (Order에서도 이미 SHIPPING/DELIVERED면 cancel 안 되게 막지만,
+    //  Shipping도 스스로 규칙을 지켜야 하므로 여기서 한 번 더 검증하기)
+    public void cancel() {
+        if (this.status != ShippingStatus.PREPARING && this.status != ShippingStatus.DELAYED) {
+            throw new BusinessException(ErrorCode.CANNOT_CANCEL_SHIPPED_ORDER);
+        }
+        this.status = ShippingStatus.CANCELLED;
+    }
+
     // NOTE : 상태 전이 규칙을 Shipping 스스로 갖게 한 이유
     // Order.cancel() → "PENDING/PAID일 때만 취소 가능"을 스스로 아는 것과 동일한 원칙
     // 서비스 레이어에서 해당 if문을 매번 반복하면,
