@@ -1,5 +1,6 @@
 package com.jeeeun.demo.controller.response;
 
+import com.jeeeun.demo.domain.order.OrderItemStatus;
 import com.jeeeun.demo.domain.order.OrderStatus;
 import com.jeeeun.demo.domain.shipping.ShippingStatus;
 import com.jeeeun.demo.service.order.model.OrderDetailResult;
@@ -25,11 +26,14 @@ public record OrderDetailResponse(
 
     @Builder
     public record OrderDetailItemResponse(
+            Long orderItemId,
             String productName,
             String variantName,
             long quantity,
             BigDecimal unitPrice,
-            String thumbnailUrl
+            String thumbnailUrl,
+            OrderItemStatus status,
+            long cancelledQuantity
     ) {}
 
     @Builder
@@ -73,11 +77,14 @@ public record OrderDetailResponse(
                 .createdAt(result.createdAt())
                 .items(result.items().stream()
                         .map(item -> OrderDetailItemResponse.builder()
+                                .orderItemId(item.orderItemId())
                                 .productName(item.productName())
                                 .variantName(item.variantName())
                                 .quantity(item.quantity())
                                 .unitPrice(item.unitPrice())
                                 .thumbnailUrl(item.thumbnailUrl())
+                                .status(item.status())
+                                .cancelledQuantity(item.cancelledQuantity())
                                 .build())
                         .toList()
                 )

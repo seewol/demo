@@ -46,6 +46,7 @@ public enum ErrorCode {
     CANNOT_DELAY_SHIPPING(HttpStatus.BAD_REQUEST, "지연 처리를 할 수 없는 배송 상태입니다."),
     CANNOT_START_SHIPPING(HttpStatus.BAD_REQUEST, "배송을 시작할 수 없는 상태입니다."),
     CANNOT_COMPLETE_DELIVERY(HttpStatus.BAD_REQUEST, "배송을 완료할 수 없는 상태입니다."),
+    CANNOT_CANCEL_SHIPPED_ORDER(HttpStatus.BAD_REQUEST, "이미 배송이 시작된 주문은 취소할 수 없습니다."),
 
     // 재고
     OUT_OF_STOCK(HttpStatus.CONFLICT, "상품 재고가 부족합니다."),

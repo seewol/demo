@@ -4,6 +4,7 @@ import com.jeeeun.demo.common.error.BusinessException;
 import com.jeeeun.demo.common.error.ErrorCode;
 import com.jeeeun.demo.common.jpa.BaseTimeEntity;
 import com.jeeeun.demo.domain.shipping.Shipping;
+import com.jeeeun.demo.domain.shipping.ShippingStatus;
 import com.jeeeun.demo.domain.user.User;
 import jakarta.persistence.*;
 import lombok.*;
@@ -63,6 +64,32 @@ public class Order extends BaseTimeEntity {
         if (this.getStatus() != OrderStatus.PENDING && this.getStatus() != OrderStatus.PAID) {
             throw new BusinessException(ErrorCode.CANNOT_CANCEL_ORDER);
         }
+
+        // 배송이 이미 시작됐으면 취소 불가 (SHIPPING/DELIVERED) ─ 이후엔 반품 처리로 진행
+        // shipping null 체크도 한 번 해 주기
+        if (this.shipping != null
+                && (this.shipping.getStatus() == ShippingStatus.SHIPPING
+                || this.shipping.getStatus() == ShippingStatus.DELIVERED)) {
+            throw new BusinessException(ErrorCode.CANNOT_CANCEL_SHIPPED_ORDER);
+        }
+
+        // 개별 아이템들도 같이 취소 처리
+        // (이미 부분취소된 아이템은 남은 수량만큼만)
+        for (OrderItem item : this.orderItems) {
+            long remainingQuantity = item.getQuantity() - item.getCancelledQuantity();
+            if (remainingQuantity > 0) {
+                item.cancel(remainingQuantity); // OrderItem.cancel() 재사용 → cancelledQuantity/status 자동 갱신
+            }
+            // remainingQuantity == 0인 아이템(이미 전량 취소된)은 건너뜀
+            // 안 그러면 OrderItem.cancel() 안의 "이미 CANCELLED면 예외" 규칙에 걸림!
+        }
+
+        // 배송도 같이 취소 처리
+        // 위에서 이미 SHIPPING/DELIVERED 걸러져서, 여기 도달했으면 PREPARING/DELAYED 상태일 것.
+        if (this.shipping != null) {
+            this.shipping.cancel();
+        }
+
         this.status = OrderStatus.CANCELLED;
     }
 
@@ -78,7 +105,7 @@ public class Order extends BaseTimeEntity {
     // 2 : 취소 후 남은 아이템이 전부 취소 상태면 Order 전체도 자동으로 CANCELLED 전환
     public void cancelItem(Long orderItemId, long cancelQuantity) {
 
-        if(this.status != OrderStatus.PENDING && this.status != OrderStatus.PAID) {
+        if (this.status != OrderStatus.PENDING && this.status != OrderStatus.PAID) {
             throw new BusinessException(ErrorCode.CANNOT_CANCEL_ORDER);
         }
 
