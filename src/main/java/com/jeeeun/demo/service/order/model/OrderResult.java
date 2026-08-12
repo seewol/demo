@@ -24,10 +24,11 @@ public record OrderResult(
     @Builder
     public record OrderItemResult(
             Long orderItemId,           // 부분 취소 API 호출 시 필요
-            String productName,         // 상품명
-            String productVariantName,  // 조합명 (ex. "white / M")
+            String productName,         // 상품명 (OrderItem 엔티티에 스냅샷 저장)
+            String productVariantName,  // 조합명 (ex. "white / M"), (OrderItem 엔티티에 스냅샷 저장)
             long quantity,              // 수량
-            BigDecimal unitPrice,       // 단가
+            BigDecimal unitPrice,       // 단가 (OrderItem 엔티티에 스냅샷 저장)
+            BigDecimal additionalPrice, // 옵션 추가금 (OrderItem 엔티티에 스냅샷 저장)
             String thumbnailUrl,        // 대표 이미지 URL (OrderItem 엔티티에 스냅샷 저장)
             OrderItemStatus status,
             long cancelledQuantity      // 취소된 수량 (누적)
@@ -47,6 +48,7 @@ public record OrderResult(
                                         .productVariantName(item.getProductVariantName())
                                         .quantity(item.getQuantity())
                                         .unitPrice(item.getUnitPrice())
+                                        .additionalPrice(item.getAdditionalPrice())
                                         .thumbnailUrl(item.getThumbnailUrl())
                                         .status(item.getStatus())
                                         .cancelledQuantity(item.getCancelledQuantity())
