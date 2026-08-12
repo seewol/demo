@@ -47,6 +47,11 @@ public class OrderItem extends BaseTimeEntity {
     @Column(name = "unit_price", nullable = false)
     private BigDecimal unitPrice;
 
+    // 주문 시점 옵션 추가금
+    // unitPrice에 하반되어 있지만, 정가/옵션가/할인가 분리 노출을 위해 별도로 필요함.
+    @Column(name = "additional_price", nullable = false)
+    private BigDecimal additionalPrice;
+
     // 할인 적용 후 실제 결제한 금액 (할인 없으면 unitPrice랑 동일)
     @Column(name = "discounted_price", nullable = false)
     private BigDecimal discountedPrice;
@@ -68,7 +73,7 @@ public class OrderItem extends BaseTimeEntity {
     public static OrderItem from(
             Order order, ProductVariant variant, long quantity,
             String productName, String productVariantName,
-            BigDecimal unitPrice, BigDecimal discountedPrice, String thumbnailUrl
+            BigDecimal unitPrice, BigDecimal additionalPrice, BigDecimal discountedPrice, String thumbnailUrl
     ) {
         OrderItem item = new OrderItem();
         item.order = order;
@@ -77,6 +82,7 @@ public class OrderItem extends BaseTimeEntity {
         item.productName = productName;
         item.productVariantName = productVariantName;
         item.unitPrice = unitPrice;
+        item.additionalPrice = additionalPrice != null ? additionalPrice : BigDecimal.ZERO;
         item.discountedPrice = discountedPrice;
         item.thumbnailUrl = thumbnailUrl;
         item.status = OrderItemStatus.ORDERED;

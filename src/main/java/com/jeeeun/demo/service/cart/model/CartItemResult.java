@@ -14,6 +14,8 @@ public record CartItemResult(
         String productName,
         String variantName,
         BigDecimal salePrice,
+        BigDecimal additionalPrice,
+        Integer discountRate,
         BigDecimal discountedPrice,
         long quantity,
         boolean isSoldOut
@@ -51,6 +53,8 @@ public record CartItemResult(
                 .productName(product.getName())
                 .variantName(cartItem.getProductVariant().getVariantName())
                 .salePrice(product.getSalePrice())
+                .additionalPrice(additionalPrice != null ? additionalPrice : BigDecimal.ZERO)
+                .discountRate(product.isDiscounted() ? product.getDiscountRate() : null)
                 .discountedPrice(discountedPrice)
                 .quantity(cartItem.getQuantity())
                 .isSoldOut(isSoldOut)

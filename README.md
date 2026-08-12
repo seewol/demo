@@ -291,7 +291,7 @@ Product
 **리팩토링**
 - [x] 배송비 + 배송 도메인
 - [x] 아이템 단위 부분 취소 (라인 단위 → 수량 단위로 확장 완료)
-- [ ] 주문상세에 아이템별 취소상태 노출 (OrderItemResult/OrderDetailItemResult에 orderItemId·status·cancelledQuantity 추가, cancelOrder()도 아이템별 상태 반영하도록 확장)
+- [x] 주문상세에 아이템별 취소상태 노출 (OrderItemResult/OrderDetailItemResult에 orderItemId·status·cancelledQuantity 추가, cancelOrder()도 아이템별 상태 반영하도록 확장)
 - [ ] 장바구니 + 주문상세 additionalPrice 분리 표시
 - [ ] cancelOrder reason 파라미터화
 - [ ] 무통장입금 (가상계좌) + Webhook

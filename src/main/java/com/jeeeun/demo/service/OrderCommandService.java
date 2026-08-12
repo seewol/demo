@@ -141,6 +141,7 @@ public class OrderCommandService {
 
                 ProductVariant variant = cartItem.getProductVariant();
                 Product product = variant.getProduct();
+                BigDecimal additionalPrice = variant.getAdditionalPrice() != null ? variant.getAdditionalPrice() : BigDecimal.ZERO;
 
                 // 정가 : 주문 시점 가격 고정 (스냅샷 의미)
                 BigDecimal unitPrice = product.getSalePrice()
@@ -164,6 +165,7 @@ public class OrderCommandService {
                                 product.getName(),
                                 variant.getVariantName(),
                                 unitPrice,
+                                additionalPrice,
                                 discountedPrice,
                                 thumbnailUrl
                         )
@@ -308,6 +310,7 @@ public class OrderCommandService {
                             product.getName(),
                             variant.getVariantName(),
                             unitPrice,
+                            additionalPrice,
                             discountedPrice,
                             thumbnailUrl
                     )

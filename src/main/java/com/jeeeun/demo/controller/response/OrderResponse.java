@@ -29,6 +29,7 @@ public record OrderResponse(
             String productVariantName,  // 조합명 (ex. "white / M")
             long quantity,              // 수량
             BigDecimal unitPrice,       // 단가
+            BigDecimal additionalPrice,
             String thumbnailUrl,        // 대표 이미지 URL
             OrderItemStatus status,
             long cancelledQuantity
@@ -48,6 +49,7 @@ public record OrderResponse(
                                         .productVariantName(item.productVariantName())
                                         .quantity(item.quantity())
                                         .unitPrice(item.unitPrice())
+                                        .additionalPrice(item.additionalPrice())
                                         .thumbnailUrl(item.thumbnailUrl())
                                         .status(item.status())
                                         .cancelledQuantity(item.cancelledQuantity())

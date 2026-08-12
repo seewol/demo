@@ -31,6 +31,7 @@ public record OrderDetailResponse(
             String variantName,
             long quantity,
             BigDecimal unitPrice,
+            BigDecimal additionalPrice,
             String thumbnailUrl,
             OrderItemStatus status,
             long cancelledQuantity
@@ -82,6 +83,7 @@ public record OrderDetailResponse(
                                 .variantName(item.variantName())
                                 .quantity(item.quantity())
                                 .unitPrice(item.unitPrice())
+                                .additionalPrice(item.additionalPrice())
                                 .thumbnailUrl(item.thumbnailUrl())
                                 .status(item.status())
                                 .cancelledQuantity(item.cancelledQuantity())
