@@ -9,7 +9,9 @@ import java.time.LocalDateTime;
 public record OrderCancelResponse(
 
         Long id,
-        String status,  // CANCELLED 고정
+        String status,
+        String reasonCode,
+        String reasonDescription,
         LocalDateTime updatedAt
 
 ) {
@@ -17,6 +19,8 @@ public record OrderCancelResponse(
         return OrderCancelResponse.builder()
                 .id(result.orderId())
                 .status(result.status())
+                .reasonCode(result.reason().name())
+                .reasonDescription(result.reason().getDescription())
                 .updatedAt(result.updatedAt())
                 .build();
     }

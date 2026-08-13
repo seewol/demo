@@ -1,6 +1,7 @@
 package com.jeeeun.demo.controller;
 
 import com.jeeeun.demo.controller.request.DirectOrderCreateRequest;
+import com.jeeeun.demo.controller.request.OrderCancelRequest;
 import com.jeeeun.demo.controller.request.OrderCreateRequest;
 import com.jeeeun.demo.controller.request.OrderItemCancelRequest;
 import com.jeeeun.demo.controller.response.*;
@@ -114,14 +115,15 @@ public class OrderController {
     @ApiResponse(responseCode = "200", description = "주문 취소 성공")
     @PatchMapping("/{orderId}/cancel")
     public OrderCancelResponse cancelOrder(
-            @PathVariable Long orderId
-    ) {
+            @PathVariable Long orderId,
+            @Valid @RequestBody OrderCancelRequest request
+            ) {
 
         Long userId = (Long) SecurityContextHolder.getContext()
                 .getAuthentication()
                 .getPrincipal();
 
-        OrderCancelResult result = orderCommandService.cancelOrder(orderId, userId);
+        OrderCancelResult result = orderCommandService.cancelOrder(request.toCommand(orderId, userId));
 
         return OrderCancelResponse.from(result);
     }
