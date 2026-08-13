@@ -187,7 +187,7 @@ public class OrderCommandService {
         } catch (BusinessException e) {
             // ★ 결제는 성공했으나 주문 생성 실패 → 포트원에 자동 환불 요청
             // 환불 후 예외 다시 던져서 @Transactional 롤백을 유도해야 함.
-            portOneClient.cancelPayment(command.impUid());
+            portOneClient.cancelPayment(command.impUid(), "결제 후 주문 생성 실패");
             throw e;
         }
 
@@ -323,7 +323,7 @@ public class OrderCommandService {
 
         } catch (BusinessException e) {
             // NOTE : 결제 성공 후 주문 생성 실패 → 포트원 자동 환불
-            portOneClient.cancelPayment(command.impUid());
+            portOneClient.cancelPayment(command.impUid(), "결제 후 주문 생성 실패");
             throw e;
         }
 
@@ -360,14 +360,14 @@ public class OrderCommandService {
 
     // 주문 취소
     @Transactional
-    public OrderCancelResult cancelOrder(Long orderId, Long userId) {
+    public OrderCancelResult cancelOrder(OrderCancelCommand command) {
 
         // ★ 1 : 주문 조회
-        Order order = orderRepository.findWithItemsById(orderId)
+        Order order = orderRepository.findWithItemsById(command.orderId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_ORDER));
 
         // ★ 2 : 본인 주문인지 검증
-        if(!order.getUser().getId().equals(userId)) {
+        if (!order.getUser().getId().equals(command.userId())) {
             throw new BusinessException(ErrorCode.FORBIDDEN);
         }
 
@@ -381,13 +381,13 @@ public class OrderCommandService {
             }
         }
 
-        // ★ 4 : 취소 가능 상태인지 검증 + 주문 상태 변경 (CANCELLED)
-        order.cancel();
+        // ★ 4 : 취소 가능 상태인지 검증 + 주문 상태 변경(CANCELLED) + 취소 사유 저장
+        order.cancel(command.reason());
 
-        // ★ 5 : PAID 상태의 주문 → 포트원에 환불 요청
+        // ★ 5 : PAID 상태의 주문 → 포트원에 환불 요청 (취소 사유도 같이 전달)
         // PENDING은 결제 전이기 때문에 환불이 불필요.
         if (order.getImpUid() != null) {
-            portOneClient.cancelPayment(order.getImpUid());
+            portOneClient.cancelPayment(order.getImpUid(), command.reason().getDescription());
         }
 
         // ★ 6 : 3에서 미리 캡쳐해둔 잔여 수량만큼 재고 복구
@@ -402,7 +402,7 @@ public class OrderCommandService {
             productStockRepository
                     .findByProductVariant_Id(item.getProductVariant().getId())
                     .ifPresent(stock -> stock.increase(remainingQuantity));
-                    // 재고 row 있으면 복구, 없으면 스킵
+            // 재고 row 있으면 복구, 없으면 스킵
         }
 
         // note : 재고 없으면 에러 띄우는 방식
@@ -442,7 +442,7 @@ public class OrderCommandService {
         if (order.getImpUid() != null) {
             BigDecimal refundAmount = targetItem.getDiscountedPrice()
                     .multiply(BigDecimal.valueOf(command.cancelQuantity()));
-            portOneClient.cancelPayment(order.getImpUid(), refundAmount);
+            portOneClient.cancelPayment(order.getImpUid(), refundAmount, "상품 부분 취소");
         }
 
         // ★ 6 : 취소한 아이템만큼만 재고 복구

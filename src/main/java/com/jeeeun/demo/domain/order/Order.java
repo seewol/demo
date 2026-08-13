@@ -48,6 +48,10 @@ public class Order extends BaseTimeEntity {
     @Column(name = "imp_uid")
     private String impUid;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "cancel_reason") // 취소 사유 (취소 안 된 주문은 null)
+    private CancelReason cancelReason;
+
 
     public static Order from(User user, BigDecimal totalPrice, String impUid) {
         Order order = new Order();
@@ -59,7 +63,7 @@ public class Order extends BaseTimeEntity {
     }
 
     // ★ 주문 상품 전체 취소
-    public void cancel() {
+    public void cancel(CancelReason reason) {
         // 취소는 PENDING, PAID 상태에서만 가능
         if (this.getStatus() != OrderStatus.PENDING && this.getStatus() != OrderStatus.PAID) {
             throw new BusinessException(ErrorCode.CANNOT_CANCEL_ORDER);
@@ -91,6 +95,7 @@ public class Order extends BaseTimeEntity {
         }
 
         this.status = OrderStatus.CANCELLED;
+        this.cancelReason = reason;
     }
 
 
