@@ -50,7 +50,8 @@ public class SecurityConfig {
                         auth.requestMatchers(
                                 "/auth/**",         // AuthController 내 모든 엔드포인트 커버
                                 "/swagger-ui/**",   // Swagger UI
-                                "/v3/api-docs/**"   // Swagger API 문서
+                                "/v3/api-docs/**",  // Swagger API 문서
+                                "/webhooks/**"      // 웹훅
                             ).permitAll()   // 위 URL 들은 토큰 없어도 접근 가능
                         .requestMatchers(HttpMethod.GET, "/products", "/products/**").permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")  // ADMIN만 접근 가능

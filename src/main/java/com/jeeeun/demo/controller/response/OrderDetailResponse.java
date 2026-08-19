@@ -20,7 +20,13 @@ public record OrderDetailResponse(
         LocalDateTime createdAt,
 
         List<OrderDetailItemResponse> items,
-        ShippingResponse shipping
+        ShippingResponse shipping,
+
+        // 가상계좌 정보들 (무통장 입금 주문일 때만 값 채워지고, 그 외는 전부 null)
+        String vbankName,
+        String vbankNum,
+        String vbankHolder,
+        LocalDateTime vbankDueDate
 
 ) {
 
@@ -94,6 +100,10 @@ public record OrderDetailResponse(
                 .shipping(result.shipping() != null
                         ? ShippingResponse.from(result.shipping())
                         : null)
+                .vbankName(result.vbankName())
+                .vbankNum(result.vbankNum())
+                .vbankHolder(result.vbankHolder())
+                .vbankDueDate(result.vbankDueDate())
                 .build();
     }
 }

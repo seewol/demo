@@ -10,6 +10,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -52,6 +53,21 @@ public class Order extends BaseTimeEntity {
     @Column(name = "cancel_reason") // 취소 사유 (취소 안 된 주문은 null)
     private CancelReason cancelReason;
 
+    // ─ 가상계좌(무통장입금) 정보 ─
+    // 카드결제 등 다른 결제수단인 주문은 이 4개 컬럼이 전부 null
+    // (별도 도메인 안 뽑고 Order에 nullable 컬럼으로 둔 이유: 지금 규모에선 이게 훨 단순)
+    @Column(name = "vbank_name")
+    private String vbankName;      // 가상계좌 은행명 (예: 신한은행)
+
+    @Column(name = "vbank_num")
+    private String vbankNum;       // 가상계좌 번호
+
+    @Column(name = "vbank_holder")
+    private String vbankHolder;    // 예금주명
+
+    @Column(name = "vbank_due_date")
+    private LocalDateTime vbankDueDate;  // 입금기한 (이 시각 지나면 계좌 만료)
+
 
     public static Order from(User user, BigDecimal totalPrice, String impUid) {
         Order order = new Order();
@@ -61,6 +77,44 @@ public class Order extends BaseTimeEntity {
         order.impUid = impUid;
         return order;
     }
+
+
+    // ★ 가상계좌(무통장입금) 주문 생성
+    // 프론트에서 IMP.request_pay(pay_method: 'vbank')로
+    // 계좌가 '발급'만 된 상태(아직 미입금)로 들어오는 케이스.
+    // 그래서 PAID가 아니라 PENDING으로 생성함.
+    public static Order fromVirtualAccount(
+            User user,
+            BigDecimal totalPrice,
+            String impUid,
+            String vbankName,
+            String vbankNum,
+            String vbankHolder,
+            LocalDateTime vbankDueDate
+    ) {
+        Order order = new Order();
+        order.user = user;
+        order.status = OrderStatus.PENDING; // 아직 입금 전 (계좌만 발급됨)
+        order.totalPrice = totalPrice;
+        order.impUid = impUid;
+        order.vbankName = vbankName;
+        order.vbankNum = vbankNum;
+        order.vbankHolder = vbankHolder;
+        order.vbankDueDate = vbankDueDate;
+        return order;
+    }
+
+
+    // ★ 가상계좌 입금 완료 처리 (Webhook에서 호출)
+    // PENDING 상태일 때만 PAID로 전환하는 규칙.
+    // 이미 PAID거나 CANCELLED인 주문에 웹훅이 중복으로 와도 예외 처리 없이 조용히 무시한다.
+    // (포트원은 우리 서버가 200을 안 주면 같은 웹훅을 재시도하기 때문에, 중복 호출 자체는 정상)
+    public void completePayment() {
+        if (this.status == OrderStatus.PENDING) {
+            this.status = OrderStatus.PAID;
+        }
+    }
+
 
     // ★ 주문 상품 전체 취소
     public void cancel(CancelReason reason) {
@@ -104,6 +158,7 @@ public class Order extends BaseTimeEntity {
     // '나머지 상품들도 다 취소됐는지' 판단해 Order 전체 상태를 바꾸는 규칙은
     // OrderItem 혼자서 알 수 없고, Order만 알 수 있는 정보이기 때문이다.
     // → 고로 해당 판단 로직은 Order가 갖고 있음이 마땅!
+
 
     // ★ 주문 상품 부분 취소 (아이템 단위)
     // 1 : 취소 대상 아이템을 찾아서 자신 규칙대로 취소할 것 (OrderItem.cancel(cancelQuantity))

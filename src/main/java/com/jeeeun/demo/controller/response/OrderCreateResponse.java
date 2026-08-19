@@ -11,9 +11,15 @@ import java.time.LocalDateTime;
 public record OrderCreateResponse(
 
         Long id,
-        OrderStatus status,     // 주문 상태 (결제 완료 후 생성되므로 PAID)
-        BigDecimal totalPrice,  // 총 주문 금액
-        LocalDateTime createdAt  // 주문 생성 시각
+        OrderStatus status,         // 주문 상태 (결제 완료 후 생성되므로 PAID)
+        BigDecimal totalPrice,      // 총 주문 금액
+        LocalDateTime createdAt,    // 주문 생성 시각
+
+        // 가상계좌 정보들 (무통장 입금 주문일 때만 값 채워지고, 그 외는 전부 null)
+        String vbankName,
+        String vbankNum,
+        String vbankHolder,
+        LocalDateTime vbankDueDate
 
 ) {
     public static OrderCreateResponse from(OrderCreateResult result) {
@@ -22,6 +28,10 @@ public record OrderCreateResponse(
                 .status(result.status())
                 .totalPrice(result.totalPrice())
                 .createdAt(result.createdAt())
+                .vbankName(result.vbankName())
+                .vbankNum(result.vbankNum())
+                .vbankHolder(result.vbankHolder())
+                .vbankDueDate(result.vbankDueDate())
                 .build();
     }
 }
