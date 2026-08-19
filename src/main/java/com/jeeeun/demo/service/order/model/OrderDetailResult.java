@@ -21,7 +21,13 @@ public record OrderDetailResult(
         LocalDateTime createdAt,
 
         List<OrderDetailItemResult> items,
-        ShippingResult shipping
+        ShippingResult shipping,
+
+        // 가상계좌 정보들 (무통장 입금 주문일 때만 값 채워지고, 그 외는 전부 null)
+        String vbankName,
+        String vbankNum,
+        String vbankHolder,
+        LocalDateTime vbankDueDate
 
 ) {
 
@@ -99,6 +105,10 @@ public record OrderDetailResult(
                 .shipping(order.getShipping() != null
                         ? ShippingResult.from(order.getShipping())
                         : null)
+                .vbankName(order.getVbankName())
+                .vbankNum(order.getVbankNum())
+                .vbankHolder(order.getVbankHolder())
+                .vbankDueDate(order.getVbankDueDate())
                 .build();
     }
 }

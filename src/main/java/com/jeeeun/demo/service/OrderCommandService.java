@@ -26,7 +26,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -53,12 +56,19 @@ public class OrderCommandService {
         PortOnePaymentResponse.PortOnePaymentBody payment =
                 portOneClient.getPayment(command.impUid());
 
-        // 결제 상태 ≠ "paid" → 결제 미완료 판단 → 예외
-        if (!"paid".equals(payment.status())) {
+        // 결제 상태 확인
+        // paid : 카드 등으로 결제까지 완료 → 주문을 PAID로 생성
+        // ready : 가상계좌가 '발급'만 됐고 아직 입금 전 → 주문을 PENDING으로 생성
+        //          (실제 PAID 전환은 나중에 웹훅 들어왔을 때 처리)
+        // 위 두 상태가 아니면 결제 자체가 잘못된 것으로 예외 처리를 한다.
+        boolean isPaid = "paid".equals(payment.status());
+        boolean isVirtualAccountIssued = "ready".equals(payment.status());
+
+        if (!isPaid && !isVirtualAccountIssued) {
             throw new BusinessException(ErrorCode.INVALID_PAYMENT);
         }
 
-        // 포트원에서 조회한 실 결제 금액
+        // 포트원에서 조회한 결제(예정) 금액 ─ 가상계좌면 '입금해야 하는' 금액
         BigDecimal paidAmount = payment.amount();
 
         try {
@@ -120,7 +130,19 @@ public class OrderCommandService {
             // 소수점 자릿수 때문인데 이는 순수하게 값만 비교, 같으면 0 반환
 
             // ★ 5 : Order 생성
-            Order order = orderRepository.save(Order.from(user, totalPrice, payment.impUid()));
+            // 결제 수단에 따라 PAID 또는 PENDING(가상계좌 입금 대기)으로 분기
+            Order order = orderRepository.save(
+                    isPaid
+                            ? Order.from(user, totalPrice, payment.impUid())
+                            : Order.fromVirtualAccount(
+                                    user,
+                                    totalPrice,
+                                    payment.impUid(),
+                                    payment.vbankName(),
+                                    payment.vbankNum(),
+                                    payment.vbankHolder(),
+                                    toVbankDueDate(payment.vbankDate()))
+            );
 
             // ★ 5-1 : Shipping 생성 (Order와 1:1 연관 관계, cascade로 자동 저장됨!)
             Shipping.from(
@@ -203,11 +225,15 @@ public class OrderCommandService {
         PortOnePaymentResponse.PortOnePaymentBody payment =
                 portOneClient.getPayment(command.impUid());
 
-        if (!"paid".equals(payment.status())) {
+        // createOrder()와 동일한 규칙: paid(결제완료) 또는 ready(가상계좌 발급) 상태만 허용
+        boolean isPaid = "paid".equals(payment.status());
+        boolean isVirtualAccountIssued = "ready".equals(payment.status());
+
+        if (!isPaid && !isVirtualAccountIssued) {
             throw new BusinessException(ErrorCode.INVALID_PAYMENT);
         }
 
-        BigDecimal paidAmount = payment.amount();   // 결제 금액
+        BigDecimal paidAmount = payment.amount();   // 결제(예정) 금액
 
         // NOTE: 결제 검증 통과 후 로직 ─ 실패 시 자동 환불
         try {
@@ -286,7 +312,20 @@ public class OrderCommandService {
                     .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_PRODUCT_IMAGE));
 
             // ★ 8 : Order 생성
-            Order order = orderRepository.save(Order.from(user, totalPrice, payment.impUid()));
+            // 결제 수단에 따라 PAID 또는 PENDING(가상계좌 입금대기)로 분기
+            Order order = orderRepository.save(
+                    isPaid
+                            ? Order.from(user, totalPrice, payment.impUid())
+                            : Order.fromVirtualAccount(
+                            user,
+                            totalPrice,
+                            payment.impUid(),
+                            payment.vbankName(),
+                            payment.vbankNum(),
+                            payment.vbankHolder(),
+                            toVbankDueDate(payment.vbankDate())
+                    )
+            );
 
             // ★ 8-1 : Shipping 생성 (cascade로 자동 저장)
             Shipping.from(
@@ -327,6 +366,16 @@ public class OrderCommandService {
             throw e;
         }
 
+    }
+
+
+    // 포트원 vbank_date(초 단위 Unix Timestamp) → LocalDateTime 변환
+    // 가상계좌가 아닌 결제 → 'payment.vbankDate() == null'이면 그대로 null 반환
+    private LocalDateTime toVbankDueDate(Long epochSeconds) {
+        if (epochSeconds == null) {
+            return null;
+        }
+        return LocalDateTime.ofInstant(Instant.ofEpochSecond(epochSeconds), ZoneId.systemDefault());
     }
 
 

@@ -1,7 +1,7 @@
 package com.jeeeun.demo.domain.order;
 
 public enum OrderStatus {
-    PENDING,    // 결제 대기 (무통장 입금 등 추후 사용 예정)
+    PENDING,    // 결제 대기 (무통장입금 - 가상계좌 발급됐으나 입금 전. 웹훅 오기 전 상태. → Webhook으로 PAID 전환됨)
     PAID,       // 결제 완료 (포트원 결제 검증 통과 후 생성)
     CANCELLED   // 취소됨
 
