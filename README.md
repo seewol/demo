@@ -292,9 +292,11 @@ Product
 - [x] 배송비 + 배송 도메인
 - [x] 아이템 단위 부분 취소 (라인 단위 → 수량 단위로 확장 완료)
 - [x] 주문상세에 아이템별 취소상태 노출 (OrderItemResult/OrderDetailItemResult에 orderItemId·status·cancelledQuantity 추가, cancelOrder()도 아이템별 상태 반영하도록 확장)
-- [ ] 장바구니 + 주문상세 additionalPrice 분리 표시
-- [ ] cancelOrder reason 파라미터화
-- [ ] 무통장입금 (가상계좌) + Webhook
+- [x] 장바구니 + 주문상세 additionalPrice 분리 표시
+- [x] cancelOrder reason 파라미터화
+- [x] 무통장입금 (가상계좌) + Webhook (단위 테스트 + ngrok 실제 Webhook 수신 테스트까지 완료)
+- [ ] OrderCommandService.createOrder() / createDirectOrder() 중복 코드 리팩토링
+- [ ] 가상계좌 입금기한 만료 시 자동취소 + 재고복구 스케줄러
 - [ ] 상품 이미지 수정 API
 - [ ] 상품 옵션/조합 수정 API
 
