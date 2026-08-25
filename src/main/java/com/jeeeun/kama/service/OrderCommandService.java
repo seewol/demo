@@ -2,8 +2,10 @@ package com.jeeeun.kama.service;
 
 import com.jeeeun.kama.common.error.BusinessException;
 import com.jeeeun.kama.common.error.ErrorCode;
+import com.jeeeun.kama.domain.order.CancelReason;
 import com.jeeeun.kama.domain.order.Order;
 import com.jeeeun.kama.domain.order.OrderItem;
+import com.jeeeun.kama.domain.order.OrderStatus;
 import com.jeeeun.kama.domain.product.Product;
 import com.jeeeun.kama.domain.product.ProductImage;
 import com.jeeeun.kama.domain.product.ProductStock;
@@ -334,65 +336,6 @@ public class OrderCommandService {
     }
 
 
-    // 포트원 vbank_date(초 단위 Unix Timestamp) → LocalDateTime 변환
-    // 가상계좌가 아닌 결제 → 'payment.vbankDate() == null'이면 그대로 null 반환
-    private LocalDateTime toVbankDueDate(Long epochSeconds) {
-        if (epochSeconds == null) {
-            return null;
-        }
-        return LocalDateTime.ofInstant(Instant.ofEpochSecond(epochSeconds), ZoneId.systemDefault());
-    }
-
-
-    // 할인 여부 확인 & 적용 후 실결제금액 계산 (Product 기준 — createDirectOrder()에서도 재사용)
-    private BigDecimal calculateDiscountedPrice(Product product, BigDecimal additionalPrice) {
-
-        BigDecimal salePrice = product.getSalePrice();
-        BigDecimal addPrice = additionalPrice != null ? additionalPrice : BigDecimal.ZERO;
-
-        if (product.isDiscounted() && product.getDiscountRate() != null) {
-            BigDecimal multiplier = BigDecimal.ONE
-                    .subtract(BigDecimal.valueOf(product.getDiscountRate())
-                            .divide(BigDecimal.valueOf(100)));
-
-            return salePrice
-                    .multiply(multiplier)
-                    .setScale(0, RoundingMode.HALF_UP)
-                    .add(addPrice);
-        }
-
-        return salePrice.add(addPrice);
-    }
-
-    // 할인 여부 확인 & 적용 후 실결제금액 계산
-    private BigDecimal calculateDiscountedPrice(CartItem cartItem) {
-        Product product = cartItem.getProductVariant().getProduct();
-        BigDecimal additionalPrice = cartItem.getProductVariant().getAdditionalPrice();
-        return calculateDiscountedPrice(product, additionalPrice);
-    }
-
-
-    // 결제 검증 결과 (payment 원본 + PAID 여부를 같이 리턴하기 위한 내부 전용 record)
-    private record PaymentValidation(
-            PortOnePaymentResponse.PortOnePaymentBody payment,
-            boolean isPaid
-    ) {}
-
-    // 포트원 결제 상태 검증 — createOrder(), createDirectOrder() 공통
-    private PaymentValidation validatePayment(String impUid) {
-        PortOnePaymentResponse.PortOnePaymentBody payment = portOneClient.getPayment(impUid);
-
-        boolean isPaid = "paid".equals(payment.status());
-        boolean isVirtualAccountIssued = "ready".equals(payment.status());
-
-        if (!isPaid && !isVirtualAccountIssued) {
-            throw new BusinessException(ErrorCode.INVALID_PAYMENT);
-        }
-
-        return new PaymentValidation(payment, isPaid);
-    }
-
-
     // 주문 취소
     @Transactional
     public OrderCancelResult cancelOrder(OrderCancelCommand command) {
@@ -406,15 +349,8 @@ public class OrderCommandService {
             throw new BusinessException(ErrorCode.FORBIDDEN);
         }
 
-        // ★ 3 : 재고 복구용 '잔여 수량'을 order.cancel() 호출 전 미리 캡쳐 (key: orderItemId)
-        // → order.cancel()이 cancelledQuantity를 다 채워서, 그 이후에 계산하면 항상 0이 나옴
-        Map<Long, Long> remainingByItemId = new HashMap<>();
-        for (OrderItem item : order.getOrderItems()) {
-            long remainingQuantity = item.getQuantity() - item.getCancelledQuantity();
-            if (remainingQuantity > 0) {
-                remainingByItemId.put(item.getId(), remainingQuantity);
-            }
-        }
+        // ★ 3 : 재고 복구용 '잔여 수량' 미리 캡쳐
+        Map<Long, Long> remainingByItemId = captureRemainingQuantities(order);
 
         // ★ 4 : 취소 가능 상태인지 검증 + 주문 상태 변경(CANCELLED) + 취소 사유 저장
         order.cancel(command.reason());
@@ -426,19 +362,7 @@ public class OrderCommandService {
         }
 
         // ★ 6 : 3에서 미리 캡쳐해둔 잔여 수량만큼 재고 복구
-        for (OrderItem item : order.getOrderItems()) {
-            Long remainingQuantity = remainingByItemId.get(item.getId());
-            // '키가 없을 수 있다' 그러므고 Long(Wrapper)로 받아서 null 체크!
-            // 그리고 Map<> 안에 들어가는 타입(제네릭)은 원시 타입 사용 불가
-            if (remainingQuantity == null) {
-                continue;   // 이미 전량 취소됐으므로, 복구할 재고가 없음
-            }
-
-            productStockRepository
-                    .findByProductVariant_Id(item.getProductVariant().getId())
-                    .ifPresent(stock -> stock.increase(remainingQuantity));
-            // 재고 row 있으면 복구, 없으면 스킵
-        }
+        restoreStock(order, remainingByItemId);
 
         // note : 재고 없으면 에러 띄우는 방식
         // .orElseThrow(()-> new BusinessException(ErrorCode.OUT_OF_STOCK));
@@ -490,5 +414,116 @@ public class OrderCommandService {
 
         return OrderItemCancelResult.from(order, targetItem);
     }
+
+
+    // 가상계좌 입금기한 만료된 주문 자동 취소 (스케줄러 전용)
+    @Transactional
+    public int expireVirtualAccountOrders() {
+        LocalDateTime now = LocalDateTime.now();
+        List<Order> expiredOrders = orderRepository.findExpiredVirtualAccountOrders(OrderStatus.PENDING, now);
+
+        for (Order order : expiredOrders) {
+            Map<Long, Long> remainingByItemId = captureRemainingQuantities(order);
+            order.cancel(CancelReason.VBANK_EXPIRED);
+
+            // 미입금 상태라 실제 환불은 아니지만,
+            // 발급된 가상계좌 막아둬야 만료 후 오입금되는 걸 방지할 수 있어 동일하게 호출!
+            if (order.getImpUid() != null) {
+                portOneClient.cancelPayment(
+                        order.getImpUid(), CancelReason.VBANK_EXPIRED.getDescription());
+            }
+
+            restoreStock(order, remainingByItemId);
+        }
+
+        return expiredOrders.size();
+    }
+
+
+    // ★ 포트원 vbank_date(초 단위 Unix Timestamp) → LocalDateTime 변환
+    // 가상계좌가 아닌 결제 → 'payment.vbankDate() == null'이면 그대로 null 반환
+    private LocalDateTime toVbankDueDate(Long epochSeconds) {
+        if (epochSeconds == null) {
+            return null;
+        }
+        return LocalDateTime.ofInstant(Instant.ofEpochSecond(epochSeconds), ZoneId.systemDefault());
+    }
+
+
+    // ★ 할인 여부 확인 & 적용 후 실결제금액 계산 (Product 기준 — createDirectOrder()에서도 재사용)
+    private BigDecimal calculateDiscountedPrice(Product product, BigDecimal additionalPrice) {
+
+        BigDecimal salePrice = product.getSalePrice();
+        BigDecimal addPrice = additionalPrice != null ? additionalPrice : BigDecimal.ZERO;
+
+        if (product.isDiscounted() && product.getDiscountRate() != null) {
+            BigDecimal multiplier = BigDecimal.ONE
+                    .subtract(BigDecimal.valueOf(product.getDiscountRate())
+                            .divide(BigDecimal.valueOf(100)));
+
+            return salePrice
+                    .multiply(multiplier)
+                    .setScale(0, RoundingMode.HALF_UP)
+                    .add(addPrice);
+        }
+
+        return salePrice.add(addPrice);
+    }
+
+    // ★ 할인 여부 확인 & 적용 후 실결제금액 계산
+    private BigDecimal calculateDiscountedPrice(CartItem cartItem) {
+        Product product = cartItem.getProductVariant().getProduct();
+        BigDecimal additionalPrice = cartItem.getProductVariant().getAdditionalPrice();
+        return calculateDiscountedPrice(product, additionalPrice);
+    }
+
+
+    // ★ 결제 검증 결과 (payment 원본 + PAID 여부를 같이 리턴하기 위한 내부 전용 record)
+    private record PaymentValidation(
+            PortOnePaymentResponse.PortOnePaymentBody payment,
+            boolean isPaid
+    ) {}
+
+    // ★ 포트원 결제 상태 검증 — createOrder(), createDirectOrder() 공통
+    private PaymentValidation validatePayment(String impUid) {
+        PortOnePaymentResponse.PortOnePaymentBody payment = portOneClient.getPayment(impUid);
+
+        boolean isPaid = "paid".equals(payment.status());
+        boolean isVirtualAccountIssued = "ready".equals(payment.status());
+
+        if (!isPaid && !isVirtualAccountIssued) {
+            throw new BusinessException(ErrorCode.INVALID_PAYMENT);
+        }
+
+        return new PaymentValidation(payment, isPaid);
+    }
+
+
+    // ★ 재고 복구용 '잔여 수량' → order.cancel() 호출 전 미리 캡쳐 (key : orderItemId)
+    // order.cancel()이 cancelledQuantity를 다 채워서, 그 이후 계산하면 늘 0이 나옴!!
+    private Map<Long, Long> captureRemainingQuantities(Order order) {
+        Map<Long, Long> remainingByItemId = new HashMap<>();
+        for (OrderItem item : order.getOrderItems()) {
+            long remainingQuantity = item.getQuantity() - item.getCancelledQuantity();
+            if (remainingQuantity > 0) {
+                remainingByItemId.put(item.getId(), remainingQuantity);
+            }
+        }
+        return remainingByItemId;
+    }
+
+    // ★ 위 captureRemainingQuantities()에서 캡쳐해둔 잔여 수량만큼 재고 복구
+    private void restoreStock(Order order, Map<Long, Long> remainingByItemId) {
+        for (OrderItem item : order.getOrderItems()) {
+            Long remainingQuantity = remainingByItemId.get(item.getId());
+            if (remainingQuantity == null) {
+                continue;   // 이미 전량 취소, 복구할 재고가 없음
+            }
+            productStockRepository
+                    .findByProductVariant_Id(item.getProductVariant().getId())
+                    .ifPresent(stock -> stock.increase(remainingQuantity));
+        }
+    }
+
 
 }
