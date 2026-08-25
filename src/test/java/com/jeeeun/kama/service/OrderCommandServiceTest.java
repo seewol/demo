@@ -1,5 +1,8 @@
 package com.jeeeun.kama.service;
 
+import com.jeeeun.kama.domain.order.CancelReason;
+import com.jeeeun.kama.domain.order.Order;
+import com.jeeeun.kama.domain.order.OrderItem;
 import com.jeeeun.kama.external.portone.PortOneClient;
 import com.jeeeun.kama.repository.order.OrderRepository;
 import com.jeeeun.kama.repository.product.ProductImageRepository;
@@ -34,7 +37,9 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.verify;
 
 // JUnit5 : 자바 개발자가 사용하는 테스팅 기반 프레임워크
 @ExtendWith(MockitoExtension.class) // Mockito 기능 사용을 JUnit5에게 알리는 어노테이션
@@ -229,6 +234,56 @@ class OrderCommandServiceTest {
         LocalDateTime expectedDueDate = LocalDateTime.ofInstant(
                 Instant.ofEpochSecond(vbankDateEpochSeconds), ZoneId.systemDefault());
         assertThat(result.vbankDueDate()).isEqualTo(expectedDueDate);
+    }
+
+
+    @Test
+    void 입금기한_지난_PENDING_주문_자동_만료_처리() {
+
+        // ── given ──────────────────────────────────────────
+
+        User user = User.from("지은", "jeeeunpark@gmail.com", "01012345678");
+
+        Product product = Product.builder()
+                .id(1L)
+                .name("텀블러")
+                .salePrice(BigDecimal.valueOf(10_000))
+                .isDiscounted(false)
+                .build();
+
+        ProductVariant variant = ProductVariant.from(product, null, null, null, "기본", null);
+        ProductStock stock = ProductStock.create(variant, 5);   // 현재 재고 5개
+
+        // 입금기한이 이미 지난 PENDING 주문
+        Order order = Order.fromVirtualAccount(
+                user, BigDecimal.valueOf(20_000), "imp_expired",
+                "국민은행", "1234567890", "홍길동",
+                LocalDateTime.now().minusDays(1)
+        );
+
+        OrderItem orderItem = OrderItem.from(
+                order, variant, 2, "텀블러", "기본",
+                BigDecimal.valueOf(10_000), BigDecimal.ZERO, BigDecimal.valueOf(10_000), "thumb.jpg"
+        );
+        order.getOrderItems().add(orderItem);
+
+        given(orderRepository.findExpiredVirtualAccountOrders(eq(OrderStatus.PENDING), any()))
+                .willReturn(List.of(order));
+        given(productStockRepository.findByProductVariant_Id(any()))
+                .willReturn(Optional.of(stock));
+
+        // ── when ───────────────────────────────────────────
+
+        int expiredCount = orderCommandService.expireVirtualAccountOrders();
+
+        // ── then ───────────────────────────────────────────
+
+        assertThat(expiredCount).isEqualTo(1);
+        assertThat(order.getStatus()).isEqualTo(OrderStatus.CANCELLED);
+        assertThat(order.getCancelReason()).isEqualTo(CancelReason.VBANK_EXPIRED);
+        assertThat(stock.getQuantity()).isEqualTo(7);   // 5(기존) + 2(복구) = 7
+
+        verify(portOneClient).cancelPayment("imp_expired", CancelReason.VBANK_EXPIRED.getDescription());
     }
 
 
