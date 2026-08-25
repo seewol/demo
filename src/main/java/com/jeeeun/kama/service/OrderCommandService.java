@@ -53,22 +53,9 @@ public class OrderCommandService {
     public OrderCreateResult createOrder(OrderCreateCommand command) {
 
         // ★ 1 : 포트원 결제 검증
-        PortOnePaymentResponse.PortOnePaymentBody payment =
-                portOneClient.getPayment(command.impUid());
-
-        // 결제 상태 확인
-        // paid : 카드 등으로 결제까지 완료 → 주문을 PAID로 생성
-        // ready : 가상계좌가 '발급'만 됐고 아직 입금 전 → 주문을 PENDING으로 생성
-        //          (실제 PAID 전환은 나중에 웹훅 들어왔을 때 처리)
-        // 위 두 상태가 아니면 결제 자체가 잘못된 것으로 예외 처리를 한다.
-        boolean isPaid = "paid".equals(payment.status());
-        boolean isVirtualAccountIssued = "ready".equals(payment.status());
-
-        if (!isPaid && !isVirtualAccountIssued) {
-            throw new BusinessException(ErrorCode.INVALID_PAYMENT);
-        }
-
-        // 포트원에서 조회한 결제(예정) 금액 ─ 가상계좌면 '입금해야 하는' 금액
+        PaymentValidation validation = validatePayment(command.impUid());
+        PortOnePaymentResponse.PortOnePaymentBody payment = validation.payment();
+        boolean isPaid = validation.isPaid();
         BigDecimal paidAmount = payment.amount();
 
         try {
@@ -166,11 +153,10 @@ public class OrderCommandService {
                 BigDecimal additionalPrice = variant.getAdditionalPrice() != null ? variant.getAdditionalPrice() : BigDecimal.ZERO;
 
                 // 정가 : 주문 시점 가격 고정 (스냅샷 의미)
-                BigDecimal unitPrice = product.getSalePrice()
-                        .add(variant.getAdditionalPrice() != null ? variant.getAdditionalPrice() : BigDecimal.ZERO);
+                BigDecimal unitPrice = product.getSalePrice().add(additionalPrice);
 
                 // 할인가 계산
-                BigDecimal discountedPrice = calculateDiscountedPrice(cartItem);
+                BigDecimal discountedPrice = calculateDiscountedPrice(product, additionalPrice);
 
                 // 썸네일 조회
                 String thumbnailUrl = productImageRepository.findThumbnailByProductId(product.getId())
@@ -222,18 +208,10 @@ public class OrderCommandService {
     public OrderCreateResult createDirectOrder(DirectOrderCreateCommand command) {
 
         // ★ 1 : 포트원 결제 검증
-        PortOnePaymentResponse.PortOnePaymentBody payment =
-                portOneClient.getPayment(command.impUid());
-
-        // createOrder()와 동일한 규칙: paid(결제완료) 또는 ready(가상계좌 발급) 상태만 허용
-        boolean isPaid = "paid".equals(payment.status());
-        boolean isVirtualAccountIssued = "ready".equals(payment.status());
-
-        if (!isPaid && !isVirtualAccountIssued) {
-            throw new BusinessException(ErrorCode.INVALID_PAYMENT);
-        }
-
-        BigDecimal paidAmount = payment.amount();   // 결제(예정) 금액
+        PaymentValidation validation = validatePayment(command.impUid());
+        PortOnePaymentResponse.PortOnePaymentBody payment = validation.payment();
+        boolean isPaid = validation.isPaid();
+        BigDecimal paidAmount = payment.amount();
 
         // NOTE: 결제 검증 통과 후 로직 ─ 실패 시 자동 환불
         try {
@@ -278,21 +256,8 @@ public class OrderCommandService {
             BigDecimal unitPrice = product.getSalePrice()
                     .add(additionalPrice != null ? additionalPrice : BigDecimal.ZERO);
 
-            // 할인가 계산
-            BigDecimal discountedPrice;
-            if (product.isDiscounted() && product.getDiscountRate() != null) {
-                // salePrice만 할인 적용 (additionalPrice는 제외)
-                BigDecimal multiplier = BigDecimal.ONE
-                        .subtract(BigDecimal.valueOf(product.getDiscountRate())
-                                .divide(BigDecimal.valueOf(100)));
-
-                discountedPrice = product.getSalePrice()
-                        .multiply(multiplier)
-                        .setScale(0, RoundingMode.HALF_UP)
-                        .add(additionalPrice != null ? additionalPrice : BigDecimal.ZERO);
-            } else {
-                discountedPrice = unitPrice;
-            }
+            // 할인가 계산 (공용 메서드 재사용)
+            BigDecimal discountedPrice = calculateDiscountedPrice(product, additionalPrice);
 
             // 총 금액 = 할인가 * 수량
             BigDecimal totalPrice = discountedPrice
@@ -379,31 +344,52 @@ public class OrderCommandService {
     }
 
 
-    // 할인 여부 확인 & 적용 후 실결제금액 계산
-    private BigDecimal calculateDiscountedPrice(CartItem cartItem) {
+    // 할인 여부 확인 & 적용 후 실결제금액 계산 (Product 기준 — createDirectOrder()에서도 재사용)
+    private BigDecimal calculateDiscountedPrice(Product product, BigDecimal additionalPrice) {
 
-        BigDecimal salePrice = cartItem.getProductVariant().getProduct().getSalePrice();
-        BigDecimal additionalPrice = cartItem.getProductVariant().getAdditionalPrice();
-        boolean isDiscounted = cartItem.getProductVariant().getProduct().isDiscounted();
-        Integer discountRate = cartItem.getProductVariant().getProduct().getDiscountRate();
+        BigDecimal salePrice = product.getSalePrice();
+        BigDecimal addPrice = additionalPrice != null ? additionalPrice : BigDecimal.ZERO;
 
-        // 할인가 (salePrice만 할인 적용 / 추가금은 예외)
-        if (isDiscounted && discountRate != null) {
+        if (product.isDiscounted() && product.getDiscountRate() != null) {
             BigDecimal multiplier = BigDecimal.ONE
-                    .subtract(BigDecimal.valueOf(discountRate)
+                    .subtract(BigDecimal.valueOf(product.getDiscountRate())
                             .divide(BigDecimal.valueOf(100)));
-
-            // note : 정가 10,000원, 할인율 10% → 10000 * (1 - 10/100) = 9,000원
 
             return salePrice
                     .multiply(multiplier)
                     .setScale(0, RoundingMode.HALF_UP)
-                    .add(additionalPrice != null ? additionalPrice : BigDecimal.ZERO);
+                    .add(addPrice);
         }
 
-        // 정가 (할인 X) + 추가금
-        return salePrice.add(additionalPrice != null ? additionalPrice : BigDecimal.ZERO);
+        return salePrice.add(addPrice);
+    }
 
+    // 할인 여부 확인 & 적용 후 실결제금액 계산
+    private BigDecimal calculateDiscountedPrice(CartItem cartItem) {
+        Product product = cartItem.getProductVariant().getProduct();
+        BigDecimal additionalPrice = cartItem.getProductVariant().getAdditionalPrice();
+        return calculateDiscountedPrice(product, additionalPrice);
+    }
+
+
+    // 결제 검증 결과 (payment 원본 + PAID 여부를 같이 리턴하기 위한 내부 전용 record)
+    private record PaymentValidation(
+            PortOnePaymentResponse.PortOnePaymentBody payment,
+            boolean isPaid
+    ) {}
+
+    // 포트원 결제 상태 검증 — createOrder(), createDirectOrder() 공통
+    private PaymentValidation validatePayment(String impUid) {
+        PortOnePaymentResponse.PortOnePaymentBody payment = portOneClient.getPayment(impUid);
+
+        boolean isPaid = "paid".equals(payment.status());
+        boolean isVirtualAccountIssued = "ready".equals(payment.status());
+
+        if (!isPaid && !isVirtualAccountIssued) {
+            throw new BusinessException(ErrorCode.INVALID_PAYMENT);
+        }
+
+        return new PaymentValidation(payment, isPaid);
     }
 
 
