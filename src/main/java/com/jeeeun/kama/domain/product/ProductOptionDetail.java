@@ -1,0 +1,29 @@
+package com.jeeeun.kama.domain.product;
+
+import jakarta.persistence.*;
+import lombok.*;
+
+@Builder
+@Getter
+@AllArgsConstructor
+@NoArgsConstructor
+@ToString(exclude = {"productOption"})
+@Entity
+@Table(name = "product_option_detail")
+public class ProductOptionDetail {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "option_detail_id")
+    private Long id;
+
+    // FK
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "option_id")
+    private ProductOption productOption;
+
+    // 옵션 내용 (ex. 옵션 설명 color 안의 blue, silver..)
+    @Column(name = "option_content", nullable = false, length = 100)
+    private String description;
+
+}

@@ -1,0 +1,65 @@
+package com.jeeeun.kama.domain.product;
+
+import com.jeeeun.kama.common.jpa.BaseTimeEntity;
+import jakarta.persistence.*;
+import lombok.*;
+
+import java.math.BigDecimal;
+
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Entity
+@ToString(exclude = {"product", "optionDetail1", "optionDetail2",
+        "optionDetail3"})
+@Table(name = "product_variant")
+public class ProductVariant extends BaseTimeEntity {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "product_variant_id", nullable = false)
+    private Long id;
+
+    // FK
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "product_id", nullable = false)
+    private Product product;
+
+    // 옵션 디테일은 최대 3 종류
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "option_detail_1_id")
+    private ProductOptionDetail optionDetail1;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "option_detail_2_id")
+    private ProductOptionDetail optionDetail2;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "option_detail_3_id")
+    private ProductOptionDetail optionDetail3;
+
+    // 조합명 (서버에서 저장하고, 요청으로 안 받음)
+    @Column(name = "variant_name", nullable = false)
+    private String variantName;
+
+    // 옵션 선택 시 추가 금액이기 때문에 nullable
+    @Column(name = "additional_price")
+    private BigDecimal additionalPrice;
+
+    public static ProductVariant from(
+            Product product,
+            ProductOptionDetail optionDetail1,
+            ProductOptionDetail optionDetail2,
+            ProductOptionDetail optionDetail3,
+            String variantName,
+            BigDecimal additionalPrice
+    ) {
+        ProductVariant variant = new ProductVariant();
+        variant.product = product;
+        variant.optionDetail1 = optionDetail1;
+        variant.optionDetail2 = optionDetail2;
+        variant.optionDetail3 = optionDetail3;
+        variant.variantName = variantName;
+        variant.additionalPrice = additionalPrice;
+        return variant;
+    }
+}

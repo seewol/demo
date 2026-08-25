@@ -8,7 +8,7 @@
         <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
 
         <!-- 네 엔티티 클래스 -->
-        <class>com.jeeeun.demo.domain.Member</class>
+        <class>com.jeeeun.kama.domain.Member</class>
 
         <properties>
             <!-- H2 메모리 DB 예시 -->

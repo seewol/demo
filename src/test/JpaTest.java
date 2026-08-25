@@ -1,6 +1,6 @@
-package com.jeeeun.demo;
+package com.jeeeun.kama;
 
-import com.jeeeun.demo.domain.Member;
+import com.jeeeun.kama.domain.Member;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.EntityTransaction;

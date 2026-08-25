@@ -1,0 +1,25 @@
+package com.jeeeun.kama.controller.response;
+
+import com.jeeeun.kama.service.product.model.ProductVariantCreateResult;
+import lombok.Builder;
+
+import java.math.BigDecimal;
+
+@Builder
+public record ProductVariantCreateResponse(
+        Long id,
+        String variantName,
+        BigDecimal additionalPrice
+) {
+    public static ProductVariantCreateResponse from(
+            ProductVariantCreateResult result
+    ) {
+        // 필드가 적을 때는 굳이 Builder 안 쓰기도 함
+        // 외려, 생성자 호출이 가장 명확!
+        return new ProductVariantCreateResponse(
+                result.variantId(),
+                result.variantName(),
+                result.additionalPrice()
+        );
+    }
+}

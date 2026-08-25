@@ -39,7 +39,7 @@ _"상품 정보가 바뀌면 주문 내역은?".._<br/>
 <br/>
 
 ```
-src/main/java/com/jeeeun/demo
+src/main/java/com/jeeeun/kama
 ├── common
 │   ├── config          # Security, Swagger, Scheduler 등
 │   ├── error            # ErrorCode, GlobalExceptionHandler

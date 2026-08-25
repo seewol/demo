@@ -1,0 +1,27 @@
+package com.jeeeun.kama.controller.request;
+
+import com.jeeeun.kama.service.cart.model.CartItemCreateCommand;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
+import lombok.Builder;
+
+@Builder
+public record CartItemCreateRequest(
+
+        @NotNull
+        Long variantId,
+
+        @NotNull(message = "수량을 입력하세요.")
+        @Min(value = 1)
+        Long quantity
+) {
+
+    // userId는 컨트롤러에서 인증 정보 꺼내서 넘겨줄 것
+    public CartItemCreateCommand toCommand(Long userId) {
+        return CartItemCreateCommand.builder()
+                .userId(userId)
+                .variantId(variantId)
+                .quantity(quantity)
+                .build();
+    }
+}

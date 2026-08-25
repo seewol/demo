@@ -1,0 +1,25 @@
+package com.jeeeun.kama.repository.product;
+
+import com.jeeeun.kama.domain.product.ProductOptionDetail;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+
+import java.util.List;
+
+public interface ProductOptionDetailRepository extends JpaRepository<ProductOptionDetail, Long>, ProductOptionDetailRepositoryCustom {
+
+    @Query("""
+        select d from ProductOptionDetail d
+        where d.productOption.product.id = :productId
+        order by d.productOption.id asc, d.id asc
+    """)
+    List<ProductOptionDetail> findAllByProductId(Long productId);
+
+    @Query("""
+        select pod.id
+        from ProductOptionDetail pod
+        where pod.productOption.product.id = :productId
+    """)    // OptionDetail → option → product 타고 올라가야 함.
+    List<Long> findIdsByProductId(@Param("productId") Long productId);
+}
