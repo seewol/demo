@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/shippings")
-@Tag(name = "ShippingController", description = "관리자용 배송 상태 변경 API 엔드포인트")
+@Tag(name = "배송", description = "관리자용 배송 상태 변경 API")
 public class ShippingController {
 
     private final ShippingCommandService shippingCommandService;
@@ -24,6 +24,7 @@ public class ShippingController {
     // PATCH /shippings/{shippingId}/ship
     @Operation(summary = "배송 시작 처리")
     @ApiResponse(responseCode = "200", description = "배송 시작 처리 성공")
+    @ApiResponse(responseCode = "404", description = "존재하지 않는 배송 정보입니다.")
     @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/{shippingId}/ship")
     public ShippingStatusResponse ship(
@@ -38,6 +39,7 @@ public class ShippingController {
     // PATCH /shippings/{shippingId}/delay
     @Operation(summary = "발송 지연 처리", description = "지연 사유 & 발송 예정일을 새로 입력받아 배송 상태를 DELAYED로 변경합니다. ")
     @ApiResponse(responseCode = "200", description = "발송 지연 처리 성공")
+    @ApiResponse(responseCode = "404", description = "존재하지 않는 배송 정보입니다.")
     @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/{shippingId}/delay")
     public ShippingStatusResponse delay(
@@ -53,6 +55,7 @@ public class ShippingController {
     // PATCH /shippings/{shippingId}/deliver
     @Operation(summary = "배송 완료 처리")
     @ApiResponse(responseCode = "200", description = "배송 완료 처리 성공")
+    @ApiResponse(responseCode = "404", description = "존재하지 않는 배송 정보입니다.")
     @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/{shippingId}/deliver")
     public ShippingStatusResponse deliver(

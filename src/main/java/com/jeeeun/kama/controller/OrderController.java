@@ -27,7 +27,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/orders")
-@Tag(name = "OrderController", description = "Order API 엔드포인트")
+@Tag(name = "주문", description = "주문 생성/조회/취소 API")
 public class OrderController {
 
     private final OrderCommandService orderCommandService;
@@ -37,6 +37,9 @@ public class OrderController {
     // ★ 주문 생성 - 장바구니 (C)
     @Operation(summary = "주문 생성")
     @ApiResponse(responseCode = "201", description = "주문 생성 성공")
+    @ApiResponse(responseCode = "400", description = "이미 삭제된 상품이 포함되어 있거나 결제 정보가 유효하지 않습니다.")
+    @ApiResponse(responseCode = "404", description = "장바구니에 존재하지 않는 상품입니다.")
+    @ApiResponse(responseCode = "409", description = "재고가 부족합니다.")
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
     public OrderCreateResponse createOrder(
@@ -55,6 +58,9 @@ public class OrderController {
     // ★ 주문 생성 - 바로구매 (C)
     @Operation(summary = "바로구매", description = "장바구니 거치지 않는 주문입니다.")
     @ApiResponse(responseCode = "201", description = "바로구매 성공")
+    @ApiResponse(responseCode = "400", description = "이미 삭제된 상품이거나, 1인당 최대 구매 수량을 초과했거나, 결제 정보가 유효하지 않습니다.")
+    @ApiResponse(responseCode = "404", description = "존재하지 않는 옵션 조합입니다.")
+    @ApiResponse(responseCode = "409", description = "재고가 부족합니다.")
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/direct")
     public OrderCreateResponse createDirectOrder(
@@ -93,6 +99,7 @@ public class OrderController {
     // GET /orders/{orderId}
     @Operation(summary = "주문 상세 조회")
     @ApiResponse(responseCode = "200", description = "주문 상세 조회 성공")
+    @ApiResponse(responseCode = "404", description = "존재하지 않는 주문입니다.")
     @GetMapping("/{orderId}")
     public OrderDetailResponse getOrder(
             @PathVariable Long orderId
@@ -110,6 +117,7 @@ public class OrderController {
     // PATCH /orders/{orderId}/cancel
     @Operation(summary = "주문 취소", description = "주문 취소 후 재고를 복구합니다.")
     @ApiResponse(responseCode = "200", description = "주문 취소 성공")
+    @ApiResponse(responseCode = "404", description = "존재하지 않는 주문입니다.")
     @PatchMapping("/{orderId}/cancel")
     public OrderCancelResponse cancelOrder(
             @PathVariable Long orderId,
@@ -129,6 +137,7 @@ public class OrderController {
     // ★ 주문 아이템 단위 부분 취소 (수량 단위)
     @Operation(summary = "주문 아이템 부분 취소", description = "지정 수량만큼 취소 후, 해당 재고를 복구합니다.")
     @ApiResponse(responseCode = "200", description = "주문 아이템 취소 성공")
+    @ApiResponse(responseCode = "404", description = "존재하지 않는 주문 상품입니다.")
     @PatchMapping("/{orderId}/items/{orderItemId}/cancel")
     public OrderItemCancelResponse cancelOrderItem(
             @PathVariable Long orderId,

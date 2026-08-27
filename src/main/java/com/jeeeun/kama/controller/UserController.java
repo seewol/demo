@@ -20,7 +20,7 @@ import java.util.List;
 @RequiredArgsConstructor // final 붙은 애들만 생성자 만들어 줌.
 @RestController
 @RequestMapping("/users")
-@Tag(name = "UserController", description = "User CRUD API 엔드포인트")
+@Tag(name = "회원", description = "회원 정보 조회/수정/탈퇴 API")
 // API 엔드 포인트 담당
 public class UserController {
 
@@ -72,6 +72,8 @@ public class UserController {
     // 내 정보 수정 (U)
     @Operation(summary = "내 정보 수정")
     @ApiResponse(responseCode = "200", description = "수정 성공")
+    @ApiResponse(responseCode = "404", description = "존재하지 않는 회원입니다.")
+    @ApiResponse(responseCode = "409", description = "이미 사용 중인 전화번호입니다.")
     @PatchMapping("/me")
     public UserUpdateResponse updateUser(
             @Valid @RequestBody UserUpdateRequest request

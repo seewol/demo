@@ -15,13 +15,14 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/variants")
-@Tag(name = "VariantController", description = "Variant API 엔드포인트")
+@Tag(name = "재고", description = "상품 옵션(variant) 재고 관리 API")
 public class VariantController {
 
     private final ProductCommandService productCommandService;
 
     @Operation(summary = "상품 재고 업데이트")
     @ApiResponse(responseCode = "200", description = "수정 성공")
+    @ApiResponse(responseCode = "404", description = "존재하지 않는 옵션 조합입니다.")
     @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/{variantId}/stock")
     public StockUpdateResponse updateStock(
