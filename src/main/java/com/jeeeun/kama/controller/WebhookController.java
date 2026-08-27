@@ -3,6 +3,7 @@ package com.jeeeun.kama.controller;
 import com.jeeeun.kama.service.WebhookService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/webhooks")
-@Tag(name = "WebhookController", description = "외부 결제사(포트원) Webhook 수신 엔드포인트")
+@Tag(name = "웹훅", description = "외부 결제사(포트원) Webhook 수신 API")
 public class WebhookController {
 
     private final WebhookService webhookService;
@@ -30,6 +31,7 @@ public class WebhookController {
 
     @Operation(summary = "포트원 결제 웹훅 수신", description = "가상계좌 입금 완료 등 결제 상태 변화가 있으면 포트원이 호출합니다.")
     @ApiResponse(responseCode = "200", description = "웹훅 정상 수신 (실제 반영 여부와 무관, 항상 200")
+    @SecurityRequirements // 포트원 서버가 호출하는 API라 JWT 토큰이 없음 (SecurityConfig에서도 permitAll)
     @PostMapping("/port-one")
     @ResponseStatus(HttpStatus.OK)
     public void handlePortOneWebhook(

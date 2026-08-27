@@ -44,7 +44,8 @@ dependencies {
 	// @NotNull, @Email, @Size 등의 요청값 검증 어노테이션 제공 (API 개발에 필수)
 
 	// Swagger UI
-	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0'
+	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.6'
+	// Spring Boot 3.4(Framework 6.2) 호환을 위해 2.6.0 -> 2.8.6로 업그레이드
 
 	// lombok (생성자, getter, setter 등 자동 생성)
 	compileOnly 'org.projectlombok:lombok'

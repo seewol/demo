@@ -13,6 +13,8 @@ import com.jeeeun.kama.service.auth.model.SignTokenResult;
 import com.jeeeun.kama.service.user.model.UserCreateResult;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirements;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -26,6 +28,7 @@ import java.util.Arrays;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/auth")
+@Tag(name = "인증", description = "회원가입/로그인/토큰 재발급 API")
 public class AuthController {
 
     private final UserCommandService userCommandService;
@@ -34,6 +37,8 @@ public class AuthController {
     // 회원 가입
     @Operation(summary = "회원 가입")
     @ApiResponse(responseCode = "201", description = "회원 등록 성공")
+    @ApiResponse(responseCode = "409", description = "이미 등록된 이메일 또는 전화번호입니다.")
+    @SecurityRequirements // 로그인 전 API라 인증 불필요 (자물쇠 아이콘 제거)
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/sign-up")
     public UserCreateResponse signUp(
@@ -46,6 +51,10 @@ public class AuthController {
     }
 
     @Operation(summary = "로컬 로그인", description = "이메일, 비밀번호로 로그인 후 JWT 발급")
+    @ApiResponse(responseCode = "400", description = "비밀번호가 일치하지 않습니다.")
+    @ApiResponse(responseCode = "401", description = "탈퇴한 사용자입니다.")
+    @ApiResponse(responseCode = "404", description = "가입되지 않은 이메일입니다.")
+    @SecurityRequirements
     @PostMapping("/sign-in")
     public SignTokenView signIn(
             @Valid @RequestBody LocalSignInRequest request,
@@ -60,6 +69,8 @@ public class AuthController {
 
 
     @Operation(summary = "구글 소셜 로그인", description = "Google OAuth2 access token으로 로그인/회원가입을 처리하고 JWT를 발급")
+    @ApiResponse(responseCode = "401", description = "탈퇴한 사용자입니다.")
+    @SecurityRequirements
     @PostMapping("/sign-in/google")
     public SignTokenView googleSignIn(
             @Valid @RequestBody GoogleSignInRequest request,
@@ -87,6 +98,8 @@ public class AuthController {
 
 
     @Operation(summary = "토큰 재발급", description = "Refresh Token 쿠키로 새 Access Token 발급")
+    @ApiResponse(responseCode = "400", description = "유효하지 않은 Refresh Token입니다.")
+    @SecurityRequirements // Access Token이 아니라 쿠키의 Refresh Token으로 인증하는 API라 별도 처리
     @PostMapping("/refresh")
     public SignTokenView refresh(HttpServletRequest request) {
 

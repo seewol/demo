@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RequiredArgsConstructor
 @RestController
-@Tag(name = "CartController", description = "Cart CRUD API 엔드포인트")
+@Tag(name = "장바구니", description = "장바구니 조회/추가/수정/삭제 API")
 @RequestMapping("/cart") // Cart 관련 API 모두 "/cart"로 시작
 public class CartController {
 
@@ -32,6 +32,8 @@ public class CartController {
 
     @Operation(summary = "장바구니 아이템 추가")
     @ApiResponse(responseCode = "201", description = "추가 성공")
+    @ApiResponse(responseCode = "404", description = "존재하지 않는 옵션 조합입니다.")
+    @ApiResponse(responseCode = "409", description = "재고가 부족합니다.")
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/items")
     public CartItemCreateResponse addCartItem(
@@ -48,6 +50,8 @@ public class CartController {
 
     @Operation(summary = "장바구니 아이템 수량 변경")
     @ApiResponse(responseCode = "200", description = "수량 변경 성공")
+    @ApiResponse(responseCode = "404", description = "장바구니에 존재하지 않는 상품입니다.")
+    @ApiResponse(responseCode = "409", description = "재고가 부족합니다.")
     @PatchMapping("/items/{cartItemId}")
     public CartItemUpdateResponse updateCartItemQuantity(
             @PathVariable Long cartItemId,
@@ -77,6 +81,7 @@ public class CartController {
 
     @Operation(summary = "장바구니 아이템 삭제")
     @ApiResponse(responseCode = "200", description = "삭제 성공")
+    @ApiResponse(responseCode = "404", description = "장바구니에 존재하지 않는 상품입니다.")
     @DeleteMapping("/items/{cartItemId}")
     public void deleteCartItem(
             @PathVariable Long cartItemId

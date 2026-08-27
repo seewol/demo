@@ -10,6 +10,7 @@ import com.jeeeun.kama.service.ProductQueryService;
 import com.jeeeun.kama.service.product.model.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -27,7 +28,7 @@ import org.springframework.web.bind.annotation.*;
 // 메서드 반환값을 그대로 HTTP 응답 바디(JSON/문자열)로 내려줌.
 // └ Jackson : 객체 → JSON 변환
 @RequestMapping("/products")
-@Tag(name = "ProductController", description = "Product CRUD API 엔드포인트")
+@Tag(name = "상품", description = "상품 및 옵션 조합(variant) CRUD API")
 public class ProductController {
 
     private final ProductCommandService productCommandService;
@@ -41,6 +42,8 @@ public class ProductController {
     // 상품 등록 (C)
     @Operation(summary = "상품 등록")
     @ApiResponse(responseCode = "201", description = "상품 등록 성공")
+    @ApiResponse(responseCode = "400", description = "할인율 또는 할인 기간이 올바르지 않습니다.")
+    @ApiResponse(responseCode = "404", description = "존재하지 않는 카테고리입니다.")
     @ResponseStatus(HttpStatus.CREATED) // 응답코드 명시적으로 바꿈
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
@@ -54,6 +57,7 @@ public class ProductController {
     // 상품 목록 조회 (R)
     @Operation(summary = "상품 목록 조회")
     @ApiResponse(responseCode = "200", description = "조회 성공")
+    @SecurityRequirements // 누구나 볼 수 있는 상품 목록 (SecurityConfig에서 GET /products permitAll)
     @GetMapping
     public Page<ProductResponse> getProducts(
             @RequestParam(required = false) String keyword, // required = false → null 허용
@@ -70,6 +74,8 @@ public class ProductController {
     // 단일 상품 조회 (상품 상세 조회)
     @Operation(summary = "단일 상품 조회")
     @ApiResponse(responseCode = "200", description = "조회 성공")
+    @ApiResponse(responseCode = "404", description = "존재하지 않는 상품입니다.")
+    @SecurityRequirements // 누구나 볼 수 있는 상품 상세 (SecurityConfig에서 GET /products/** permitAll)
     @GetMapping("/{productId}")
     public ProductDetailResponse getProduct(
             @PathVariable Long productId
@@ -84,6 +90,7 @@ public class ProductController {
     // 수정된 내용은 상품 재조회로 확인하면 됨
     @Operation(summary = "상품 수정")
     @ApiResponse(responseCode = "200", description = "수정 성공")
+    @ApiResponse(responseCode = "404", description = "존재하지 않는 상품이거나, 변경하려는 카테고리가 존재하지 않습니다.")
     @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/{productId}")   // 전체 교체 아닌 부분 수정이라 PUT 말고 PATCH
     public void updateProduct(
@@ -97,6 +104,7 @@ public class ProductController {
     // 상품 삭제 (D)
     @Operation(summary = "상품 삭제", description = "soft delete로 처리됩니다.")
     @ApiResponse(responseCode = "200", description = "삭제 성공")
+    @ApiResponse(responseCode = "404", description = "존재하지 않는 상품입니다.")
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{productId}")
     public void deleteProduct(
@@ -109,6 +117,8 @@ public class ProductController {
     // 상품 조합 등록 (C)
     @Operation(summary = "상품 조합 등록")
     @ApiResponse(responseCode = "201", description = "등록 성공")
+    @ApiResponse(responseCode = "400", description = "옵션 조합이 올바르지 않습니다.")
+    @ApiResponse(responseCode = "404", description = "존재하지 않는 상품입니다.")
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/{productId}/variants")
