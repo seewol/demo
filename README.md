@@ -295,12 +295,12 @@ Product
 - [x] 장바구니 + 주문상세 additionalPrice 분리 표시
 - [x] cancelOrder reason 파라미터화
 - [x] 무통장입금 (가상계좌) + Webhook (단위 테스트 + ngrok 실제 Webhook 수신 테스트까지 완료)
-- [ ] OrderCommandService.createOrder() / createDirectOrder() 중복 코드 리팩토링
-- [ ] 가상계좌 입금기한 만료 시 자동취소 + 재고복구 스케줄러
+- [x] OrderCommandService.createOrder() / createDirectOrder() 중복 코드 리팩토링
+- [x] 가상계좌 입금기한 만료 시 자동취소 + 재고복구 스케줄러
 - [ ] 상품 이미지 수정 API
 - [ ] 상품 옵션/조합 수정 API
 
 **4단계**
-- [ ] Swagger 정리
+- [x] Swagger 정리
 - [ ] AOP 로깅
 - [ ] Docker + CI/CD (GitHub Actions)
